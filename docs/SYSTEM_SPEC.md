@@ -262,83 +262,102 @@ class RadarResponse(BaseModel):
 
 ---
 
-## 5\. Automation: GitHub Actions Workflow
+## 5. Automation: GitHub Actions Workflow
 
-Archivo `.github/workflows/daily_radar.yml`:
+Archivo `.github/workflows/daily_radar.yml` (con resiliencia, inputs manuales, rebase y alertas de fallo):
 
+```yaml
 name: Daily Data Newsjacking Radar
 
 on:
-
   schedule:
-
-    \# Corre todos los días a las 10:30 UTC (07:30 AM CLT en UTC-3)
-
-    \- cron: '30 10 \* \* \*'
-
-  workflow\_dispatch: \# Permite ejecución manual desde la UI de GitHub
+    # Corre todos los días a las 10:30 UTC (07:30 AM CLT en UTC-3 / 06:30 AM CLT en UTC-4)
+    - cron: '30 10 * * *'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Simular despacho a Telegram'
+        type: boolean
+        required: false
+        default: false
+      skip_llm:
+        description: 'Omitir fase de evaluación con Gemini'
+        type: boolean
+        required: false
+        default: false
 
 jobs:
-
   run-radar:
-
     runs-on: ubuntu-latest
-
+    timeout-minutes: 10
+    permissions:
+      contents: write
     steps:
-
-      \- name: Check out repository
-
+      - name: Check out repository
         uses: actions/checkout@v4
-
         with:
+          token: ${{ secrets.GITHUB_TOKEN }}
 
-          token: \${{ secrets.GITHUB\_TOKEN }}
-
-      \- name: Set up Python
-
+      - name: Set up Python
         uses: actions/setup-python@v5
-
         with:
-
           python-version: '3.11'
-
           cache: 'pip'
 
-      \- name: Install dependencies
-
+      - name: Install dependencies
         run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
 
-          python \-m pip install \--upgrade pip
-
-          pip install \-r requirements.txt
-
-      \- name: Run Radar Pipeline
-
+      - name: Run Radar Pipeline
         env:
-
-          GEMINI\_API\_KEY: \${{ secrets.GEMINI\_API\_KEY }}
-
-          TELEGRAM\_BOT\_TOKEN: \${{ secrets.TELEGRAM\_BOT\_TOKEN }}
-
-          TELEGRAM\_CHAT\_ID: \${{ secrets.TELEGRAM\_CHAT\_ID }}
-
-        run: python main.py
-
-      \- name: Commit and push history updates
-
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          INPUT_DRY_RUN: ${{ github.event.inputs.dry_run }}
+          INPUT_SKIP_LLM: ${{ github.event.inputs.skip_llm }}
         run: |
+          CMD="python main.py"
+          if [ "$INPUT_DRY_RUN" = "true" ]; then
+            CMD="$CMD --dry-run"
+          fi
+          if [ "$INPUT_SKIP_LLM" = "true" ]; then
+            CMD="$CMD --skip-llm"
+          fi
+          echo "Ejecutando: $CMD"
+          $CMD
 
-          git config \--local user.email "github-actions\[bot\]@users.noreply.github.com"
-
-          git config \--local user.name "github-actions\[bot\]"
-
+      - name: Commit and push history updates
+        if: success()
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
           git add data/history.json
+          if ! git diff --staged --quiet; then
+            git commit -m "chore: update radar history [skip ci]"
+            git pull --rebase origin main || true
+            git push origin main
+          fi
 
-          git diff \--quiet && git diff \--staged \--quiet || (git commit \-m "chore: update radar history \[skip ci\]" && git push)
+      - name: Notify Failure to Telegram
+        if: failure()
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          if [ -n "$TELEGRAM_BOT_TOKEN" ] && [ -n "$TELEGRAM_CHAT_ID" ]; then
+            MSG="🚨 <b>DNR Error en GitHub Actions</b>%0A%0AEl radar diario falló durante su ejecución.%0A👉 <a href=\"$RUN_URL\">Ver registro de errores en Actions</a>"
+            curl -s -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+              -d "chat_id=${TELEGRAM_CHAT_ID}" \
+              -d "text=${MSG}" \
+              -d "parse_mode=HTML" || true
+          fi
+```
 
 ---
 
-## 6\. Environment Variables Required
+## 6. Environment Variables Required
 
 Configurar en `Settings > Secrets and variables > Actions`:
 
@@ -348,10 +367,10 @@ Configurar en `Settings > Secrets and variables > Actions`:
 
 ---
 
-## 7\. Immediate Next Steps for Implementation
+## 7. Implementation Status
 
-1. Inicializar el repositorio Git con la estructura de carpetas definida en la sección 3\.  
-2. Implementar `src/ingestion/news_rss.py` probando los 4 feeds RSS chilenos básicos.  
-3. Configurar la llamada a Gemini con salida tipada (`Pydantic`) en `src/analysis/opportunity_eval.py`.  
-4. Probar la ejecución local de `main.py` verificando que llegue la alerta a Telegram y se actualice `data/history.json`.  
-5. Subir a GitHub y activar el workflow de Actions.
+1. [x] **Paso 1:** Inicializar repositorio Git y arquitectura modular tipada (`src/`, `config/`, `data/`).
+2. [x] **Paso 2:** Ingesta unificada y resiliente de prensa chilena (RSS) y comunidades (Reddit) con snapshot cache local.
+3. [x] **Paso 3:** Motor de evaluación analítica con Gemini Flash, fallback resiliente y esquemas tipados Pydantic.
+4. [x] **Paso 4:** Capa de despacho a Telegram con formato HTML seguro, trazabilidad 1-click y rate limiting.
+5. [x] **Paso 5:** Automatización desatendida con GitHub Actions, CI con pytest, rebase seguro, inputs dinámicos y alertas ante fallos.
