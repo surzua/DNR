@@ -154,5 +154,74 @@
     "trigger_article_title": "Corte Suprema expulsa a otros cuatro jueces que viajaron al extranjero con licencia médica",
     "trigger_article_url": "https://www.latercera.com/nacional/noticia/corte-suprema-expulsa-a-otros-cuatro-jueces-que-viajaron-al-extranjero-con-licencia-medica/",
     "status": "candidate"
+  },
+  {
+    "id": "2026-10-07-011",
+    "timestamp": "2026-10-07T18:21:00.860642Z",
+    "topic": "¿El fin de la austeridad? El mapa de los recortes presupuestarios 2027 vs. el gasto real",
+    "category": "Economía & Finanzas",
+    "viral_hook_type": "Contrarian / Curious Hook",
+    "analytical_angle": "Más allá de la retórica política, ¿qué ministerios realmente han visto caer su presupuesto ajustado por inflación en la última década? Un análisis que desmiente si el recorte es 'eficiencia' o 'desmantelamiento'.",
+    "data_sources": [
+      {
+        "name": "Dipres - Ley de Presupuestos",
+        "type": "Portal Abierto",
+        "potential_url_or_query": "https://www.dipres.gob.cl/598/w3-propertyvalue-15777.html",
+        "friction_level": "Baja (Horas)"
+      }
+    ],
+    "feasibility_score": 8,
+    "virality_score": 9,
+    "recommended_deliverable": "App Interactiva (Streamlit)",
+    "fast_execution_strategy": "1. Descargar los archivos CSV de ejecución presupuestaria histórica (2015-2026) desde Dipres. 2. Calcular la variación real (ajustada por IPC) por partida ministerial. 3. Crear un dashboard en Streamlit que permita al usuario comparar el presupuesto 2027 con el promedio de los últimos 5 años.",
+    "trigger_article_title": "Hacienda recorta a 0,7% la proyección de crecimiento para 2026 y la deuda pública llegaría a 44% del PIB en 2029",
+    "trigger_article_url": "https://www.reddit.com/r/chile/comments/1wzgg0u/hacienda_recorta_a_07_la_proyección_de/",
+    "status": "candidate"
+  },
+  {
+    "id": "2026-10-07-012",
+    "timestamp": "2026-10-07T18:21:00.861000Z",
+    "topic": "La 'Jauría' y el fraude digital: ¿Qué tan vulnerables son nuestras transferencias?",
+    "category": "Sociedad & Tendencias",
+    "viral_hook_type": "Contrarian / Curious Hook",
+    "analytical_angle": "El mito de la seguridad bancaria: ¿Es más peligroso el robo físico o la coacción digital? Análisis de la frecuencia de delitos de 'transferencia forzada' en el último año.",
+    "data_sources": [
+      {
+        "name": "Centro de Estudios y Análisis del Delito (CEAD)",
+        "type": "Dataset Descargable",
+        "potential_url_or_query": "https://cead.spd.gov.cl/estadisticas-delictuales/",
+        "friction_level": "Baja (Horas)"
+      }
+    ],
+    "feasibility_score": 9,
+    "virality_score": 8,
+    "recommended_deliverable": "Gráfico Estático de Alto Impacto",
+    "fast_execution_strategy": "1. Descargar estadísticas de delitos de robo con violencia/intimidación del CEAD. 2. Filtrar por tipo de delito y comuna (RM). 3. Visualizar la tendencia de estos delitos en el último año y compararla con el aumento de denuncias por transferencias fraudulentas.",
+    "trigger_article_title": "Detienen a siete integrantes de la “Jauría del Parque Los Reyes”: obligaban a las víctimas realizar transferencias bancarias",
+    "trigger_article_url": "https://www.latercera.com/nacional/noticia/detienen-a-siete-integrantes-de-la-jauria-del-parque-los-reyes-obligaban-a-las-victimas-realizar-transferencias-bancarias/",
+    "status": "candidate"
+  },
+  {
+    "id": "2026-10-07-013",
+    "timestamp": "2026-10-07T18:21:00.861312Z",
+    "topic": "El costo de la inacción: 23 años de retraso en drenaje de Antofagasta",
+    "category": "Sociedad & Tendencias",
+    "viral_hook_type": "Contrarian / Curious Hook",
+    "analytical_angle": "No es solo falta de presupuesto: ¿Cuántas obras aluvionales prometidas en los últimos 20 años en Chile siguen en papel? Un mapa de la 'deuda de infraestructura' regional.",
+    "data_sources": [
+      {
+        "name": "Contraloría General de la República - Informes de Auditoría",
+        "type": "Scraping HTML",
+        "potential_url_or_query": "https://www.contraloria.cl/web/cgr/buscador-de-informes",
+        "friction_level": "Media (1-2 días)"
+      }
+    ],
+    "feasibility_score": 7,
+    "virality_score": 8,
+    "recommended_deliverable": "Gráfico Estático de Alto Impacto",
+    "fast_execution_strategy": "1. Extraer los datos del informe de Contraloría sobre Antofagasta. 2. Cruzar con datos históricos de precipitaciones y eventos aluvionales en la zona. 3. Generar una infografía que contraste el tiempo de retraso vs. el costo de las obras no ejecutadas.",
+    "trigger_article_title": "Contraloría detecta retraso de más de 23 años en actualización del plan de drenaje de aguas lluvias de Antofagasta",
+    "trigger_article_url": "https://www.latercera.com/nacional/noticia/contraloria-detecta-retraso-de-mas-de-23-anos-en-actualizacion-del-plan-de-drenaje-de-aguas-lluvias-de-antofagasta/",
+    "status": "candidate"
   }
 ]

@@ -136,6 +136,7 @@ def evaluate_opportunities(
     min_virality: int = 7,
     min_feasibility: int = 6,
     max_opportunities: int = 3,
+    timeout_ms: int = 90000,
 ) -> RadarResponse:
     """Evalúa candidatos de noticias utilizando Gemini y Structured Outputs Pydantic.
 
@@ -143,11 +144,12 @@ def evaluate_opportunities(
         articles: Lista de objetos NewsArticle o diccionarios con noticias.
         recent_history_topics: Lista opcional de temas de los últimos días para deduplicar.
         api_key: Gemini API Key opcional (usa GEMINI_API_KEY del entorno por defecto).
-        model_name: Nombre del modelo a usar (por defecto gemini-2.5-flash).
+        model_name: Nombre del modelo a usar (por defecto gemini-3.1-flash-lite con fallbacks).
         client: Cliente de Gemini inyectable (útil para pruebas unitarias).
         min_virality: Puntaje mínimo de viralidad requerido (defecto: 7).
         min_feasibility: Puntaje mínimo de factibilidad técnica requerido (defecto: 6).
         max_opportunities: Máximo de oportunidades a retornar (defecto: 3).
+        timeout_ms: Timeout máximo por petición HTTP en milisegundos (defecto: 90000 ms).
 
     Returns:
         RadarResponse con la cantidad de temas evaluados y las mejores oportunidades filtradas.
@@ -158,7 +160,13 @@ def evaluate_opportunities(
 
     # Resolver cliente y credenciales
     resolved_key = api_key or os.getenv("GEMINI_API_KEY")
-    default_candidates = ["gemini-3.5-flash", "gemini-3.8-flash", "gemini-flash-latest"]
+    default_candidates = [
+        "gemini-3.1-flash-lite",
+        "gemini-3.5-flash-lite",
+        "gemini-3.8-flash",
+        "gemini-3.5-flash",
+        "gemini-flash-latest",
+    ]
     if model_name:
         candidate_models = [model_name]
     elif os.getenv("GEMINI_MODEL"):
@@ -171,7 +179,13 @@ def evaluate_opportunities(
             raise ValueError(
                 "GEMINI_API_KEY no encontrada. Configúrala en .env o como variable de entorno."
             )
-        genai_client = genai.Client(api_key=resolved_key)
+        genai_client = genai.Client(
+            api_key=resolved_key,
+            http_options=types.HttpOptions(
+                timeout=timeout_ms,
+                retry_options=types.HttpRetryOptions(attempts=2),
+            ),
+        )
     else:
         genai_client = client
 
