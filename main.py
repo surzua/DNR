@@ -3,10 +3,23 @@
 import argparse
 from collections import Counter
 import logging
+import os
 import sys
+from dotenv import load_dotenv
 
+from src.analysis import evaluate_opportunities
 from src.ingestion import gather_all_sources
-from src.storage import load_articles_cache, save_articles_cache
+from src.storage import (
+    HistoryEntry,
+    generate_next_id,
+    get_recent_topics,
+    load_articles_cache,
+    load_history,
+    save_articles_cache,
+    save_history,
+)
+
+load_dotenv()
 
 logging.basicConfig(
     level=logging.INFO,
@@ -24,6 +37,11 @@ def main() -> None:
         "--use-cache",
         action="store_true",
         help="Carga los artículos desde el snapshot local data/latest_articles.json si existe",
+    )
+    parser.add_argument(
+        "--skip-llm",
+        action="store_true",
+        help="Omite la fase de evaluación con Gemini LLM",
     )
     args = parser.parse_args()
 
@@ -51,7 +69,70 @@ def main() -> None:
     for source_name, count in counts.most_common():
         logger.info("  • %s: %d artículos", source_name, count)
 
-    logger.info("Pipeline listo para Fase de Evaluación con LLM (Paso 3).")
+    # Fase 2 y 3: Evaluación de oportunidades con Gemini Flash
+    if args.skip_llm:
+        logger.info("Bandera --skip-llm activa: Omitiendo fase de evaluación LLM.")
+        return
+
+    gemini_key = os.getenv("GEMINI_API_KEY")
+    if not gemini_key:
+        logger.warning(
+            "GEMINI_API_KEY no encontrada en variables de entorno o archivo .env. "
+            "Para ejecutar la evaluación de oportunidades, configura tu API key en .env. "
+            "Omitiendo Fase 3 por ahora."
+        )
+        return
+
+    logger.info("--------------------------------------------------")
+    logger.info("Fase 3: Evaluando oportunidades con Gemini Flash...")
+    logger.info("--------------------------------------------------")
+
+    history = load_history()
+    recent_topics = get_recent_topics(history, days=7)
+    logger.info(
+        "Historial cargado: %d registros previos (%d temas analizados en los últimos 7 días).",
+        len(history),
+        len(recent_topics),
+    )
+
+    try:
+        radar_result = evaluate_opportunities(
+            articles=articles,
+            recent_history_topics=recent_topics,
+        )
+    except Exception as e:
+        logger.error("Error durante la evaluación de oportunidades con Gemini: %s", e)
+        return
+
+    opportunities = radar_result.top_opportunities
+    logger.info(
+        "Evaluación finalizada: %d oportunidades calificadas sobre el umbral.",
+        len(opportunities),
+    )
+
+    if not opportunities:
+        logger.info("No se detectaron oportunidades que superaran los umbrales de viabilidad y viralidad hoy.")
+        return
+
+    # Guardado de oportunidades en historial
+    for opp in opportunities:
+        new_id = generate_next_id(history)
+        entry = HistoryEntry.from_opportunity(opp, entry_id=new_id)
+        history.append(entry)
+
+        logger.info("\n🚀 [%s] %s (Viralidad: %d/10 | Viabilidad: %d/10)", new_id, opp.headline, opp.virality_score, opp.technical_feasibility_score)
+        logger.info("   📂 Categoría: %s", opp.category)
+        logger.info("   🎯 Ángulo: %s", opp.contrarian_or_curious_angle)
+        logger.info("   📊 Entregable sugerido: %s", opp.suggested_deliverable)
+        if opp.trigger_article_title:
+            logger.info("   📰 Noticia detonante: %s (%s)", opp.trigger_article_title, opp.trigger_article_url or "Sin URL")
+        logger.info("   🛠️ Plan rápido: %s", opp.fast_execution_strategy)
+        for ds in opp.data_sources:
+            logger.info("      • Fuente: %s (%s, Fricción: %s)", ds.name, ds.type, ds.friction_level)
+
+    save_history(history)
+    logger.info("\nHistorial actualizado exitosamente en data/history.json con %d oportunidades nuevas.", len(opportunities))
+    logger.info("Pipeline listo para Fase de Notificación Telegram (Paso 4).")
 
 
 if __name__ == "__main__":

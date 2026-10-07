@@ -26,6 +26,8 @@ class HistoryEntry(BaseModel):
     virality_score: int = Field(description="Puntaje de potencial viral (1-10)")
     recommended_deliverable: str = Field(description="Formato de entrega sugerido")
     fast_execution_strategy: Optional[str] = Field(default=None, description="Estrategia rápida de ejecución")
+    trigger_article_title: Optional[str] = Field(default=None, description="Titular de la noticia detonante")
+    trigger_article_url: Optional[str] = Field(default=None, description="URL de la noticia detonante")
     status: str = Field(default="candidate", description="Estado de la oportunidad")
 
     @classmethod
@@ -54,6 +56,8 @@ class HistoryEntry(BaseModel):
             virality_score=getattr(opportunity, "virality_score", 0),
             recommended_deliverable=getattr(opportunity, "suggested_deliverable", ""),
             fast_execution_strategy=getattr(opportunity, "fast_execution_strategy", None),
+            trigger_article_title=getattr(opportunity, "trigger_article_title", None),
+            trigger_article_url=getattr(opportunity, "trigger_article_url", None),
             status=status,
         )
 
