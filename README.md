@@ -15,10 +15,10 @@ El objetivo es aprovechar la ventana dorada de atención pública (**24 a 72 hor
 
 ## 🧭 ¿Cómo Funciona?
 
-Cada mañana a las **07:30 AM CLT** (10:30 UTC), el radar se ejecuta de forma desatendida mediante **GitHub Actions**, completando el siguiente pipeline:
+Cada mañana a las **07:23 AM CLT** (10:23 UTC), el radar se ejecuta de forma desatendida mediante **GitHub Actions**, completando el siguiente pipeline:
 
 ```text
-  [ Cron Diario 07:30 CLT / Manual ]
+  [ Cron Diario 07:23 CLT / Manual ]
                   │
                   ▼
    ┌──────────────────────────────┐
@@ -96,7 +96,7 @@ El motor analítico ([src/analysis/opportunity_eval.py](src/analysis/opportunity
 DNR/
 ├── .github/
 │   └── workflows/
-│       ├── daily_radar.yml        # Orquestación matutina (07:30 CLT) + alertas de fallo
+│       ├── daily_radar.yml        # Orquestación matutina (07:23 CLT) + alertas de fallo
 │       └── ci.yml                 # CI automático con pytest en cada push/PR
 ├── config/
 │   └── sources.yaml               # Catálogo de feeds RSS, subreddits y parámetros
@@ -183,7 +183,7 @@ pytest tests/
 
 El sistema corre en la nube sin costo de servidores gracias a **GitHub Actions**:
 
-- **Frecuencia:** Ejecución diaria a las **10:30 UTC** (`30 10 * * *`), correspondiente a las **07:30 AM CLT** (horario de verano) / **06:30 AM CLT** (horario de invierno).
+- **Frecuencia:** Ejecución diaria a las **10:23 UTC** (`23 10 * * *`), correspondiente a las **07:23 AM CLT** (horario de verano) / **06:23 AM CLT** (horario de invierno). Evita picos de congestión de GitHub en minutos en punto.
 - **Ejecución Manual:** Pestaña *Actions > Daily Data Newsjacking Radar > Run workflow* (permite activar `--dry-run` o `--skip-llm` desde la UI).
 - **Persistencia Autónoma:** Actualiza `data/history.json` directamente en el repositorio usando `[skip ci]`.
 - **Alertas de Emergencia:** Si ocurre un fallo en los servidores de GitHub, envía una alerta instantánea a Telegram con el link al run para diagnosticar en segundos.

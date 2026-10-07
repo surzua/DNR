@@ -10,7 +10,7 @@ El objetivo es maximizar la visibilidad y el alcance profesional mediante la pub
 
 ## 2\. Architecture & Data Flow
 
-\[Cron: GitHub Actions (07:30 CLT)\]
+\[Cron: GitHub Actions (07:23 CLT)\]
 
                 │
 
@@ -271,8 +271,8 @@ name: Daily Data Newsjacking Radar
 
 on:
   schedule:
-    # Corre todos los días a las 10:30 UTC (07:30 AM CLT en UTC-3 / 06:30 AM CLT en UTC-4)
-    - cron: '30 10 * * *'
+    # Corre todos los días a las 10:23 UTC (07:23 AM CLT en UTC-3 / 06:23 AM CLT en UTC-4)
+    - cron: '23 10 * * *'
   workflow_dispatch:
     inputs:
       dry_run:
