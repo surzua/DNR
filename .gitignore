@@ -30,3 +30,7 @@ Thumbs.db
 .pytest_cache/
 .coverage
 htmlcov/
+
+# Local Data Snapshots & Cache
+data/latest_articles.json
+data/*_cache.json

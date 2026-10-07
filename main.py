@@ -1,10 +1,12 @@
 """Data Newsjacking Radar (DNR) - Pipeline Entrypoint."""
 
+import argparse
 from collections import Counter
 import logging
 import sys
 
 from src.ingestion import gather_all_sources
+from src.storage import load_articles_cache, save_articles_cache
 
 logging.basicConfig(
     level=logging.INFO,
@@ -17,13 +19,32 @@ logger = logging.getLogger("dnr.main")
 
 def main() -> None:
     """Ejecuta el pipeline principal de Data Newsjacking Radar."""
+    parser = argparse.ArgumentParser(description="Data Newsjacking Radar (DNR)")
+    parser.add_argument(
+        "--use-cache",
+        action="store_true",
+        help="Carga los artículos desde el snapshot local data/latest_articles.json si existe",
+    )
+    args = parser.parse_args()
+
     logger.info("==================================================")
     logger.info("Iniciando Data Newsjacking Radar (DNR)")
     logger.info("==================================================")
 
-    # Fase 1: Ingesta de fuentes (Prensa RSS + Reddit)
-    articles = gather_all_sources()
-    logger.info("Fase de Ingesta completada exitosamente: %d artículos recopilados", len(articles))
+    # Fase 1: Ingesta de fuentes (Prensa RSS + Reddit) o carga desde cache
+    if args.use_cache:
+        logger.info("Modo desarrollo: Intentando cargar artículos desde cache local...")
+        articles = load_articles_cache()
+        if not articles:
+            logger.info("Cache vacío o no encontrado. Ejecutando recolección en vivo...")
+            articles = gather_all_sources()
+            save_articles_cache(articles)
+    else:
+        articles = gather_all_sources()
+        # Guardar snapshot local (ignorado en Git) para inspección y depuración
+        save_articles_cache(articles)
+
+    logger.info("Fase de Ingesta finalizada: %d artículos disponibles", len(articles))
 
     # Resumen por fuente
     counts = Counter(a.source for a in articles)
