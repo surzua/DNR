@@ -43,16 +43,19 @@ def test_main_with_dry_run_and_opportunities(mock_radar_opp: Opportunity):
         with patch.dict("os.environ", {"GEMINI_API_KEY": "fake_key"}):
             with patch("main.load_articles_cache", return_value=[MagicMock(source="La Tercera")]):
                 with patch("main.evaluate_opportunities", return_value=radar_resp):
-                    with patch("main.send_batch_alerts") as mock_batch:
-                        mock_batch.return_value = {
-                            "briefing_sent": True,
-                            "sent": 1,
-                            "failed": 0,
-                            "total": 1,
-                        }
-                        main()
-                        mock_batch.assert_called_once()
-                        assert mock_batch.call_args.kwargs["dry_run"] is True
+                    with patch("main.save_history") as mock_save:
+                        with patch("main.load_history", return_value=[]):
+                            with patch("main.send_batch_alerts") as mock_batch:
+                                mock_batch.return_value = {
+                                    "briefing_sent": True,
+                                    "sent": 1,
+                                    "failed": 0,
+                                    "total": 1,
+                                }
+                                main()
+                                mock_batch.assert_called_once()
+                                assert mock_batch.call_args.kwargs["dry_run"] is True
+                                mock_save.assert_called_once()
 
 
 def test_main_with_skip_telegram(mock_radar_opp: Opportunity):
@@ -65,6 +68,8 @@ def test_main_with_skip_telegram(mock_radar_opp: Opportunity):
         with patch.dict("os.environ", {"GEMINI_API_KEY": "fake_key"}):
             with patch("main.load_articles_cache", return_value=[MagicMock(source="La Tercera")]):
                 with patch("main.evaluate_opportunities", return_value=radar_resp):
-                    with patch("main.send_batch_alerts") as mock_batch:
-                        main()
-                        mock_batch.assert_not_called()
+                    with patch("main.save_history"):
+                        with patch("main.load_history", return_value=[]):
+                            with patch("main.send_batch_alerts") as mock_batch:
+                                main()
+                                mock_batch.assert_not_called()
