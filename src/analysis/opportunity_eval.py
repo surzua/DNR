@@ -4,6 +4,7 @@ import json
 import logging
 import os
 from typing import Any, List, Literal, Optional
+from urllib.parse import urlparse
 from dotenv import load_dotenv
 from google import genai
 from google.genai import types
@@ -91,19 +92,33 @@ class RadarResponse(BaseModel):
     )
 
 
+def _is_safe_http_url(url: Optional[str]) -> bool:
+    """Verifica que la URL provenga de un protocolo web estándar (http/https)."""
+    if not url or not isinstance(url, str):
+        return False
+    parsed = urlparse(url.strip())
+    return parsed.scheme in ("http", "https") and bool(parsed.netloc)
+
+
 def filter_and_rank_opportunities(
     opportunities: List[Opportunity],
     min_virality: int = 7,
     min_feasibility: int = 6,
     max_items: int = 3,
 ) -> List[Opportunity]:
-    """Aplica filtros deterministas de umbral y ordena por score combinado descendente."""
-    valid = [
-        opp
-        for opp in opportunities
-        if opp.virality_score >= min_virality
-        and opp.technical_feasibility_score >= min_feasibility
-    ]
+    """Aplica filtros deterministas de umbral, sanitiza URLs y ordena por score descendente."""
+    valid: List[Opportunity] = []
+    for opp in opportunities:
+        if opp.virality_score >= min_virality and opp.technical_feasibility_score >= min_feasibility:
+            # Blindaje contra enlaces inseguros o esquemas maliciosos
+            if opp.trigger_article_url and not _is_safe_http_url(opp.trigger_article_url):
+                logger.warning(
+                    "Descartando trigger_article_url con esquema no seguro: %s",
+                    opp.trigger_article_url,
+                )
+                opp.trigger_article_url = None
+            valid.append(opp)
+
     # Ordenar por puntaje total combinado (viralidad + factibilidad técnica) y luego por viralidad
     valid.sort(
         key=lambda o: (o.virality_score + o.technical_feasibility_score, o.virality_score),

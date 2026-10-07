@@ -11,12 +11,33 @@ import os
 import re
 import time
 from typing import Any, Dict, List, Optional
+from urllib.parse import urlparse
 import requests
 
 logger = logging.getLogger("dnr.telegram_bot")
 
 TELEGRAM_API_URL = "https://api.telegram.org/bot{token}/sendMessage"
 MAX_MESSAGE_LENGTH = 4096
+
+
+def is_safe_url(url: Optional[str]) -> bool:
+    """Verifica que la URL use un esquema web seguro (http/https) y tenga host válido."""
+    if not url or not isinstance(url, str):
+        return False
+    parsed = urlparse(url.strip())
+    return parsed.scheme in ("http", "https") and bool(parsed.netloc)
+
+
+def redact_sensitive_text(text: str, token: Optional[str] = None) -> str:
+    """Enmascara tokens y credenciales de Telegram en logs y excepciones de red."""
+    if not text:
+        return ""
+    redacted = text
+    if token and len(token) > 5:
+        redacted = redacted.replace(token, "[REDACTED_TOKEN]")
+    redacted = re.sub(r"/bot[0-9]+:[A-Za-z0-9_-]+", "/bot[REDACTED_TOKEN]", redacted)
+    redacted = re.sub(r"/bot[^/\s]+", "/bot[REDACTED_TOKEN]", redacted)
+    return redacted
 
 
 def _extract_field(obj: Any, field_name: str, default: Any = None) -> Any:
@@ -129,9 +150,9 @@ def format_opportunity_html(opportunity: Any) -> str:
 
     if trigger_title:
         lines.append("")
-        if trigger_url:
+        if trigger_url and is_safe_url(trigger_url):
             lines.append(
-                f"📰 <b>Noticia Detonante:</b> <a href=\"{html.escape(str(trigger_url), quote=True)}\">"
+                f"📰 <b>Noticia Detonante:</b> <a href=\"{html.escape(str(trigger_url).strip(), quote=True)}\">"
                 f"{html.escape(str(trigger_title), quote=False)}</a>"
             )
         else:
@@ -215,14 +236,14 @@ def send_telegram_message(
             logger.error(
                 "Error también en fallback de Telegram: HTTP %d - %s",
                 fallback_res.status_code,
-                fallback_res.text,
+                redact_sensitive_text(fallback_res.text, token=token),
             )
             return False
 
         logger.error(
             "Error al enviar mensaje a Telegram: HTTP %d - %s",
             response.status_code,
-            response.text,
+            redact_sensitive_text(response.text, token=token),
         )
         return False
 
@@ -230,10 +251,12 @@ def send_telegram_message(
         logger.error("Timeout al intentar conectar con la API de Telegram (%ds).", timeout)
         return False
     except requests.exceptions.RequestException as e:
-        logger.error("Error de conexión de red con Telegram: %s", e)
+        safe_msg = redact_sensitive_text(str(e), token=token)
+        logger.error("Error de conexión de red con Telegram: %s", safe_msg)
         return False
     except Exception as e:
-        logger.error("Excepción inesperada al enviar mensaje a Telegram: %s", e)
+        safe_msg = redact_sensitive_text(str(e), token=token)
+        logger.error("Excepción inesperada al enviar mensaje a Telegram: %s", safe_msg)
         return False
 
 

@@ -2,7 +2,9 @@
 
 import json
 import logging
+import os
 from pathlib import Path
+import tempfile
 from typing import List
 from src.ingestion.models import NewsArticle
 
@@ -15,13 +17,28 @@ def save_articles_cache(
     articles: List[NewsArticle],
     filepath: Path = DEFAULT_CACHE_PATH,
 ) -> Path:
-    """Guarda un snapshot de los artículos ingeridos en un archivo JSON local."""
+    """Guarda un snapshot de los artículos ingeridos en un archivo JSON local de forma atómica."""
     filepath = Path(filepath)
     filepath.parent.mkdir(parents=True, exist_ok=True)
 
     serialized = [item.model_dump(mode="json") for item in articles]
-    with open(filepath, "w", encoding="utf-8") as f:
-        json.dump(serialized, f, indent=2, ensure_ascii=False)
+    temp_file = tempfile.NamedTemporaryFile(
+        "w",
+        dir=filepath.parent,
+        delete=False,
+        encoding="utf-8",
+        suffix=".tmp",
+    )
+    temp_path = Path(temp_file.name)
+    try:
+        with temp_file as f:
+            json.dump(serialized, f, indent=2, ensure_ascii=False)
+        os.replace(temp_path, filepath)
+    except Exception as exc:
+        if temp_path.exists():
+            temp_path.unlink()
+        logger.error("Fallo durante guardado atómico de cache en %s: %s", filepath, exc)
+        raise exc
 
     logger.info("Snapshot local guardado: %d artículos en %s", len(articles), filepath)
     return filepath

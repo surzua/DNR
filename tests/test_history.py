@@ -98,3 +98,15 @@ def test_get_recent_topics():
     recent = get_recent_topics(history=history, days=7, now=now)
     assert "Tema Reciente" in recent
     assert "Tema Antiguo" not in recent
+
+
+def test_load_history_corrupt_file_preserves_backup(tmp_path: Path):
+    corrupt_file = tmp_path / "history.json"
+    corrupt_file.write_text("{ this is invalid json content ...", encoding="utf-8")
+
+    loaded = load_history(filepath=corrupt_file)
+    assert loaded == []
+
+    backup_file = tmp_path / "history.corrupt.bak"
+    assert backup_file.exists()
+    assert backup_file.read_text(encoding="utf-8") == "{ this is invalid json content ..."

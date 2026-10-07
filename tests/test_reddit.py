@@ -136,3 +136,11 @@ def test_fetch_subreddit_posts_both_fail_gracefully(mock_get):
 
     articles = fetch_subreddit_posts(subreddit="chile")
     assert articles == []
+
+
+def test_fetch_subreddit_posts_invalid_name():
+    # Caracteres no permitidos / inyecciones de ruta o parámetros
+    assert fetch_subreddit_posts(subreddit="../../etc/passwd") == []
+    assert fetch_subreddit_posts(subreddit="chile?param=1") == []
+    assert fetch_subreddit_posts(subreddit="") == []
+    assert fetch_subreddit_posts(subreddit="a" * 60) == []

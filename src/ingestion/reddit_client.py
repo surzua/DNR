@@ -6,6 +6,7 @@ Implementa estrategia dual (JSON / RSS fallback), filtrado por engagement y degr
 from datetime import datetime, timedelta, timezone
 import logging
 from pathlib import Path
+import re
 import time
 from typing import Any, Dict, List, Optional
 import feedparser
@@ -16,6 +17,8 @@ from src.ingestion.http_client import DEFAULT_HEADERS
 from src.ingestion.models import NewsArticle
 
 logger = logging.getLogger("dnr.reddit_client")
+
+SUBREDDIT_REGEX = re.compile(r"^[a-zA-Z0-9_]{1,50}$")
 
 
 def parse_reddit_json_post(
@@ -122,10 +125,14 @@ def fetch_subreddit_posts(
         "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
     }
     articles: List[NewsArticle] = []
+    if not subreddit or not SUBREDDIT_REGEX.match(subreddit.strip()):
+        logger.warning("Nombre de subreddit inválido o con caracteres no permitidos: %r", subreddit)
+        return []
 
     # Intento 1: API JSON
-    json_url = f"https://www.reddit.com/r/{subreddit}/hot.json?limit={limit}"
-    logger.info("Consultando Reddit JSON: r/%s", subreddit)
+    clean_sub = subreddit.strip()
+    json_url = f"https://www.reddit.com/r/{clean_sub}/hot.json?limit={limit}"
+    logger.info("Consultando Reddit JSON: r/%s", clean_sub)
     try:
         response = requests.get(json_url, headers=headers, timeout=timeout)
         if response.status_code == 200:
@@ -154,7 +161,7 @@ def fetch_subreddit_posts(
         logger.warning("Fallo al conectar con Reddit JSON r/%s: %s. Probando fallback RSS...", subreddit, exc)
 
     # Intento 2: Fallback a RSS
-    rss_url = f"https://www.reddit.com/r/{subreddit}/.rss"
+    rss_url = f"https://www.reddit.com/r/{clean_sub}/.rss"
     try:
         response = requests.get(rss_url, headers=headers, timeout=timeout)
         if response.status_code == 200:

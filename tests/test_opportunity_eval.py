@@ -136,6 +136,25 @@ def test_filter_and_rank_opportunities():
     assert filtered[1].headline == "Oportunidad Justa en Umbral"
 
 
+def test_filter_and_rank_opportunities_sanitizes_unsafe_trigger_url():
+    opp_unsafe = Opportunity(
+        headline="Oportunidad Inyectada",
+        category="Economía & Finanzas",
+        why_is_trending="Tema",
+        contrarian_or_curious_angle="Ángulo",
+        suggested_deliverable="Gráfico Estático de Alto Impacto",
+        data_sources=[],
+        virality_score=8,
+        technical_feasibility_score=8,
+        fast_execution_strategy="Paso 1, 2, 3",
+        trigger_article_title="Noticia",
+        trigger_article_url="javascript:alert(1)",
+    )
+    filtered = filter_and_rank_opportunities([opp_unsafe])
+    assert len(filtered) == 1
+    assert filtered[0].trigger_article_url is None
+
+
 def test_evaluate_opportunities_empty():
     """Verifica que con lista vacía retorne inmediatamente sin llamar a la API."""
     result = evaluate_opportunities(articles=[])

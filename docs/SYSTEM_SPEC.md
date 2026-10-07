@@ -335,7 +335,7 @@ jobs:
           git add data/history.json
           if ! git diff --staged --quiet; then
             git commit -m "chore: update radar history [skip ci]"
-            git pull --rebase origin main || true
+            git pull --rebase origin main || git rebase --abort
             git push origin main
           fi
 
@@ -347,11 +347,24 @@ jobs:
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           if [ -n "$TELEGRAM_BOT_TOKEN" ] && [ -n "$TELEGRAM_CHAT_ID" ]; then
-            MSG="🚨 <b>DNR Error en GitHub Actions</b>%0A%0AEl radar diario falló durante su ejecución.%0A👉 <a href=\"$RUN_URL\">Ver registro de errores en Actions</a>"
-            curl -s -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
-              -d "chat_id=${TELEGRAM_CHAT_ID}" \
-              -d "text=${MSG}" \
-              -d "parse_mode=HTML" || true
+            python3 -c '
+          import os, urllib.request, json
+          token = os.environ.get("TELEGRAM_BOT_TOKEN")
+          chat_id = os.environ.get("TELEGRAM_CHAT_ID")
+          run_url = os.environ.get("RUN_URL", "")
+          if token and chat_id:
+              msg = f"🚨 <b>DNR Error en GitHub Actions</b>\n\nEl radar diario falló durante su ejecución.\n👉 <a href=\"{run_url}\">Ver registro de errores en Actions</a>"
+              payload = json.dumps({"chat_id": chat_id, "text": msg, "parse_mode": "HTML"}).encode("utf-8")
+              req = urllib.request.Request(
+                  f"https://api.telegram.org/bot{token}/sendMessage",
+                  data=payload,
+                  headers={"Content-Type": "application/json"}
+              )
+              try:
+                  urllib.request.urlopen(req, timeout=10)
+              except Exception:
+                  pass
+          ' || true
           fi
 ```
 
@@ -374,3 +387,4 @@ Configurar en `Settings > Secrets and variables > Actions`:
 3. [x] **Paso 3:** Motor de evaluación analítica con Gemini Flash, fallback resiliente y esquemas tipados Pydantic.
 4. [x] **Paso 4:** Capa de despacho a Telegram con formato HTML seguro, trazabilidad 1-click y rate limiting.
 5. [x] **Paso 5:** Automatización desatendida con GitHub Actions, CI con pytest, rebase seguro, inputs dinámicos y alertas ante fallos.
+6. [x] **Paso 6 (Seguridad & DevSecOps):** Blindaje AppSec integral: redacción de secretos en logs, defensa ante inyección indirecta de prompts (`<untrusted_news_items>`), sanitización de URLs salientes, stream acotado anti-DoS en HTTP, validación de subreddits y persistencia atómica con resguardo ante corrupción de datos.

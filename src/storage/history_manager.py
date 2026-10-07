@@ -3,7 +3,10 @@
 from datetime import datetime, timedelta, timezone
 import json
 import logging
+import os
 from pathlib import Path
+import shutil
+import tempfile
 from typing import Any, Dict, List, Optional
 from pydantic import BaseModel, Field
 
@@ -63,7 +66,12 @@ class HistoryEntry(BaseModel):
 
 
 def load_history(filepath: Path = HISTORY_FILE_PATH) -> List[HistoryEntry]:
-    """Carga y valida el historial de oportunidades analizadas."""
+    """Carga y valida el historial de oportunidades analizadas.
+
+    Si el archivo está dañado, preserva una copia de seguridad (.corrupt.bak)
+    antes de retornar lista vacía, previniendo pérdida silenciosa de datos.
+    """
+    filepath = Path(filepath)
     if not filepath.exists():
         return []
     try:
@@ -75,15 +83,43 @@ def load_history(filepath: Path = HISTORY_FILE_PATH) -> List[HistoryEntry]:
             return [HistoryEntry.model_validate(item) for item in data]
     except Exception as e:
         logger.warning("Error al cargar historial desde %s: %s", filepath, e)
+        # Resguardo de seguridad: preservar archivo corrupto para auditoría/recuperación
+        try:
+            backup_path = filepath.with_suffix(".corrupt.bak")
+            shutil.copyfile(filepath, backup_path)
+            logger.error("Copia de seguridad del historial dañado guardada en: %s", backup_path)
+        except Exception as copy_err:
+            logger.warning("No se pudo crear backup del archivo dañado: %s", copy_err)
         return []
 
 
 def save_history(history: List[HistoryEntry], filepath: Path = HISTORY_FILE_PATH) -> None:
-    """Guarda el historial serializado como JSON formateado."""
+    """Guarda el historial serializado como JSON formateado de forma atómica.
+
+    Utiliza un archivo temporal y reemplazo atómico para evitar corrupción por abortos
+    o cortes de proceso en ejecuciones desatendidas.
+    """
+    filepath = Path(filepath)
     filepath.parent.mkdir(parents=True, exist_ok=True)
     serialized = [item.model_dump(mode="json") for item in history]
-    with open(filepath, "w", encoding="utf-8") as f:
-        json.dump(serialized, f, indent=2, ensure_ascii=False)
+
+    temp_file = tempfile.NamedTemporaryFile(
+        "w",
+        dir=filepath.parent,
+        delete=False,
+        encoding="utf-8",
+        suffix=".tmp",
+    )
+    temp_path = Path(temp_file.name)
+    try:
+        with temp_file as f:
+            json.dump(serialized, f, indent=2, ensure_ascii=False)
+        os.replace(temp_path, filepath)
+    except Exception as exc:
+        if temp_path.exists():
+            temp_path.unlink()
+        logger.error("Fallo durante guardado atómico del historial en %s: %s", filepath, exc)
+        raise exc
 
 
 def get_recent_topics(

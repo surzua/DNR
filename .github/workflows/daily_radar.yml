@@ -66,7 +66,7 @@ jobs:
           git add data/history.json
           if ! git diff --staged --quiet; then
             git commit -m "chore: update radar history [skip ci]"
-            git pull --rebase origin main || true
+            git pull --rebase origin main || git rebase --abort
             git push origin main
           else
             echo "Sin cambios en data/history.json para commitear."
@@ -80,9 +80,22 @@ jobs:
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           if [ -n "$TELEGRAM_BOT_TOKEN" ] && [ -n "$TELEGRAM_CHAT_ID" ]; then
-            MSG="🚨 <b>DNR Error en GitHub Actions</b>%0A%0AEl radar diario falló durante su ejecución.%0A👉 <a href=\"$RUN_URL\">Ver registro de errores en Actions</a>"
-            curl -s -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
-              -d "chat_id=${TELEGRAM_CHAT_ID}" \
-              -d "text=${MSG}" \
-              -d "parse_mode=HTML" || true
+            python3 -c '
+          import os, urllib.request, json
+          token = os.environ.get("TELEGRAM_BOT_TOKEN")
+          chat_id = os.environ.get("TELEGRAM_CHAT_ID")
+          run_url = os.environ.get("RUN_URL", "")
+          if token and chat_id:
+              msg = f"🚨 <b>DNR Error en GitHub Actions</b>\n\nEl radar diario falló durante su ejecución.\n👉 <a href=\"{run_url}\">Ver registro de errores en Actions</a>"
+              payload = json.dumps({"chat_id": chat_id, "text": msg, "parse_mode": "HTML"}).encode("utf-8")
+              req = urllib.request.Request(
+                  f"https://api.telegram.org/bot{token}/sendMessage",
+                  data=payload,
+                  headers={"Content-Type": "application/json"}
+              )
+              try:
+                  urllib.request.urlopen(req, timeout=10)
+              except Exception:
+                  pass
+          ' || true
           fi

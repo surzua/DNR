@@ -10,6 +10,8 @@ from src.notifiers.telegram_bot import (
     _strip_html_tags,
     format_briefing_html,
     format_opportunity_html,
+    is_safe_url,
+    redact_sensitive_text,
     send_batch_alerts,
     send_telegram_alert,
     send_telegram_message,
@@ -278,3 +280,49 @@ def test_send_batch_alerts_live_mocked(mock_post, sample_opportunity: Opportunit
     assert results["sent"] == 1
     assert results["failed"] == 0
     assert mock_post.call_count == 2  # 1 briefing + 1 oportunidad
+
+
+def test_is_safe_url():
+    assert is_safe_url("https://latercera.com/noticia") is True
+    assert is_safe_url("http://df.cl/economia") is True
+    assert is_safe_url("javascript:alert(1)") is False
+    assert is_safe_url("tg://resolve?domain=test") is False
+    assert is_safe_url("data:text/html,<h1>test</h1>") is False
+    assert is_safe_url("") is False
+    assert is_safe_url(None) is False
+    assert is_safe_url("just-a-string") is False
+
+
+def test_format_opportunity_html_rejects_unsafe_trigger_url(sample_opportunity: Opportunity):
+    sample_opportunity.trigger_article_url = "javascript:alert('XSS')"
+    formatted = format_opportunity_html(sample_opportunity)
+    assert "<a href=\"javascript:" not in formatted
+    assert "Precios de arriendos en Santiago marcan leve retroceso" in formatted
+
+
+def test_redact_sensitive_text():
+    secret_token = "123456789:ABCDefGhIjKlMnOpQrStUvWxYz"
+    raw_error = f"HTTPSConnectionPool: Max retries exceeded with url: /bot{secret_token}/sendMessage"
+    redacted = redact_sensitive_text(raw_error, token=secret_token)
+    assert secret_token not in redacted
+    assert "[REDACTED_TOKEN]" in redacted
+
+
+@patch("src.notifiers.telegram_bot.logger.error")
+@patch("src.notifiers.telegram_bot.requests.post")
+def test_send_telegram_message_redacts_token_on_network_error(mock_post, mock_logger_error):
+    token = "987654321:SECRET_TOKEN_XYZ"
+    mock_post.side_effect = requests.exceptions.RequestException(
+        f"Failed to connect: https://api.telegram.org/bot{token}/sendMessage"
+    )
+
+    ok = send_telegram_message(
+        text="Test",
+        bot_token=token,
+        chat_id="123",
+    )
+    assert ok is False
+    mock_logger_error.assert_called_once()
+    logged_msg = mock_logger_error.call_args[0][1]
+    assert token not in logged_msg
+    assert "[REDACTED_TOKEN]" in logged_msg
