@@ -29,6 +29,7 @@ Sistema automatizado de inteligencia de tendencias diseñado para detectar notic
 │   └── notifiers/                 # Notificaciones a Telegram
 ├── main.py                        # Entrypoint de ejecución
 ├── pyproject.toml / requirements.txt
+├── tests/                         # Suite de pruebas automatizadas (pytest)
 └── README.md
 ```
 
@@ -40,16 +41,55 @@ Copiar `.env.example` a `.env`:
 cp .env.example .env
 ```
 
-Configurar:
-- `GEMINI_API_KEY`: API Key de Google AI Studio.
-- `TELEGRAM_BOT_TOKEN`: Token de bot de Telegram (@BotFather).
-- `TELEGRAM_CHAT_ID`: ID del chat de destino.
+Variables requeridas:
+- `GEMINI_API_KEY`: API Key obtenida en Google AI Studio.
+- `TELEGRAM_BOT_TOKEN`: Token HTTP del bot generado con `@BotFather`.
+- `TELEGRAM_CHAT_ID`: ID numérico del chat destinatario (obtenible vía `@userinfobot`).
 
-## Instalación y Ejecución
+## Instalación y Ejecución Local
 
 ```bash
+# 1. Crear y activar entorno virtual
 python3 -m venv .venv
 source .venv/bin/activate
+
+# 2. Instalar dependencias
 pip install -r requirements.txt
+
+# 3. Ejecutar pipeline completo
 python main.py
 ```
+
+### Opciones de Ejecución CLI
+
+El script `main.py` incluye banderas útiles para desarrollo y depuración:
+
+- `python main.py --dry-run`: Simula el despacho a Telegram mostrando las tarjetas formateadas en consola sin enviarlas a la red.
+- `python main.py --use-cache`: Carga las noticias desde el snapshot local `data/latest_articles.json` (ahorra tiempo y peticiones de red).
+- `python main.py --skip-llm`: Ejecuta solo la fase de ingesta (RSS + Reddit) sin consumir cuota de Gemini.
+- `python main.py --skip-telegram`: Evalúa las oportunidades y actualiza `history.json` omitiendo el envío a Telegram.
+
+## Pruebas Automatizadas
+
+El proyecto cuenta con una suite completa de pruebas unitarias y de integración:
+
+```bash
+pytest tests/
+```
+
+## Automatización con GitHub Actions
+
+El flujo en `.github/workflows/daily_radar.yml` ejecuta el radar automáticamente todas las mañanas:
+
+- **Programación:** Cron a las 10:30 UTC (07:30 AM CLT en verano / 06:30 AM CLT en invierno).
+- **Ejecución Manual:** Pestaña *Actions > Daily Data Newsjacking Radar > Run workflow* (soporta opciones `dry_run` y `skip_llm`).
+- **Persistencia:** Commitea y pushea automáticamente las nuevas oportunidades a `data/history.json` con `[skip ci]`.
+- **Alertas de Fallo:** Si la ejecución en GitHub Actions falla, envía una alerta instantánea a Telegram con enlace al log.
+
+### Configuración en GitHub:
+
+1. **Secrets:** En el repositorio de GitHub, ir a `Settings > Secrets and variables > Actions > Repository secrets` y agregar:
+   - `GEMINI_API_KEY`
+   - `TELEGRAM_BOT_TOKEN`
+   - `TELEGRAM_CHAT_ID`
+2. **Permisos de Escritura:** En `Settings > Actions > General > Workflow permissions`, asegurarse de seleccionar **"Read and write permissions"** para permitir que el workflow actualice `data/history.json`.
