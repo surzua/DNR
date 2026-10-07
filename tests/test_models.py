@@ -15,7 +15,10 @@ def test_news_article_normalization():
     )
 
     assert article.title == "Noticia de prueba con espacios"
+    assert article.summary == "Resumen limpio"
     assert article.published_at.tzinfo is not None
     # 12:00 at UTC-3 is 15:00 UTC
     assert article.published_at == datetime(2026, 10, 6, 15, 0, 0, tzinfo=timezone.utc)
     assert article.source == "EMOL"
+    assert article.score is None
+    assert article.comments_count is None

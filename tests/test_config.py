@@ -13,7 +13,7 @@ def test_sources_yaml_structure():
 
     assert "rss_feeds" in config
     feeds = config["rss_feeds"]
-    assert "emol" in feeds
+    assert "cooperativa" in feeds
     assert "diario_financiero" in feeds
     assert "la_tercera" in feeds
     assert "biobiochile" in feeds
