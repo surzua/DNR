@@ -1,1 +1,71 @@
-[]
+[
+  {
+    "id": "2026-10-07-001",
+    "timestamp": "2026-10-07T02:33:16.689328Z",
+    "topic": "¿Tijeretazo o Eficiencia? El Buscador del Presupuesto 2027",
+    "category": "Economía & Finanzas",
+    "viral_hook_type": "Contrarian / Curious Hook",
+    "analytical_angle": "Mientras el gobierno defiende la 'responsabilidad fiscal', analizamos qué programas específicos pierden más financiamiento real frente al aumento de presupuesto en Contraloría y Deporte.",
+    "data_sources": [
+      {
+        "name": "Dirección de Presupuestos (DIPRES)",
+        "type": "Portal Abierto",
+        "potential_url_or_query": "https://www.dipres.gob.cl/598/w3-propertyvalue-15544.html",
+        "friction_level": "Baja (Horas)"
+      }
+    ],
+    "feasibility_score": 8,
+    "virality_score": 9,
+    "recommended_deliverable": "App Interactiva (Streamlit)",
+    "fast_execution_strategy": "1. Descargar los PDF/Excel del Proyecto de Ley de Presupuesto 2027 de DIPRES. 2. Extraer las variaciones porcentuales de las partidas clave (Ciencia, Energía, Salud, Deporte). 3. Crear un dashboard en Streamlit que permita al usuario buscar su área de interés y ver si sube o baja.",
+    "trigger_article_title": "Con un fuerte rechazo a los recortes a programas sociales, la oposición afronta la primera jornada de discusión del Presupuesto 2027",
+    "trigger_article_url": "http://www.df.cl/economia-y-politica/congreso/con-un-fuerte-rechazo-a-los-recortes-a-programas-sociales-la-oposicion",
+    "status": "candidate"
+  },
+  {
+    "id": "2026-10-07-002",
+    "timestamp": "2026-10-07T02:33:16.689686Z",
+    "topic": "Cunas Vacías: El Mapa de la Extinción Demográfica en las Comunas de Chile",
+    "category": "Sociedad & Tendencias",
+    "viral_hook_type": "Contrarian / Curious Hook",
+    "analytical_angle": "No es solo que nazcan menos niños: la brecha demográfica se concentra críticamente en comunas específicas. ¿Cuáles son las comunas que se están quedando sin niños más rápido?",
+    "data_sources": [
+      {
+        "name": "DEIS - Estadísticas de Natalidad",
+        "type": "Portal Abierto",
+        "potential_url_or_query": "https://deis.minsal.cl/",
+        "friction_level": "Baja (Horas)"
+      }
+    ],
+    "feasibility_score": 8,
+    "virality_score": 8,
+    "recommended_deliverable": "Gráfico Estático de Alto Impacto",
+    "fast_execution_strategy": "1. Descargar el dataset histórico de nacimientos por comuna del DEIS Minsal (2015-2025). 2. Calcular la tasa de variación porcentual de nacimientos por cada 1.000 habitantes usando proyecciones del INE. 3. Generar un mapa de calor de Chile mostrando las comunas con mayor colapso de natalidad.",
+    "trigger_article_title": "Birth rate decline",
+    "trigger_article_url": "https://www.reddit.com/r/chile/comments/1wz5hbr/birth_rate_decline/",
+    "status": "candidate"
+  },
+  {
+    "id": "2026-10-07-003",
+    "timestamp": "2026-10-07T02:33:16.689992Z",
+    "topic": "La Paradoja del Cobre: ¿Qué divisiones de Codelco inflaron sus cifras?",
+    "category": "Economía & Finanzas",
+    "viral_hook_type": "Contrarian / Curious Hook",
+    "analytical_angle": "La narrativa común es que Codelco sufre por baja producción, pero la data histórica revela anomalías donde se reportó de más. ¿Cómo se compara la producción real vs. la proyectada por división?",
+    "data_sources": [
+      {
+        "name": "Cochilco - Estadísticas de Producción de Cobre",
+        "type": "Portal Abierto",
+        "potential_url_or_query": "https://www.cochilco.cl/Paginas/Estadisticas/Bases-de-Datos.aspx",
+        "friction_level": "Baja (Horas)"
+      }
+    ],
+    "feasibility_score": 7,
+    "virality_score": 8,
+    "recommended_deliverable": "Gráfico Estático de Alto Impacto",
+    "fast_execution_strategy": "1. Descargar la base de datos histórica de producción mensual de cobre por división de Cochilco. 2. Identificar desviaciones estándar atípicas en Ministro Hales y Salvador durante 2024-2025. 3. Diseñar un gráfico de líneas comparativo destacando los meses con 'picos' sospechosos de sobreproducción.",
+    "trigger_article_title": "Codelco investiga nueva sobreproducción de cobre tras posible “incremento artificial” en Ministro Hales y Salvador",
+    "trigger_article_url": "https://www.latercera.com/pulso/noticia/codelco-investiga-nueva-sobreproduccion-de-cobre-con-posible-incremento-artificial-en-ministro-hales-y-salvador/",
+    "status": "candidate"
+  }
+]

@@ -143,7 +143,13 @@ def evaluate_opportunities(
 
     # Resolver cliente y credenciales
     resolved_key = api_key or os.getenv("GEMINI_API_KEY")
-    resolved_model = model_name or os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
+    default_candidates = ["gemini-3.5-flash", "gemini-3.8-flash", "gemini-flash-latest"]
+    if model_name:
+        candidate_models = [model_name]
+    elif os.getenv("GEMINI_MODEL"):
+        candidate_models = [os.getenv("GEMINI_MODEL")]
+    else:
+        candidate_models = default_candidates
 
     if client is None:
         if not resolved_key:
@@ -155,26 +161,34 @@ def evaluate_opportunities(
         genai_client = client
 
     prompt = build_evaluation_prompt(articles, recent_topics=recent_history_topics)
-    logger.info(
-        "Invocando Gemini (%s) para evaluar %d artículos...",
-        resolved_model,
-        len(articles),
-    )
 
-    try:
-        response = genai_client.models.generate_content(
-            model=resolved_model,
-            contents=prompt,
-            config=types.GenerateContentConfig(
-                system_instruction=SYSTEM_PROMPT,
-                response_mime_type="application/json",
-                response_schema=RadarResponse,
-                temperature=0.2,
-            ),
-        )
-    except Exception as e:
-        logger.error("Error al invocar API de Gemini: %s", e)
-        raise
+    response = None
+    last_error = None
+    for model in candidate_models:
+        try:
+            logger.info(
+                "Invocando Gemini (%s) para evaluar %d artículos...",
+                model,
+                len(articles),
+            )
+            response = genai_client.models.generate_content(
+                model=model,
+                contents=prompt,
+                config=types.GenerateContentConfig(
+                    system_instruction=SYSTEM_PROMPT,
+                    response_mime_type="application/json",
+                    response_schema=RadarResponse,
+                    temperature=0.2,
+                ),
+            )
+            break
+        except Exception as e:
+            logger.warning("Fallo al consultar modelo %s: %s", model, e)
+            last_error = e
+
+    if response is None:
+        logger.error("Todos los modelos candidatos de Gemini fallaron: %s", last_error)
+        raise last_error
 
     # Extracción y validación del modelo Pydantic
     radar_response: Optional[RadarResponse] = None
