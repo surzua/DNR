@@ -218,5 +218,37 @@
     "trigger_article_title": "Corte Suprema expulsa a otros cuatro jueces que viajaron al extranjero con licencia médica",
     "trigger_article_url": "https://www.latercera.com/nacional/noticia/corte-suprema-expulsa-a-otros-cuatro-jueces-que-viajaron-al-extranjero-con-licencia-medica/",
     "status": "candidate"
+  },
+  {
+    "id": "2026-10-07-011",
+    "timestamp": "2026-10-07T02:47:27.458394Z",
+    "topic": "Oportunidad de prueba",
+    "category": "Economía & Finanzas",
+    "viral_hook_type": "Contrarian / Curious Hook",
+    "analytical_angle": "Ángulo curioso",
+    "data_sources": [],
+    "feasibility_score": 8,
+    "virality_score": 8,
+    "recommended_deliverable": "Gráfico Estático de Alto Impacto",
+    "fast_execution_strategy": "1. Datos 2. Graficar 3. Publicar",
+    "trigger_article_title": null,
+    "trigger_article_url": null,
+    "status": "candidate"
+  },
+  {
+    "id": "2026-10-07-012",
+    "timestamp": "2026-10-07T02:47:27.459642Z",
+    "topic": "Oportunidad de prueba",
+    "category": "Economía & Finanzas",
+    "viral_hook_type": "Contrarian / Curious Hook",
+    "analytical_angle": "Ángulo curioso",
+    "data_sources": [],
+    "feasibility_score": 8,
+    "virality_score": 8,
+    "recommended_deliverable": "Gráfico Estático de Alto Impacto",
+    "fast_execution_strategy": "1. Datos 2. Graficar 3. Publicar",
+    "trigger_article_title": null,
+    "trigger_article_url": null,
+    "status": "candidate"
   }
 ]
