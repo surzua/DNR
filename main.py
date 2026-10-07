@@ -9,6 +9,7 @@ from dotenv import load_dotenv
 
 from src.analysis import evaluate_opportunities
 from src.ingestion import gather_all_sources
+from src.notifiers import send_batch_alerts
 from src.storage import (
     HistoryEntry,
     generate_next_id,
@@ -42,6 +43,16 @@ def main() -> None:
         "--skip-llm",
         action="store_true",
         help="Omite la fase de evaluación con Gemini LLM",
+    )
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Simula el despacho a Telegram mostrando los mensajes formateados en consola sin enviarlos a la red",
+    )
+    parser.add_argument(
+        "--skip-telegram",
+        action="store_true",
+        help="Omite la fase de despacho de notificaciones a Telegram",
     )
     args = parser.parse_args()
 
@@ -112,6 +123,13 @@ def main() -> None:
 
     if not opportunities:
         logger.info("No se detectaron oportunidades que superaran los umbrales de viabilidad y viralidad hoy.")
+        if not args.skip_telegram:
+            logger.info("Despachando notificación de estado a Telegram (0 oportunidades)...")
+            send_batch_alerts(
+                opportunities=[],
+                total_articles=len(articles),
+                dry_run=args.dry_run,
+            )
         return
 
     # Guardado de oportunidades en historial
@@ -132,7 +150,28 @@ def main() -> None:
 
     save_history(history)
     logger.info("\nHistorial actualizado exitosamente en data/history.json con %d oportunidades nuevas.", len(opportunities))
-    logger.info("Pipeline listo para Fase de Notificación Telegram (Paso 4).")
+
+    # Fase 4: Despacho de alertas a Telegram
+    if args.skip_telegram:
+        logger.info("Bandera --skip-telegram activa: Omitiendo despacho a Telegram.")
+    else:
+        logger.info("--------------------------------------------------")
+        logger.info("Fase 4: Despachando alertas a Telegram%s...", " (DRY-RUN)" if args.dry_run else "")
+        logger.info("--------------------------------------------------")
+        dispatch_results = send_batch_alerts(
+            opportunities=opportunities,
+            total_articles=len(articles),
+            dry_run=args.dry_run,
+        )
+        if dispatch_results.get("skipped"):
+            logger.warning("Despacho a Telegram omitido por credenciales faltantes.")
+        else:
+            logger.info(
+                "Fase 4 finalizada: %d alertas enviadas (Fallidas: %d, Briefing enviado: %s).",
+                dispatch_results.get("sent", 0),
+                dispatch_results.get("failed", 0),
+                dispatch_results.get("briefing_sent", False),
+            )
 
 
 if __name__ == "__main__":

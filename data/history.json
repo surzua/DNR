@@ -67,5 +67,156 @@
     "trigger_article_title": "Codelco investiga nueva sobreproducción de cobre tras posible “incremento artificial” en Ministro Hales y Salvador",
     "trigger_article_url": "https://www.latercera.com/pulso/noticia/codelco-investiga-nueva-sobreproduccion-de-cobre-con-posible-incremento-artificial-en-ministro-hales-y-salvador/",
     "status": "candidate"
+  },
+  {
+    "id": "2026-10-07-004",
+    "timestamp": "2026-10-07T02:43:26.747138Z",
+    "topic": "Oportunidad de prueba",
+    "category": "Economía & Finanzas",
+    "viral_hook_type": "Contrarian / Curious Hook",
+    "analytical_angle": "Ángulo curioso",
+    "data_sources": [],
+    "feasibility_score": 8,
+    "virality_score": 8,
+    "recommended_deliverable": "Gráfico Estático de Alto Impacto",
+    "fast_execution_strategy": "1. Datos 2. Graficar 3. Publicar",
+    "trigger_article_title": null,
+    "trigger_article_url": null,
+    "status": "candidate"
+  },
+  {
+    "id": "2026-10-07-005",
+    "timestamp": "2026-10-07T02:43:26.748388Z",
+    "topic": "Oportunidad de prueba",
+    "category": "Economía & Finanzas",
+    "viral_hook_type": "Contrarian / Curious Hook",
+    "analytical_angle": "Ángulo curioso",
+    "data_sources": [],
+    "feasibility_score": 8,
+    "virality_score": 8,
+    "recommended_deliverable": "Gráfico Estático de Alto Impacto",
+    "fast_execution_strategy": "1. Datos 2. Graficar 3. Publicar",
+    "trigger_article_title": null,
+    "trigger_article_url": null,
+    "status": "candidate"
+  },
+  {
+    "id": "2026-10-07-006",
+    "timestamp": "2026-10-07T02:44:22.362963Z",
+    "topic": "Oportunidad de prueba",
+    "category": "Economía & Finanzas",
+    "viral_hook_type": "Contrarian / Curious Hook",
+    "analytical_angle": "Ángulo curioso",
+    "data_sources": [],
+    "feasibility_score": 8,
+    "virality_score": 8,
+    "recommended_deliverable": "Gráfico Estático de Alto Impacto",
+    "fast_execution_strategy": "1. Datos 2. Graficar 3. Publicar",
+    "trigger_article_title": null,
+    "trigger_article_url": null,
+    "status": "candidate"
+  },
+  {
+    "id": "2026-10-07-007",
+    "timestamp": "2026-10-07T02:44:22.364120Z",
+    "topic": "Oportunidad de prueba",
+    "category": "Economía & Finanzas",
+    "viral_hook_type": "Contrarian / Curious Hook",
+    "analytical_angle": "Ángulo curioso",
+    "data_sources": [],
+    "feasibility_score": 8,
+    "virality_score": 8,
+    "recommended_deliverable": "Gráfico Estático de Alto Impacto",
+    "fast_execution_strategy": "1. Datos 2. Graficar 3. Publicar",
+    "trigger_article_title": null,
+    "trigger_article_url": null,
+    "status": "candidate"
+  },
+  {
+    "id": "2026-10-07-008",
+    "timestamp": "2026-10-07T02:46:57.675999Z",
+    "topic": "El Umbral del Apagón: El mapa comunal que revela con cuántos milímetros de lluvia colapsa la red eléctrica",
+    "category": "Sociedad & Tendencias",
+    "viral_hook_type": "Contrarian / Curious Hook",
+    "analytical_angle": "Se suele culpar a la 'intensidad inusual' del temporal, pero al correlacionar milímetros de agua con clientes sin luz se evidencia que comunas de menores recursos sufren cortes masivos con apenas 10 a 15 mm de precipitación, mientras comunas del sector oriente toleran más de 40 mm sin interrupciones críticas.",
+    "data_sources": [
+      {
+        "name": "Superintendencia de Electricidad y Combustibles (SEC)",
+        "type": "Portal Abierto",
+        "potential_url_or_query": "https://www.sec.cl/interrupciones-en-linea/",
+        "friction_level": "Baja (Horas)"
+      },
+      {
+        "name": "Dirección Meteorológica de Chile (DMC)",
+        "type": "API Pública",
+        "potential_url_or_query": "https://climatologia.meteochile.gob.cl/application/estaciones/datosDescarga/estaciones",
+        "friction_level": "Baja (Horas)"
+      }
+    ],
+    "feasibility_score": 8,
+    "virality_score": 9,
+    "recommended_deliverable": "Gráfico Estático de Alto Impacto",
+    "fast_execution_strategy": "1. Extraer registros comunales de clientes afectados reportados por la SEC durante las últimas 48 horas. 2. Cruzar los datos con las precipitaciones acumuladas por estación de la DMC. 3. Graficar en un scatter plot y mapa coroplético el 'Índice de Fragilidad Eléctrica' por comuna para visibilizar la desigualdad en la respuesta de la red.",
+    "trigger_article_title": "Lluvia causa estragos en la Región Metropolitana: Miles de clientes sin luz y calles anegadas",
+    "trigger_article_url": "https://www.biobiochile.cl/noticias/nacional/region-metropolitana/2026/10/06/lluvia-causa-estragos-en-la-region-metropolitana-mas-de-13-mil-clientes-sin-luz-y-calles-anegadas.shtml",
+    "status": "candidate"
+  },
+  {
+    "id": "2026-10-07-009",
+    "timestamp": "2026-10-07T02:46:57.676778Z",
+    "topic": "¿Cuánto te cuesta tu AFP al año? El Simulador del Impacto de una Guerra de Comisiones",
+    "category": "Economía & Finanzas",
+    "viral_hook_type": "Contrarian / Curious Hook",
+    "analytical_angle": "El cotizante promedio suele ignorar el porcentaje que paga mensualmente asumiendo que no tiene impacto visible, pero una diferencia de apenas 0,4% en la comisión sobre el sueldo bruto equivale a más de $4.000.000 en pérdidas de liquidez durante la vida laboral activa.",
+    "data_sources": [
+      {
+        "name": "Superintendencia de Pensiones (SPensiones)",
+        "type": "Portal Abierto",
+        "potential_url_or_query": "https://www.spensiones.cl/portal/institucional/594/w3-propertyvalue-9921.html",
+        "friction_level": "Baja (Horas)"
+      },
+      {
+        "name": "Base de Datos de Cotizantes e Ingresos Imponibles (SPensiones)",
+        "type": "Dataset Descargable",
+        "potential_url_or_query": "https://www.spensiones.cl/apps/centroEstadisticas/paginaOri.php?menu=sci&ref=afi",
+        "friction_level": "Baja (Horas)"
+      }
+    ],
+    "feasibility_score": 9,
+    "virality_score": 8,
+    "recommended_deliverable": "App Interactiva (Streamlit)",
+    "fast_execution_strategy": "1. Descargar la tabla histórica y vigente de comisiones por AFP en formato CSV desde SPensiones. 2. Construir en Python un modelo de proyección que calcule el costo anual y vitalicio según el sueldo bruto ingresado por el usuario. 3. Desplegar una app en Streamlit que permita comparar el ahorro real frente a una eventual tarifa low-cost.",
+    "trigger_article_title": "Fintual ingresa solicitud formal ante la Superintendencia de Pensiones para constituir AFP y busca personal",
+    "trigger_article_url": "http://www.df.cl/mercados/pensiones/fintual-ingresa-solicitud-formal-ante-la-superintendencia-de-pensiones-para",
+    "status": "candidate"
+  },
+  {
+    "id": "2026-10-07-010",
+    "timestamp": "2026-10-07T02:46:57.677734Z",
+    "topic": "El Doble Estándar de las Licencias: Días de Permiso y Destituciones en la Magistratura vs el Ciudadano Común",
+    "category": "Política & Estado",
+    "viral_hook_type": "Contrarian / Curious Hook",
+    "analytical_angle": "Mientras a los trabajadores chilenos la COMPIN y las Isapres les rechazan sistemáticamente más del 15% de sus licencias y tardan meses en pagar subsidios, magistrados con sueldos fiscales de alto rango mantuvieron permisos irregulares durante meses sin que existiera interoperabilidad básica entre el Poder Judicial y el control migratorio de la PDI.",
+    "data_sources": [
+      {
+        "name": "Transparencia Activa Poder Judicial (PJUD)",
+        "type": "Scraping HTML",
+        "potential_url_or_query": "https://transparencia.pjud.cl/remuneraciones-y-personal/",
+        "friction_level": "Baja (Horas)"
+      },
+      {
+        "name": "Superintendencia de Seguridad Social (SUSESO)",
+        "type": "Dataset Descargable",
+        "potential_url_or_query": "https://www.suseso.cl/608/w3-propertyvalue-10364.html",
+        "friction_level": "Baja (Horas)"
+      }
+    ],
+    "feasibility_score": 7,
+    "virality_score": 8,
+    "recommended_deliverable": "Gráfico Estático de Alto Impacto",
+    "fast_execution_strategy": "1. Consolidar los datos públicos de los fallos del pleno de la Suprema (número de jueces, regiones y días de ausencia detectados). 2. Comparar los días promedio de reposo y la tasa de fiscalización judicial contra las estadísticas de rechazos de licencias de SUSESO. 3. Diseñar una infografía que exponga la brecha de control institucional y el costo fiscal acumulado de las licencias fraudulentas.",
+    "trigger_article_title": "Corte Suprema expulsa a otros cuatro jueces que viajaron al extranjero con licencia médica",
+    "trigger_article_url": "https://www.latercera.com/nacional/noticia/corte-suprema-expulsa-a-otros-cuatro-jueces-que-viajaron-al-extranjero-con-licencia-medica/",
+    "status": "candidate"
   }
 ]
