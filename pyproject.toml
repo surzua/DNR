@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "data-newsjacking-radar"
+version = "0.1.0"
+description = "Automated trend intelligence system to detect high-traction Chilean news and evaluate Data Science / Analytics feasibility."
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "feedparser>=6.0.10",
+    "requests>=2.31.0",
+    "pydantic>=2.5.0",
+    "google-genai>=0.1.0",
+    "pyyaml>=6.0.1",
+    "python-dotenv>=1.0.0"
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "black>=23.0.0",
+    "ruff>=0.1.0"
+]

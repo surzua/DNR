@@ -1,0 +1,45 @@
+rss_feeds:
+  emol:
+    name: "EMOL"
+    categories:
+      nacional: "https://www.emol.com/rss/nacional.xml"
+      economia: "https://www.emol.com/rss/economia.xml"
+      deportes: "https://www.emol.com/rss/deportes.xml"
+  diario_financiero:
+    name: "Diario Financiero"
+    categories:
+      portada: "https://www.df.cl/noticias/site/tax/port/all/rss____1.xml"
+      economia: "https://www.df.cl/noticias/site/tax/port/all/rss____2.xml"
+      empresas: "https://www.df.cl/noticias/site/tax/port/all/rss____3.xml"
+  la_tercera:
+    name: "La Tercera"
+    categories:
+      nacional: "https://www.latercera.com/arc/outboundfeeds/rss/category/nacional/?outputType=xml"
+      politica: "https://www.latercera.com/arc/outboundfeeds/rss/category/politica/?outputType=xml"
+      pulso: "https://www.latercera.com/arc/outboundfeeds/rss/category/pulso/?outputType=xml"
+  biobiochile:
+    name: "BioBioChile"
+    categories:
+      nacional: "https://www.biobiochile.cl/lista/categorias/nacional/feed"
+      economia: "https://www.biobiochile.cl/lista/categorias/economia/feed"
+
+reddit:
+  subreddits:
+    - "chile"
+    - "republicadechile"
+  filters:
+    min_score: 50
+    min_comments: 30
+    limit: 50
+    time_filter: "day"
+
+google_trends:
+  geo: "CL"
+  hl: "es-CL"
+
+pipeline:
+  max_hours_lookback: 24
+  history_days_lookback: 7
+  max_opportunities_to_notify: 3
+  min_virality_score: 7
+  min_feasibility_score: 6
