@@ -15,10 +15,10 @@ El objetivo es aprovechar la ventana dorada de atención pública (**24 a 72 hor
 
 ## 🧭 ¿Cómo Funciona?
 
-Cada mañana a las **07:23 AM CLT** (10:23 UTC), el radar se ejecuta de forma desatendida mediante **GitHub Actions**, completando el siguiente pipeline:
+Cada día a las **11:37 AM CLT** (14:37 UTC), el radar se ejecuta de forma desatendida mediante **GitHub Actions** en horario de baja demanda global, completando el siguiente pipeline:
 
 ```text
-  [ Cron Diario 07:23 CLT / Manual ]
+  [ Cron Diario 11:37 CLT / Manual ]
                   │
                   ▼
    ┌──────────────────────────────┐
@@ -183,7 +183,7 @@ pytest tests/
 
 El sistema corre en la nube sin costo de servidores gracias a **GitHub Actions**:
 
-- **Frecuencia:** Ejecución diaria a las **10:23 UTC** (`23 10 * * *`), correspondiente a las **07:23 AM CLT** (horario de verano) / **06:23 AM CLT** (horario de invierno). Evita picos de congestión de GitHub en minutos en punto.
+- **Frecuencia:** Ejecución diaria a las **14:37 UTC** (`37 14 * * *`), correspondiente a las **11:37 AM CLT** (horario de verano) / **10:37 AM CLT** (horario de invierno). Diseñado para operar en el valle de menor demanda global de GitHub y tras la publicación de portadas matutinas chilenas.
 - **Ejecución Manual:** Pestaña *Actions > Daily Data Newsjacking Radar > Run workflow* (permite activar `--dry-run` o `--skip-llm` desde la UI).
 - **Persistencia Autónoma:** Actualiza `data/history.json` directamente en el repositorio usando `[skip ci]`.
 - **Alertas de Emergencia:** Si ocurre un fallo en los servidores de GitHub, envía una alerta instantánea a Telegram con el link al run para diagnosticar en segundos.

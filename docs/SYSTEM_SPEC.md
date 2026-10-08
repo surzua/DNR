@@ -271,8 +271,8 @@ name: Daily Data Newsjacking Radar
 
 on:
   schedule:
-    # Corre todos los días a las 10:23 UTC (07:23 AM CLT en UTC-3 / 06:23 AM CLT en UTC-4)
-    - cron: '23 10 * * *'
+    # Corre todos los días a las 14:37 UTC (11:37 AM CLT en UTC-3 / 10:37 AM CLT en UTC-4) en valle de baja demanda global en GitHub
+    - cron: '37 14 * * *'
   workflow_dispatch:
     inputs:
       dry_run:

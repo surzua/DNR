@@ -6,7 +6,7 @@ El trigger nativo `schedule` en GitHub Actions opera bajo una política de **mej
 - **Retrasos de horas:** Si los servidores de GitHub tienen alta demanda (especialmente en horas punta de la mañana europea y americana), los workflows programados se retrasan entre 1 y 7 horas.
 - **Descartes silenciosos (*dropped*):** Durante incidentes de plataforma o saturación de cola de runners, GitHub descarta ejecuciones completas sin iniciar el runner y sin emitir notificaciones de error.
 
-Para garantizar que el reporte llegue a tu Telegram **exactamente a las 07:23 CLT (10:23 UTC)** todos los días, se recomiendan las siguientes alternativas:
+Para garantizar que el reporte se ejecute sin retrasos ni colas (por ejemplo a las **11:37 CLT / 14:37 UTC** o a la hora exacta que definas), se recomiendan las siguientes alternativas:
 
 ---
 
@@ -20,7 +20,7 @@ Mantiene la ejecución en los runners de GitHub Actions (sin gastar recursos de 
    * **Title:** `DNR Daily Trigger`
    * **URL:** `https://api.github.com/repos/surzua/DNR/actions/workflows/daily_radar.yml/dispatches`
    * **Request Method:** `POST`
-   * **Schedule:** Todos los días a las `07:23` (Horario Santiago de Chile / `America/Santiago`) o `10:23 UTC`.
+   * **Schedule:** Todos los días a las `11:37` (Horario Santiago de Chile / `America/Santiago`) o `14:37 UTC`.
 3. **Configurar Headers HTTP:**
    * `Authorization`: `Bearer <TU_GITHUB_PERSONAL_ACCESS_TOKEN>`
    * `Accept`: `application/vnd.github+json`
