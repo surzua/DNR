@@ -223,5 +223,74 @@
     "trigger_article_title": "Contraloría detecta retraso de más de 23 años en actualización del plan de drenaje de aguas lluvias de Antofagasta",
     "trigger_article_url": "https://www.latercera.com/nacional/noticia/contraloria-detecta-retraso-de-mas-de-23-anos-en-actualizacion-del-plan-de-drenaje-de-aguas-lluvias-de-antofagasta/",
     "status": "candidate"
+  },
+  {
+    "id": "2026-10-08-001",
+    "timestamp": "2026-10-08T15:52:51.352934Z",
+    "topic": "¿El fin de la meritocracia? El mapa de la dotación pública y los recortes en programas sociales",
+    "category": "Política & Estado",
+    "viral_hook_type": "Contrarian / Curious Hook",
+    "analytical_angle": "Mientras el gobierno justifica recortes por eficiencia, los datos podrían revelar si el ahorro real se traduce en una mejora fiscal o si simplemente se están eliminando programas de alto impacto social mientras se mantienen gastos administrativos ineficientes.",
+    "data_sources": [
+      {
+        "name": "Ley de Presupuestos 2027 (Dipres)",
+        "type": "Portal Abierto",
+        "potential_url_or_query": "https://www.dipres.gob.cl/598/w3-propertyvalue-15798.html",
+        "friction_level": "Baja (Horas)"
+      }
+    ],
+    "feasibility_score": 8,
+    "virality_score": 9,
+    "recommended_deliverable": "App Interactiva (Streamlit)",
+    "fast_execution_strategy": "1. Descargar el archivo Excel de la Ley de Presupuestos 2027 desde Dipres. 2. Filtrar por partidas de Educación y programas sociales específicos. 3. Crear un dashboard en Streamlit que compare el presupuesto 2026 vs 2027 para visualizar el impacto porcentual de los recortes.",
+    "trigger_article_title": "Dipres defiende fin a Yo Elijo mi PC: \"Lo que considero un beneficio, a lo mejor no es tal\"",
+    "trigger_article_url": "https://www.biobiochile.cl/noticias/economia/actualidad-economica/2026/10/08/dipres-defiende-fin-a-yo-elijo-mi-pc-lo-que-considero-un-beneficio-a-lo-mejor-no-es-tal.shtml",
+    "status": "candidate"
+  },
+  {
+    "id": "2026-10-08-002",
+    "timestamp": "2026-10-08T15:52:51.353120Z",
+    "topic": "El costo real del CyberMonday: ¿Realmente bajaron los precios o solo el ticket promedio?",
+    "category": "Economía & Finanzas",
+    "viral_hook_type": "Contrarian / Curious Hook",
+    "analytical_angle": "Desmitificar el 'ahorro' del CyberMonday: ¿Es una oportunidad real o el consumidor está comprando productos más baratos y menos duraderos debido a la inflación?",
+    "data_sources": [
+      {
+        "name": "Cámara de Comercio de Santiago (CCS)",
+        "type": "Scraping HTML",
+        "potential_url_or_query": "https://www.ccs.cl/prensa/noticias/",
+        "friction_level": "Baja (Horas)"
+      }
+    ],
+    "feasibility_score": 9,
+    "virality_score": 8,
+    "recommended_deliverable": "Gráfico Estático de Alto Impacto",
+    "fast_execution_strategy": "1. Recopilar datos históricos de ventas de CyberMonday de los últimos 5 años. 2. Normalizar los datos de ticket promedio ajustados por IPC. 3. Generar un gráfico comparativo que muestre la correlación entre el aumento de transacciones y la disminución del valor real de compra.",
+    "trigger_article_title": "Récord de transacciones no se tradujo en ventas históricas del CyberMonday: bajó el ticket promedio y compradores prefirieron supermercados y farmacias",
+    "trigger_article_url": "http://www.df.cl/empresas/retail/record-de-transacciones-no-se-tradujo-en-un-cybermonday-historico-bajo-el",
+    "status": "candidate"
+  },
+  {
+    "id": "2026-10-08-003",
+    "timestamp": "2026-10-08T15:52:51.353236Z",
+    "topic": "La paradoja del turismo regional: ¿Por qué la RM pierde terreno frente a Antofagasta?",
+    "category": "Sociedad & Tendencias",
+    "viral_hook_type": "Contrarian / Curious Hook",
+    "analytical_angle": "Todo el mundo cree que Santiago es el motor turístico de Chile, pero los datos muestran que la descentralización económica está cambiando el mapa del gasto turístico de forma irreversible.",
+    "data_sources": [
+      {
+        "name": "INE - Estadísticas de Turismo",
+        "type": "Portal Abierto",
+        "potential_url_or_query": "https://www.ine.gob.cl/estadisticas/economia/turismo",
+        "friction_level": "Baja (Horas)"
+      }
+    ],
+    "feasibility_score": 8,
+    "virality_score": 7,
+    "recommended_deliverable": "Gráfico Estático de Alto Impacto",
+    "fast_execution_strategy": "1. Extraer datos de PIB turístico regional de los últimos 5 años desde el INE. 2. Calcular la variación porcentual de participación de cada región. 3. Crear un mapa de calor interactivo o gráfico de barras comparativo que destaque el ascenso de Antofagasta.",
+    "trigger_article_title": "El nuevo mapa del PIB turístico: Antofagasta es la región que más crece en aporte a la industria a nivel nacional y RM retrocede más de dos puntos",
+    "trigger_article_url": "http://www.df.cl/regiones/el-nuevo-mapa-del-pib-turistico-antofagasta-es-la-region-que-mas-crecio-en",
+    "status": "candidate"
   }
 ]
