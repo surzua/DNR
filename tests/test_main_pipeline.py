@@ -33,6 +33,16 @@ def test_main_with_skip_llm():
                     mock_eval.assert_not_called()
 
 
+def test_main_missing_gemini_key_exits():
+    test_args = ["main.py", "--use-cache"]
+    with patch.object(sys, "argv", test_args):
+        with patch.dict("os.environ", {}, clear=True):
+            with patch("main.load_articles_cache", return_value=[]):
+                with pytest.raises(SystemExit) as exc_info:
+                    main()
+                assert exc_info.value.code == 1
+
+
 def test_main_with_dry_run_and_opportunities(mock_radar_opp: Opportunity):
     test_args = ["main.py", "--use-cache", "--dry-run"]
     radar_resp = RadarResponse(

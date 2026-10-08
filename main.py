@@ -87,12 +87,12 @@ def main() -> None:
 
     gemini_key = os.getenv("GEMINI_API_KEY")
     if not gemini_key:
-        logger.warning(
+        logger.error(
             "GEMINI_API_KEY no encontrada en variables de entorno o archivo .env. "
             "Para ejecutar la evaluación de oportunidades, configura tu API key en .env. "
-            "Omitiendo Fase 3 por ahora."
+            "Si deseas probar sin LLM, utiliza la bandera --skip-llm."
         )
-        return
+        sys.exit(1)
 
     logger.info("--------------------------------------------------")
     logger.info("Fase 3: Evaluando oportunidades con Gemini Flash...")
