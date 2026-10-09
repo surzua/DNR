@@ -292,5 +292,63 @@
     "trigger_article_title": "El nuevo mapa del PIB turístico: Antofagasta es la región que más crece en aporte a la industria a nivel nacional y RM retrocede más de dos puntos",
     "trigger_article_url": "http://www.df.cl/regiones/el-nuevo-mapa-del-pib-turistico-antofagasta-es-la-region-que-mas-crecio-en",
     "status": "candidate"
+  },
+  {
+    "id": "2026-10-09-001",
+    "timestamp": "2026-10-09T15:40:07.594226Z",
+    "topic": "El mapa de la vulnerabilidad: ¿Qué tan expuesta está tu comuna a los aluviones?",
+    "category": "Sociedad & Tendencias",
+    "viral_hook_type": "Contrarian / Curious Hook",
+    "analytical_angle": "Las autoridades dicen que son eventos 'imposibles de anticipar', pero los datos geológicos y de incendios forestales históricos permiten mapear exactamente qué quebradas son bombas de tiempo.",
+    "data_sources": [
+      {
+        "name": "Sernageomin - Catastro de Peligros Geológicos",
+        "type": "Portal Abierto",
+        "potential_url_or_query": "https://www.sernageomin.cl/geologia-de-remocion-en-masa/",
+        "friction_level": "Baja (Horas)"
+      },
+      {
+        "name": "CONAF - Histórico de Incendios Forestales",
+        "type": "Dataset Descargable",
+        "potential_url_or_query": "https://datos.gob.cl/dataset/estadisticas-historicas-de-incendios-forestales",
+        "friction_level": "Baja (Horas)"
+      }
+    ],
+    "feasibility_score": 8,
+    "virality_score": 9,
+    "recommended_deliverable": "App Interactiva (Streamlit)",
+    "fast_execution_strategy": "1. Descargar shapefiles de zonas de riesgo de Sernageomin y datos de incendios de CONAF. 2. Cruzar geográficamente las zonas de incendios previos con quebradas habitadas usando GeoPandas. 3. Desplegar en Streamlit un mapa interactivo donde el usuario ingrese su dirección y vea su nivel de riesgo relativo.",
+    "trigger_article_title": "Directora de Senapred afirma que no existe monitoreo de remoción en masa en Chile y que aluvión fue un “evento súbito” imposible de anticipar",
+    "trigger_article_url": "https://www.latercera.com/nacional/noticia/gobierno-afirma-que-no-existe-monitoreo-de-remocion-en-masa-en-chile-y-que-aluvion-fue-un-evento-subito-imposible-de-anticipar/",
+    "status": "candidate"
+  },
+  {
+    "id": "2026-10-09-002",
+    "timestamp": "2026-10-09T15:40:07.594436Z",
+    "topic": "El mito del 'ticket promedio' en el CyberMonday: ¿Estamos comprando más o solo más barato?",
+    "category": "Economía & Finanzas",
+    "viral_hook_type": "Contrarian / Curious Hook",
+    "analytical_angle": "El éxito del CyberMonday no es el crecimiento del consumo, sino la 'atomización' del gasto: los chilenos están comprando muchas cosas pequeñas en lugar de bienes durables.",
+    "data_sources": [
+      {
+        "name": "Cámara de Comercio de Santiago (CCS) - Informes Cyber",
+        "type": "Scraping HTML",
+        "potential_url_or_query": "https://www.ccs.cl/prensa/informes-cyber/",
+        "friction_level": "Baja (Horas)"
+      },
+      {
+        "name": "Banco Central - Indicadores de Consumo",
+        "type": "API Pública",
+        "potential_url_or_query": "https://si3.bcentral.cl/SieteRestWS/rest/SIETERestWS/getSeries",
+        "friction_level": "Media (1-2 días)"
+      }
+    ],
+    "feasibility_score": 9,
+    "virality_score": 8,
+    "recommended_deliverable": "Gráfico Estático de Alto Impacto",
+    "fast_execution_strategy": "1. Extraer datos históricos de montos totales y número de transacciones de los informes de la CCS. 2. Calcular el ticket promedio anual y ajustar por inflación (IPC). 3. Crear un gráfico de líneas comparativo que muestre la divergencia entre volumen de transacciones y valor real del ticket.",
+    "trigger_article_title": "CyberMonday 2026 registra récord en transacciones pero ticket promedio cayó al nivel más bajo desde que hay registros",
+    "trigger_article_url": "https://www.latercera.com/pulso/noticia/cybermonday-2026-registra-record-en-transacciones-pero-ticket-promedio-cayo-al-nivel-mas-bajo-desde-que-hay-registros/",
+    "status": "candidate"
   }
 ]
