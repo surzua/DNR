@@ -402,5 +402,57 @@
     "trigger_article_title": "Personas con estudios universitarios y mayores de 45 años son las que más están demorando en encontrar empleo",
     "trigger_article_url": "https://www.latercera.com/pulso/noticia/personas-con-estudios-universitarios-y-mayores-de-45-anos-son-las-que-mas-estan-demorando-en-encontrar-empleo/",
     "status": "candidate"
+  },
+  {
+    "id": "2026-10-09-005",
+    "timestamp": "2026-10-09T19:40:13.750457Z",
+    "topic": "¿Es el aluvión de Las Condes un evento súbito o una tragedia anunciada por la planificación urbana?",
+    "category": "Sociedad & Tendencias",
+    "viral_hook_type": "Contrarian / Curious Hook",
+    "analytical_angle": "El gobierno califica el aluvión como un 'evento súbito' imposible de predecir, pero los datos de planificación territorial y el historial de incendios en la zona sugieren que el riesgo era previsible y conocido por las autoridades locales.",
+    "data_sources": [
+      {
+        "name": "Portal de Mapas de Riesgo Sernageomin",
+        "type": "Portal Abierto",
+        "potential_url_or_query": "https://www.sernageomin.cl/mapas-de-peligros-geologicos/",
+        "friction_level": "Baja (Horas)"
+      },
+      {
+        "name": "Histórico de Incendios CONAF",
+        "type": "Dataset Descargable",
+        "potential_url_or_query": "https://www.conaf.cl/incendios-forestales/estadisticas-historicas/",
+        "friction_level": "Baja (Horas)"
+      }
+    ],
+    "feasibility_score": 8,
+    "virality_score": 9,
+    "recommended_deliverable": "App Interactiva (Streamlit)",
+    "fast_execution_strategy": "1. Descargar capas de riesgo de remoción en masa de Sernageomin y cruzar con polígonos de incendios de CONAF 2025-2026. 2. Crear un mapa interactivo en Streamlit que superponga las zonas afectadas con los mapas de riesgo preexistentes. 3. Publicar el comparativo visual para demostrar si la zona estaba catalogada como de riesgo.",
+    "trigger_article_title": "Director regional de Senapred y aluvión en Las Condes: “El cerro se vino abajo, no servía de nada lanzar el SAE”",
+    "trigger_article_url": "https://www.latercera.com/nacional/noticia/director-regional-de-senapred-y-aluvion-en-las-condes-el-cerro-se-vino-abajo-no-servia-de-nada-lanzar-el-sae/",
+    "status": "candidate"
+  },
+  {
+    "id": "2026-10-09-006",
+    "timestamp": "2026-10-09T19:40:13.750860Z",
+    "topic": "La brecha del empleo: ¿Por qué los profesionales mayores de 45 años tardan más en encontrar trabajo?",
+    "category": "Economía & Finanzas",
+    "viral_hook_type": "Contrarian / Curious Hook",
+    "analytical_angle": "Contrario a la creencia de que la falta de empleo es por falta de vacantes, los datos sugieren una desconexión estructural entre la oferta de profesionales senior y los requerimientos de las empresas, con tiempos de búsqueda que se han duplicado en una década.",
+    "data_sources": [
+      {
+        "name": "INE - Encuesta Nacional de Empleo (ENE)",
+        "type": "Dataset Descargable",
+        "potential_url_or_query": "https://www.ine.gob.cl/estadisticas/laborales/ene",
+        "friction_level": "Baja (Horas)"
+      }
+    ],
+    "feasibility_score": 9,
+    "virality_score": 8,
+    "recommended_deliverable": "Gráfico Estático de Alto Impacto",
+    "fast_execution_strategy": "1. Extraer series históricas de tiempo de búsqueda de empleo por tramo etario y nivel educacional desde el portal del INE. 2. Calcular la tasa de crecimiento del tiempo promedio de búsqueda entre 2014 y 2026. 3. Diseñar un gráfico de líneas comparativo que destaque la pendiente más pronunciada en el segmento >45 años.",
+    "trigger_article_title": "Personas con estudios universitarios y mayores de 45 años son las que más están demorando en encontrar empleo",
+    "trigger_article_url": "https://www.latercera.com/pulso/noticia/personas-con-estudios-universitarios-y-mayores-de-45-anos-son-las-que-mas-estan-demorando-en-encontrar-empleo/",
+    "status": "candidate"
   }
 ]
