@@ -350,5 +350,57 @@
     "trigger_article_title": "CyberMonday 2026 registra récord en transacciones pero ticket promedio cayó al nivel más bajo desde que hay registros",
     "trigger_article_url": "https://www.latercera.com/pulso/noticia/cybermonday-2026-registra-record-en-transacciones-pero-ticket-promedio-cayo-al-nivel-mas-bajo-desde-que-hay-registros/",
     "status": "candidate"
+  },
+  {
+    "id": "2026-10-09-003",
+    "timestamp": "2026-10-09T17:11:26.889057Z",
+    "topic": "¿Es realmente el aluvión de Las Condes un evento súbito? Análisis de riesgo histórico",
+    "category": "Sociedad & Tendencias",
+    "viral_hook_type": "Contrarian / Curious Hook",
+    "analytical_angle": "Contrastar la narrativa de 'evento súbito' con el historial de alertas de Sernageomin y la cartografía de zonas de riesgo de remoción en masa, demostrando si las viviendas afectadas estaban en zonas de peligro conocidas.",
+    "data_sources": [
+      {
+        "name": "Sernageomin - Cartas de Peligro de Remoción en Masa",
+        "type": "Portal Abierto",
+        "potential_url_or_query": "https://www.sernageomin.cl/cartas-de-peligro-de-remocion-en-masa/",
+        "friction_level": "Baja (Horas)"
+      },
+      {
+        "name": "IDE Chile - Capas de Riesgo Geológico",
+        "type": "API Pública",
+        "potential_url_or_query": "https://www.ide.cl/",
+        "friction_level": "Baja (Horas)"
+      }
+    ],
+    "feasibility_score": 8,
+    "virality_score": 9,
+    "recommended_deliverable": "App Interactiva (Streamlit)",
+    "fast_execution_strategy": "1. Descargar capas de riesgo de remoción en masa de Sernageomin/IDE Chile. 2. Superponer la ubicación del aluvión (San Carlos de Apoquindo) sobre el mapa de riesgo. 3. Crear un mapa interactivo en Streamlit que permita a los usuarios ver si su propia comuna tiene zonas de riesgo similares no mitigadas.",
+    "trigger_article_title": "Directora de Senapred afirma que no existe monitoreo de remoción en masa en Chile y que aluvión fue un “evento súbito” imposible de anticipar",
+    "trigger_article_url": "https://www.latercera.com/nacional/noticia/gobierno-afirma-que-no-existe-monitoreo-de-remocion-en-masa-en-chile-y-que-aluvion-fue-un-evento-subito-imposible-de-anticipar/",
+    "status": "candidate"
+  },
+  {
+    "id": "2026-10-09-004",
+    "timestamp": "2026-10-09T17:11:26.889548Z",
+    "topic": "El mito de la 'búsqueda rápida': ¿Por qué los profesionales mayores de 45 años tardan más en encontrar empleo?",
+    "category": "Economía & Finanzas",
+    "viral_hook_type": "Contrarian / Curious Hook",
+    "analytical_angle": "Desmitificar que la falta de empleo es solo por 'falta de vacantes', analizando la correlación entre edad, nivel educativo y el tiempo de desempleo, comparándolo con la oferta de cargos senior en portales públicos.",
+    "data_sources": [
+      {
+        "name": "INE - Encuesta Nacional de Empleo (ENE)",
+        "type": "Dataset Descargable",
+        "potential_url_or_query": "https://www.ine.gob.cl/estadisticas/economia/mercado-laboral/ocupacion-y-desocupacion",
+        "friction_level": "Baja (Horas)"
+      }
+    ],
+    "feasibility_score": 9,
+    "virality_score": 8,
+    "recommended_deliverable": "Gráfico Estático de Alto Impacto",
+    "fast_execution_strategy": "1. Descargar microdatos de la ENE del INE (últimos 12 meses). 2. Filtrar por tramo etario (>45 años) y nivel educativo (universitario). 3. Calcular el tiempo promedio de búsqueda y graficar la tendencia comparativa vs otros grupos etarios para visualizar la brecha.",
+    "trigger_article_title": "Personas con estudios universitarios y mayores de 45 años son las que más están demorando en encontrar empleo",
+    "trigger_article_url": "https://www.latercera.com/pulso/noticia/personas-con-estudios-universitarios-y-mayores-de-45-anos-son-las-que-mas-estan-demorando-en-encontrar-empleo/",
+    "status": "candidate"
   }
 ]
