@@ -83,3 +83,23 @@ def test_main_with_skip_telegram(mock_radar_opp: Opportunity):
                             with patch("main.send_batch_alerts") as mock_batch:
                                 main()
                                 mock_batch.assert_not_called()
+
+
+def test_main_with_days_flag_propagates_lookback_hours():
+    test_args = ["main.py", "--days", "3", "--skip-llm"]
+    with patch.object(sys, "argv", test_args):
+        with patch("main.gather_all_sources") as mock_gather:
+            with patch("main.save_articles_cache"):
+                mock_gather.return_value = []
+                main()
+                mock_gather.assert_called_once_with(lookback_hours=72)
+
+
+def test_main_default_days_propagates_24_hours():
+    test_args = ["main.py", "--skip-llm"]
+    with patch.object(sys, "argv", test_args):
+        with patch("main.gather_all_sources") as mock_gather:
+            with patch("main.save_articles_cache"):
+                mock_gather.return_value = []
+                main()
+                mock_gather.assert_called_once_with(lookback_hours=24)

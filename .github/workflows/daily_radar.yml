@@ -6,6 +6,11 @@ on:
     - cron: '37 14 * * *'
   workflow_dispatch:
     inputs:
+      days:
+        description: 'Ventana de días hacia atrás para recolectar noticias (ej: 1, 3, 7)'
+        type: string
+        required: false
+        default: '1'
       dry_run:
         description: 'Simular despacho a Telegram (consola de GitHub Actions)'
         type: boolean
@@ -45,10 +50,14 @@ jobs:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          INPUT_DAYS: ${{ github.event.inputs.days }}
           INPUT_DRY_RUN: ${{ github.event.inputs.dry_run }}
           INPUT_SKIP_LLM: ${{ github.event.inputs.skip_llm }}
         run: |
           CMD="python main.py"
+          if [ -n "$INPUT_DAYS" ] && [ "$INPUT_DAYS" != "1" ]; then
+            CMD="$CMD --days $INPUT_DAYS"
+          fi
           if [ "$INPUT_DRY_RUN" = "true" ]; then
             CMD="$CMD --dry-run"
           fi

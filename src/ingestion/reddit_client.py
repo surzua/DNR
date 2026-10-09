@@ -137,7 +137,30 @@ def fetch_subreddit_posts(
         response = requests.get(json_url, headers=headers, timeout=timeout)
         if response.status_code == 200:
             data = response.json()
-            children = data.get("data", {}).get("children", [])
+            children = list(data.get("data", {}).get("children", []))
+
+            # Si la ventana temporal es mayor a 24 horas (ej. 3 o 7 días), consultar también top semanal
+            now = datetime.now(timezone.utc)
+            if cutoff_time and (now - cutoff_time).total_seconds() > 90000:
+                top_url = f"https://www.reddit.com/r/{clean_sub}/top.json?t=week&limit={limit}"
+                try:
+                    time.sleep(1)
+                    top_resp = requests.get(top_url, headers=headers, timeout=timeout)
+                    if top_resp.status_code == 200:
+                        top_children = top_resp.json().get("data", {}).get("children", [])
+                        seen_permalinks = {
+                            c.get("data", {}).get("permalink")
+                            for c in children
+                            if c.get("data", {}).get("permalink")
+                        }
+                        for tc in top_children:
+                            plink = tc.get("data", {}).get("permalink")
+                            if plink and plink not in seen_permalinks:
+                                children.append(tc)
+                                seen_permalinks.add(plink)
+                except Exception as top_exc:
+                    logger.warning("No se pudo obtener Reddit top semanal para r/%s: %s", clean_sub, top_exc)
+
             for child in children:
                 post_data = child.get("data", {})
                 art = parse_reddit_json_post(

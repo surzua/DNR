@@ -144,3 +144,56 @@ def test_fetch_subreddit_posts_invalid_name():
     assert fetch_subreddit_posts(subreddit="chile?param=1") == []
     assert fetch_subreddit_posts(subreddit="") == []
     assert fetch_subreddit_posts(subreddit="a" * 60) == []
+
+
+@patch("src.ingestion.reddit_client.time.sleep")
+@patch("src.ingestion.reddit_client.requests.get")
+def test_fetch_subreddit_posts_extended_lookback(mock_get, mock_sleep):
+    now = datetime.now(timezone.utc)
+    cutoff = now - timedelta(days=3)
+
+    hot_resp = MagicMock()
+    hot_resp.status_code = 200
+    hot_resp.json.return_value = {
+        "data": {
+            "children": [
+                {
+                    "data": {
+                        "id": "post_1",
+                        "title": "Post de hoy",
+                        "permalink": "/r/chile/comments/p1/",
+                        "score": 100,
+                        "num_comments": 50,
+                        "created_utc": (now - timedelta(hours=2)).timestamp(),
+                    }
+                }
+            ]
+        }
+    }
+
+    top_resp = MagicMock()
+    top_resp.status_code = 200
+    top_resp.json.return_value = {
+        "data": {
+            "children": [
+                {
+                    "data": {
+                        "id": "post_2",
+                        "title": "Post de hace 2 días",
+                        "permalink": "/r/chile/comments/p2/",
+                        "score": 250,
+                        "num_comments": 90,
+                        "created_utc": (now - timedelta(days=2)).timestamp(),
+                    }
+                }
+            ]
+        }
+    }
+
+    mock_get.side_effect = [hot_resp, top_resp]
+
+    articles = fetch_subreddit_posts(subreddit="chile", cutoff_time=cutoff, min_score=50, min_comments=30)
+    assert len(articles) == 2
+    titles = [a.title for a in articles]
+    assert "Post de hoy" in titles
+    assert "Post de hace 2 días" in titles

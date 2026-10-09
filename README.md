@@ -157,6 +157,9 @@ python main.py
 # Simular el despacho mostrando el mensaje formateado en consola sin enviar a Telegram
 python main.py --dry-run
 
+# Analizar una ventana de tiempo retroactiva (ej: últimos 3 días o 7 días)
+python main.py --days 3
+
 # Reutilizar el snapshot local de noticias para no hacer scraping de red nuevamente
 python main.py --use-cache
 

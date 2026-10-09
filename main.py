@@ -35,6 +35,12 @@ def main() -> None:
     """Ejecuta el pipeline principal de Data Newsjacking Radar."""
     parser = argparse.ArgumentParser(description="Data Newsjacking Radar (DNR)")
     parser.add_argument(
+        "--days",
+        type=int,
+        default=1,
+        help="Ventana de días hacia atrás para recolectar noticias (ej: 1, 3, 7). Por defecto 1 día (24h)",
+    )
+    parser.add_argument(
         "--use-cache",
         action="store_true",
         help="Carga los artículos desde el snapshot local data/latest_articles.json si existe",
@@ -56,8 +62,13 @@ def main() -> None:
     )
     args = parser.parse_args()
 
+    lookback_days = max(1, args.days) if args.days else 1
+    lookback_hours = lookback_days * 24
+
     logger.info("==================================================")
     logger.info("Iniciando Data Newsjacking Radar (DNR)")
+    if lookback_days > 1:
+        logger.info("Ventana extendida de ingesta: %d días (%d horas hacia atrás)", lookback_days, lookback_hours)
     logger.info("==================================================")
 
     # Fase 1: Ingesta de fuentes (Prensa RSS + Reddit) o carga desde cache
@@ -66,10 +77,10 @@ def main() -> None:
         articles = load_articles_cache()
         if not articles:
             logger.info("Cache vacío o no encontrado. Ejecutando recolección en vivo...")
-            articles = gather_all_sources()
+            articles = gather_all_sources(lookback_hours=lookback_hours)
             save_articles_cache(articles)
     else:
-        articles = gather_all_sources()
+        articles = gather_all_sources(lookback_hours=lookback_hours)
         # Guardar snapshot local (ignorado en Git) para inspección y depuración
         save_articles_cache(articles)
 
@@ -99,11 +110,13 @@ def main() -> None:
     logger.info("--------------------------------------------------")
 
     history = load_history()
-    recent_topics = get_recent_topics(history, days=7)
+    history_lookback_days = max(7, lookback_days)
+    recent_topics = get_recent_topics(history, days=history_lookback_days)
     logger.info(
-        "Historial cargado: %d registros previos (%d temas analizados en los últimos 7 días).",
+        "Historial cargado: %d registros previos (%d temas analizados en los últimos %d días).",
         len(history),
         len(recent_topics),
+        history_lookback_days,
     )
 
     try:

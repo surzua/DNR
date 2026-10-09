@@ -36,7 +36,7 @@ def get_github_token() -> str:
     return ""
 
 
-def trigger_workflow(dry_run: bool = False, skip_llm: bool = False) -> bool:
+def trigger_workflow(days: int = 1, dry_run: bool = False, skip_llm: bool = False) -> bool:
     """Dispara el workflow en GitHub Actions."""
     token = get_github_token()
     if not token:
@@ -47,6 +47,7 @@ def trigger_workflow(dry_run: bool = False, skip_llm: bool = False) -> bool:
     payload = json.dumps({
         "ref": "main",
         "inputs": {
+            "days": str(max(1, days)),
             "dry_run": str(dry_run).lower(),
             "skip_llm": str(skip_llm).lower(),
         }
@@ -67,6 +68,8 @@ def trigger_workflow(dry_run: bool = False, skip_llm: bool = False) -> bool:
         with urllib.request.urlopen(req) as resp:
             if resp.status == 204:
                 print(f"✅ Workflow '{WORKFLOW_FILE}' disparado exitosamente en GitHub Actions ({REPO_OWNER}/{REPO_NAME}).")
+                print(f"   • Ventana de análisis: {max(1, days)} día(s)")
+                print(f"   • Dry-run: {dry_run} | Skip-LLM: {skip_llm}")
                 print(f"👉 Revisa la ejecución en: https://github.com/{REPO_OWNER}/{REPO_NAME}/actions")
                 return True
             print(f"⚠️ Respuesta inesperada: HTTP {resp.status}")
@@ -80,7 +83,26 @@ def trigger_workflow(dry_run: bool = False, skip_llm: bool = False) -> bool:
 
 
 if __name__ == "__main__":
-    is_dry = "--dry-run" in sys.argv
-    is_skip = "--skip-llm" in sys.argv
-    success = trigger_workflow(dry_run=is_dry, skip_llm=is_skip)
+    import argparse
+
+    parser = argparse.ArgumentParser(description="Disparador remoto para Daily Data Newsjacking Radar en GitHub Actions.")
+    parser.add_argument(
+        "--days",
+        type=int,
+        default=1,
+        help="Ventana de días hacia atrás a recolectar (ej: 1, 3, 7). Por defecto 1.",
+    )
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Simular despacho a Telegram en los logs de Actions.",
+    )
+    parser.add_argument(
+        "--skip-llm",
+        action="store_true",
+        help="Omitir fase de evaluación con Gemini LLM.",
+    )
+    args = parser.parse_args()
+
+    success = trigger_workflow(days=args.days, dry_run=args.dry_run, skip_llm=args.skip_llm)
     sys.exit(0 if success else 1)
