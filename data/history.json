@@ -454,5 +454,80 @@
     "trigger_article_title": "Personas con estudios universitarios y mayores de 45 años son las que más están demorando en encontrar empleo",
     "trigger_article_url": "https://www.latercera.com/pulso/noticia/personas-con-estudios-universitarios-y-mayores-de-45-anos-son-las-que-mas-estan-demorando-en-encontrar-empleo/",
     "status": "candidate"
+  },
+  {
+    "id": "2026-10-10-001",
+    "timestamp": "2026-10-10T14:37:29.148378Z",
+    "topic": "El mapa de la desprotección: ¿Qué comunas tienen menos presupuesto para desastres que Las Condes?",
+    "category": "Política & Estado",
+    "viral_hook_type": "Contrarian / Curious Hook",
+    "analytical_angle": "Mientras se debate la 'inmediatez' de la respuesta en Las Condes, los datos presupuestarios revelan qué comunas están estructuralmente más desprotegidas ante eventos climáticos similares.",
+    "data_sources": [
+      {
+        "name": "Ley de Presupuestos 2027 (Dipres)",
+        "type": "Dataset Descargable",
+        "potential_url_or_query": "https://www.dipres.gob.cl/598/w3-propertyvalue-30537.html",
+        "friction_level": "Baja (Horas)"
+      },
+      {
+        "name": "Catastro de Riesgos Naturales (Senapred)",
+        "type": "Portal Abierto",
+        "potential_url_or_query": "https://ide.senapred.cl/",
+        "friction_level": "Media (1-2 días)"
+      }
+    ],
+    "feasibility_score": 8,
+    "virality_score": 9,
+    "recommended_deliverable": "App Interactiva (Streamlit)",
+    "fast_execution_strategy": "1. Descargar el presupuesto de inversión regional de la Dipres. 2. Cruzar con el índice de vulnerabilidad comunal de Senapred. 3. Crear un mapa de calor en Streamlit que compare gasto per cápita en prevención vs. riesgo geológico.",
+    "trigger_article_title": "Gobierno explica por qué reaccionó de inmediato en aluvión de Las Condes y no lo hizo en los del norte",
+    "trigger_article_url": "https://www.reddit.com/r/chile/comments/1x1s3o2/gobierno_explica_por_qué_reaccionó_de_inmediato/",
+    "status": "candidate"
+  },
+  {
+    "id": "2026-10-10-002",
+    "timestamp": "2026-10-10T14:37:29.148554Z",
+    "topic": "La trampa de la experiencia: ¿Cuánto más tardan los profesionales +45 en encontrar empleo?",
+    "category": "Sociedad & Tendencias",
+    "viral_hook_type": "Contrarian / Curious Hook",
+    "analytical_angle": "La narrativa común es que la experiencia es un activo, pero la data muestra que se ha convertido en un 'castigo' en el mercado laboral chileno actual.",
+    "data_sources": [
+      {
+        "name": "Encuesta Nacional de Empleo (INE)",
+        "type": "API Pública",
+        "potential_url_or_query": "https://www.ine.gob.cl/estadisticas/economicas/mercado-laboral",
+        "friction_level": "Baja (Horas)"
+      }
+    ],
+    "feasibility_score": 9,
+    "virality_score": 8,
+    "recommended_deliverable": "Gráfico Estático de Alto Impacto",
+    "fast_execution_strategy": "1. Extraer series históricas de tiempo de búsqueda de empleo por tramo etario del INE. 2. Calcular la pendiente de crecimiento del tiempo de búsqueda para el segmento 45-60 años. 3. Generar un gráfico comparativo de 'años de estudio vs. meses de búsqueda' para visualizar la brecha.",
+    "trigger_article_title": "Personas con estudios universitarios y mayores de 45 años son las que más están demorando en encontrar empleo",
+    "trigger_article_url": "https://www.latercera.com/pulso/noticia/personas-con-estudios-universitarios-y-mayores-de-45-anos-son-las-que-mas-estan-demorando-en-encontrar-empleo/",
+    "status": "candidate"
+  },
+  {
+    "id": "2026-10-10-003",
+    "timestamp": "2026-10-10T14:37:29.148695Z",
+    "topic": "El mito del 'Fondo E': ¿Es realmente el más seguro para tu jubilación?",
+    "category": "Economía & Finanzas",
+    "viral_hook_type": "Contrarian / Curious Hook",
+    "analytical_angle": "Desmitificar la seguridad del Fondo E: mostrar cómo la inflación y la política de bonos han hecho que el 'refugio' sea hoy una fuente de pérdidas reales.",
+    "data_sources": [
+      {
+        "name": "Superintendencia de Pensiones",
+        "type": "Dataset Descargable",
+        "potential_url_or_query": "https://www.spensiones.cl/apps/rentabilidad/index.php",
+        "friction_level": "Baja (Horas)"
+      }
+    ],
+    "feasibility_score": 7,
+    "virality_score": 8,
+    "recommended_deliverable": "App Interactiva (Streamlit)",
+    "fast_execution_strategy": "1. Descargar rentabilidad histórica mensual de los multifondos desde la web de la SP. 2. Calcular el retorno real (ajustado por IPC) del Fondo E vs. otros fondos. 3. Crear un simulador simple donde el usuario vea cuánto ha perdido su capital en el Fondo E en los últimos 24 meses.",
+    "trigger_article_title": "El fondo E, el más conservador de las AFP, anota uno de los peores resultados desde su creación",
+    "trigger_article_url": "https://www.latercera.com/pulso/noticia/el-fondo-e-el-mas-conservador-de-las-afp-anota-uno-de-los-peores-resultados-desde-su-creacion/",
+    "status": "candidate"
   }
 ]
