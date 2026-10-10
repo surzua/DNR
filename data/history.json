@@ -529,5 +529,74 @@
     "trigger_article_title": "El fondo E, el más conservador de las AFP, anota uno de los peores resultados desde su creación",
     "trigger_article_url": "https://www.latercera.com/pulso/noticia/el-fondo-e-el-mas-conservador-de-las-afp-anota-uno-de-los-peores-resultados-desde-su-creacion/",
     "status": "candidate"
+  },
+  {
+    "id": "2026-10-10-004",
+    "timestamp": "2026-10-10T18:47:49.890468Z",
+    "topic": "El mapa del recorte: ¿Qué comunas perdieron más presupuesto de conectividad en 2027?",
+    "category": "Política & Estado",
+    "viral_hook_type": "Contrarian / Curious Hook",
+    "analytical_angle": "El discurso oficial habla de eficiencia, pero la data presupuestaria permite visualizar qué regiones específicas están siendo desfinanciadas, contrastando el discurso de descentralización con la realidad de los recortes.",
+    "data_sources": [
+      {
+        "name": "Ley de Presupuestos 2027 (Dipres)",
+        "type": "Portal Abierto",
+        "potential_url_or_query": "https://www.dipres.gob.cl/598/w3-propertyvalue-28751.html",
+        "friction_level": "Baja (Horas)"
+      }
+    ],
+    "feasibility_score": 9,
+    "virality_score": 9,
+    "recommended_deliverable": "Gráfico Estático de Alto Impacto",
+    "fast_execution_strategy": "1. Descargar el archivo Excel de la partida presupuestaria del Ministerio de Transportes desde el portal de Dipres. 2. Filtrar por el ítem de 'Transferencias a fondos de conectividad regional' y comparar el presupuesto 2026 vs 2027. 3. Crear un mapa de calor o gráfico de barras comparativo por región usando Datawrapper o Flourish.",
+    "trigger_article_title": "Presupuesto 2027 de Transportes reduce 31,5% las iniciativas de inversión y 78,5% la transferencia a fondo de conectividad regional",
+    "trigger_article_url": "https://www.reddit.com/r/chile/comments/1x2ggnw/presupuesto_2027_de_transportes_reduce_315_las/",
+    "status": "candidate"
+  },
+  {
+    "id": "2026-10-10-005",
+    "timestamp": "2026-10-10T18:47:49.890735Z",
+    "topic": "El costo de la inacción: ¿Qué comunas tienen menos presupuesto para Senapred?",
+    "category": "Sociedad & Tendencias",
+    "viral_hook_type": "Contrarian / Curious Hook",
+    "analytical_angle": "Correlacionar el presupuesto asignado a prevención de desastres por comuna con su nivel de riesgo histórico, revelando si las comunas más vulnerables son las que menos recursos reciben.",
+    "data_sources": [
+      {
+        "name": "Senapred - Presupuesto y Ejecución",
+        "type": "Portal Abierto",
+        "potential_url_or_query": "https://www.senapred.cl/transparencia/presupuesto",
+        "friction_level": "Media (1-2 días)"
+      }
+    ],
+    "feasibility_score": 7,
+    "virality_score": 9,
+    "recommended_deliverable": "Gráfico Estático de Alto Impacto",
+    "fast_execution_strategy": "1. Extraer los datos de presupuesto ejecutado por Senapred en los últimos 3 años. 2. Cruzar con datos de riesgo de desastres (aluviones/incendios) por comuna disponibles en el Atlas de Riesgos de Chile. 3. Generar un gráfico de dispersión que muestre 'Riesgo vs Presupuesto' para identificar comunas desatendidas.",
+    "trigger_article_title": "El recorte de $918 millones a Senapred realizado por Hacienda que resurge en medio del aluvión en Las Condes y las críticas por falta de prevención",
+    "trigger_article_url": "https://www.reddit.com/r/chile/comments/1x1z59b/el_recorte_de_918_millones_a_senapred_realizado/",
+    "status": "candidate"
+  },
+  {
+    "id": "2026-10-10-006",
+    "timestamp": "2026-10-10T18:47:49.890912Z",
+    "topic": "La trampa de la rentabilidad: ¿Por qué el Fondo E es el peor negocio de la década?",
+    "category": "Economía & Finanzas",
+    "viral_hook_type": "Contrarian / Curious Hook",
+    "analytical_angle": "Desmitificar la idea de que el Fondo E es 'seguro' mediante un análisis histórico de rentabilidad vs inflación, mostrando que el costo de oportunidad de ser conservador ha sido altísimo.",
+    "data_sources": [
+      {
+        "name": "Superintendencia de Pensiones",
+        "type": "Dataset Descargable",
+        "potential_url_or_query": "https://www.spensiones.cl/apps/rentabilidad/index.php",
+        "friction_level": "Baja (Horas)"
+      }
+    ],
+    "feasibility_score": 8,
+    "virality_score": 8,
+    "recommended_deliverable": "App Interactiva (Streamlit)",
+    "fast_execution_strategy": "1. Descargar la serie histórica de rentabilidad mensual de los multifondos desde la web de la Superintendencia. 2. Calcular el rendimiento acumulado real (descontando IPC) de los últimos 10 años. 3. Construir un simulador simple en Streamlit donde el usuario ingrese su saldo actual y vea cuánto habría ganado/perdido en cada fondo.",
+    "trigger_article_title": "La apuesta de las AFP que gatilló la crisis de rentabilidad del fondo E",
+    "trigger_article_url": "http://www.df.cl/senal-df/senales-financieras/la-apuesta-de-las-afp-que-gatillo-la-crisis-de-rentabilidad-del-fondo-e",
+    "status": "candidate"
   }
 ]
