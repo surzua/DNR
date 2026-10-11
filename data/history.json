@@ -598,5 +598,51 @@
     "trigger_article_title": "La apuesta de las AFP que gatilló la crisis de rentabilidad del fondo E",
     "trigger_article_url": "http://www.df.cl/senal-df/senales-financieras/la-apuesta-de-las-afp-que-gatillo-la-crisis-de-rentabilidad-del-fondo-e",
     "status": "candidate"
+  },
+  {
+    "id": "2026-10-11-001",
+    "timestamp": "2026-10-11T14:37:28.257091Z",
+    "topic": "El mito de la 'soledad pandémica': ¿Están los jóvenes chilenos realmente más solos hoy?",
+    "category": "Sociedad & Tendencias",
+    "viral_hook_type": "Contrarian / Curious Hook",
+    "analytical_angle": "Contrastar la percepción de soledad con el uso de redes sociales y horas de pantalla en jóvenes chilenos: ¿Es la soledad un fenómeno de aislamiento físico o de hiperconectividad digital?",
+    "data_sources": [
+      {
+        "name": "Encuesta Nacional de Juventud (INJUV)",
+        "type": "Dataset Descargable",
+        "potential_url_or_query": "https://www.injuv.gob.cl/estudios-y-datos/encuesta-nacional-de-juventud/",
+        "friction_level": "Baja (Horas)"
+      }
+    ],
+    "feasibility_score": 7,
+    "virality_score": 9,
+    "recommended_deliverable": "App Interactiva (Streamlit)",
+    "fast_execution_strategy": "1. Extraer datos de salud mental y uso de redes de la última Encuesta Nacional de Juventud. 2. Crear un dashboard que permita filtrar por rango etario y región. 3. Cruzar con datos de conectividad móvil por comuna para ver si existe una correlación inversa entre acceso a internet y bienestar reportado.",
+    "trigger_article_title": "La época de los jóvenes solitarios",
+    "trigger_article_url": "https://www.latercera.com/nacional/noticia/la-epoca-de-los-jovenes-solitarios/",
+    "status": "candidate"
+  },
+  {
+    "id": "2026-10-11-002",
+    "timestamp": "2026-10-11T14:37:28.257318Z",
+    "topic": "La brecha de la 'Generación de Quintos Medios': ¿Es la universidad el nuevo colegio?",
+    "category": "Sociedad & Tendencias",
+    "viral_hook_type": "Contrarian / Curious Hook",
+    "analytical_angle": "Más allá de la anécdota: ¿Ha aumentado realmente la tasa de deserción o la demanda de tutorías personalizadas en los últimos 5 años en universidades chilenas?",
+    "data_sources": [
+      {
+        "name": "SIES (Servicio de Información de Educación Superior)",
+        "type": "Portal Abierto",
+        "potential_url_or_query": "https://www.mifuturo.cl/bases-de-datos-sies/",
+        "friction_level": "Baja (Horas)"
+      }
+    ],
+    "feasibility_score": 8,
+    "virality_score": 8,
+    "recommended_deliverable": "Gráfico Estático de Alto Impacto",
+    "fast_execution_strategy": "1. Descargar bases de deserción de primer año del SIES (2019-2024). 2. Calcular la tasa de deserción por tipo de institución (CRUCH vs Privadas). 3. Visualizar la tendencia temporal para ver si el 'drama' de los profesores tiene correlación con datos duros de retención.",
+    "trigger_article_title": "“Pidieron una reunión para decir cómo hacer las clases”: El drama de profesores universitarios que describen una generación de 'quintos medios' en la educación superior",
+    "trigger_article_url": "https://www.reddit.com/r/chile/comments/1x36dxi/pidieron_una_reunión_para_decir_cómo_hacer_las/",
+    "status": "candidate"
   }
 ]
