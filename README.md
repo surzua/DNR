@@ -160,6 +160,9 @@ python main.py --dry-run
 # Analizar una ventana de tiempo retroactiva (ej: últimos 3 días o 7 días)
 python main.py --days 3
 
+# Ajustar los días de enfriamiento para no repetir noticias detonantes (defecto: 7 días, 0 para desactivar)
+python main.py --cooldown-days 7
+
 # Reutilizar el snapshot local de noticias para no hacer scraping de red nuevamente
 python main.py --use-cache
 
@@ -174,7 +177,7 @@ python main.py --skip-telegram
 
 ## 🧪 Pruebas Automatizadas
 
-El proyecto incluye 42 pruebas unitarias y de integración que validan la ingesta de fuentes, el motor de Gemini, la deduplicación y el despacho a Telegram:
+El proyecto incluye 63 pruebas unitarias y de integración que validan la ingesta de fuentes, el motor de Gemini, la deduplicación y el despacho a Telegram:
 
 ```bash
 pytest tests/

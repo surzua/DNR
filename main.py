@@ -12,8 +12,11 @@ from src.ingestion import gather_all_sources
 from src.notifiers import send_batch_alerts
 from src.storage import (
     HistoryEntry,
+    filter_articles_by_history,
     generate_next_id,
     get_recent_topics,
+    get_recent_trigger_titles,
+    get_recent_trigger_urls,
     load_articles_cache,
     load_history,
     save_articles_cache,
@@ -39,6 +42,12 @@ def main() -> None:
         type=int,
         default=1,
         help="Ventana de días hacia atrás para recolectar noticias (ej: 1, 3, 7). Por defecto 1 día (24h)",
+    )
+    parser.add_argument(
+        "--cooldown-days",
+        type=int,
+        default=7,
+        help="Días de gracia para evitar repetir noticias que ya generaron oportunidades (por defecto 7 días). Usa 0 para desactivar",
     )
     parser.add_argument(
         "--use-cache",
@@ -110,19 +119,41 @@ def main() -> None:
     logger.info("--------------------------------------------------")
 
     history = load_history()
-    history_lookback_days = max(7, lookback_days)
+    cooldown_days = max(0, args.cooldown_days) if args.cooldown_days is not None else 7
+    history_lookback_days = max(cooldown_days, lookback_days) if cooldown_days > 0 else lookback_days
     recent_topics = get_recent_topics(history, days=history_lookback_days)
+    recent_trigger_titles = get_recent_trigger_titles(history, days=history_lookback_days)
+    recent_trigger_urls = get_recent_trigger_urls(history, days=history_lookback_days)
+
     logger.info(
-        "Historial cargado: %d registros previos (%d temas analizados en los últimos %d días).",
+        "Historial cargado: %d registros previos (%d temas y %d noticias detonantes en los últimos %d días).",
         len(history),
         len(recent_topics),
+        len(recent_trigger_urls),
         history_lookback_days,
     )
 
+    # Filtrado determinista de artículos para evitar repetir noticias detonantes
+    filtered_articles = filter_articles_by_history(
+        articles=articles,
+        history=history,
+        days=cooldown_days,
+    )
+    if len(filtered_articles) < len(articles):
+        logger.info(
+            "Filtro de novedades: %d de %d artículos excluidos por coincidir con noticias de los últimos %d días (%d artículos a evaluar).",
+            len(articles) - len(filtered_articles),
+            len(articles),
+            cooldown_days,
+            len(filtered_articles),
+        )
+
     try:
         radar_result = evaluate_opportunities(
-            articles=articles,
+            articles=filtered_articles,
             recent_history_topics=recent_topics,
+            recent_trigger_titles=recent_trigger_titles,
+            exclude_trigger_urls=recent_trigger_urls,
         )
     except Exception as e:
         logger.error("Error durante la evaluación de oportunidades con Gemini: %s", e)

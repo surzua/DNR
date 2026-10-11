@@ -3,7 +3,7 @@
 import json
 import logging
 import os
-from typing import Any, List, Literal, Optional
+from typing import Any, List, Literal, Optional, Set
 from urllib.parse import urlparse
 from dotenv import load_dotenv
 from google import genai
@@ -11,6 +11,7 @@ from google.genai import types
 from pydantic import BaseModel, Field, ValidationError
 
 from src.analysis.prompt_templates import SYSTEM_PROMPT, build_evaluation_prompt
+from src.storage.history_manager import normalize_title_for_dedup, normalize_url_for_dedup
 
 load_dotenv()
 logger = logging.getLogger("dnr.opportunity_eval")
@@ -105,8 +106,10 @@ def filter_and_rank_opportunities(
     min_virality: int = 7,
     min_feasibility: int = 6,
     max_items: int = 3,
+    exclude_trigger_urls: Optional[Set[str]] = None,
+    exclude_trigger_titles: Optional[Set[str]] = None,
 ) -> List[Opportunity]:
-    """Aplica filtros deterministas de umbral, sanitiza URLs y ordena por score descendente."""
+    """Aplica filtros deterministas de umbral, sanitiza URLs, deduplica y ordena por score descendente."""
     valid: List[Opportunity] = []
     for opp in opportunities:
         if opp.virality_score >= min_virality and opp.technical_feasibility_score >= min_feasibility:
@@ -117,6 +120,18 @@ def filter_and_rank_opportunities(
                     opp.trigger_article_url,
                 )
                 opp.trigger_article_url = None
+
+            norm_url = normalize_url_for_dedup(opp.trigger_article_url)
+            norm_title = normalize_title_for_dedup(opp.trigger_article_title)
+
+            # Exclusión por historial previo
+            if exclude_trigger_urls and norm_url and norm_url in exclude_trigger_urls:
+                logger.info("Oportunidad descartada por coincidir con URL de historial reciente: %s", opp.trigger_article_url)
+                continue
+            if exclude_trigger_titles and norm_title and norm_title in exclude_trigger_titles:
+                logger.info("Oportunidad descartada por coincidir con titular de historial reciente: %s", opp.trigger_article_title)
+                continue
+
             valid.append(opp)
 
     # Ordenar por puntaje total combinado (viralidad + factibilidad técnica) y luego por viralidad
@@ -124,12 +139,38 @@ def filter_and_rank_opportunities(
         key=lambda o: (o.virality_score + o.technical_feasibility_score, o.virality_score),
         reverse=True,
     )
-    return valid[:max_items]
+
+    # Deduplicación intra-ejecución: si dos oportunidades provienen de la misma noticia detonante,
+    # conservar únicamente la de mayor score.
+    deduped: List[Opportunity] = []
+    seen_run_urls: Set[str] = set()
+    seen_run_titles: Set[str] = set()
+    for opp in valid:
+        norm_url = normalize_url_for_dedup(opp.trigger_article_url)
+        norm_title = normalize_title_for_dedup(opp.trigger_article_title)
+
+        if norm_url and norm_url in seen_run_urls:
+            logger.info("Oportunidad descartada por duplicar noticia detonante en la misma corrida: %s", opp.trigger_article_url)
+            continue
+        if norm_title and norm_title in seen_run_titles:
+            logger.info("Oportunidad descartada por duplicar titular detonante en la misma corrida: %s", opp.trigger_article_title)
+            continue
+
+        if norm_url:
+            seen_run_urls.add(norm_url)
+        if norm_title:
+            seen_run_titles.add(norm_title)
+        deduped.append(opp)
+
+    return deduped[:max_items]
 
 
 def evaluate_opportunities(
     articles: List[Any],
     recent_history_topics: Optional[List[str]] = None,
+    recent_trigger_titles: Optional[List[str]] = None,
+    exclude_trigger_urls: Optional[Set[str]] = None,
+    exclude_trigger_titles: Optional[Set[str]] = None,
     api_key: Optional[str] = None,
     model_name: Optional[str] = None,
     client: Optional[Any] = None,
@@ -189,7 +230,11 @@ def evaluate_opportunities(
     else:
         genai_client = client
 
-    prompt = build_evaluation_prompt(articles, recent_topics=recent_history_topics)
+    prompt = build_evaluation_prompt(
+        articles,
+        recent_topics=recent_history_topics,
+        recent_trigger_titles=recent_trigger_titles,
+    )
 
     response = None
     last_error = None
@@ -245,6 +290,8 @@ def evaluate_opportunities(
         min_virality=min_virality,
         min_feasibility=min_feasibility,
         max_items=max_opportunities,
+        exclude_trigger_urls=exclude_trigger_urls,
+        exclude_trigger_titles=exclude_trigger_titles,
     )
     radar_response.top_opportunities = filtered
 

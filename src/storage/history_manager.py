@@ -5,9 +5,12 @@ import json
 import logging
 import os
 from pathlib import Path
+import re
 import shutil
 import tempfile
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Set
+import unicodedata
+from urllib.parse import urlparse
 from pydantic import BaseModel, Field
 
 logger = logging.getLogger("dnr.history_manager")
@@ -136,6 +139,120 @@ def get_recent_topics(
         for item in items
         if item.timestamp.astimezone(timezone.utc) >= cutoff
     ]
+
+
+def normalize_url_for_dedup(url: Optional[str]) -> str:
+    """Normaliza una URL para comparación determinista y deduplicación.
+
+    Elimina protocolo (http/https), prefijo 'www.', parámetros de consulta,
+    fragmentos y barras finales para asociar variantes del mismo enlace.
+    """
+    if not url or not isinstance(url, str):
+        return ""
+    parsed = urlparse(url.strip())
+    netloc = parsed.netloc.lower().replace("www.", "")
+    path = parsed.path.rstrip("/").lower()
+    return f"{netloc}{path}"
+
+
+def normalize_title_for_dedup(title: Optional[str]) -> str:
+    """Normaliza un titular eliminando tildes, caracteres especiales y normalizando espacios."""
+    if not title or not isinstance(title, str):
+        return ""
+    nfkd = unicodedata.normalize("NFKD", title)
+    without_accents = "".join(c for c in nfkd if not unicodedata.combining(c))
+    return re.sub(r"[\W_]+", " ", without_accents.lower()).strip()
+
+
+def get_recent_trigger_urls(
+    history: Optional[List[HistoryEntry]] = None,
+    days: int = 7,
+    now: Optional[datetime] = None,
+    filepath: Path = HISTORY_FILE_PATH,
+) -> Set[str]:
+    """Obtiene el conjunto de URLs detonantes normalizadas en los últimos N días."""
+    items = history if history is not None else load_history(filepath)
+    cutoff = (now or datetime.now(timezone.utc)) - timedelta(days=days)
+    urls: Set[str] = set()
+    for item in items:
+        if item.timestamp.astimezone(timezone.utc) >= cutoff and item.trigger_article_url:
+            norm = normalize_url_for_dedup(item.trigger_article_url)
+            if norm:
+                urls.add(norm)
+    return urls
+
+
+def get_recent_trigger_titles(
+    history: Optional[List[HistoryEntry]] = None,
+    days: int = 7,
+    now: Optional[datetime] = None,
+    filepath: Path = HISTORY_FILE_PATH,
+) -> List[str]:
+    """Obtiene los titulares originales de noticias detonantes de los últimos N días."""
+    items = history if history is not None else load_history(filepath)
+    cutoff = (now or datetime.now(timezone.utc)) - timedelta(days=days)
+    titles: List[str] = []
+    seen: Set[str] = set()
+    for item in items:
+        if item.timestamp.astimezone(timezone.utc) >= cutoff and item.trigger_article_title:
+            cleaned = item.trigger_article_title.strip()
+            norm = normalize_title_for_dedup(cleaned)
+            if norm and norm not in seen:
+                seen.add(norm)
+                titles.append(cleaned)
+    return titles
+
+
+def filter_articles_by_history(
+    articles: List[Any],
+    history: Optional[List[HistoryEntry]] = None,
+    days: int = 7,
+    now: Optional[datetime] = None,
+    filepath: Path = HISTORY_FILE_PATH,
+) -> List[Any]:
+    """Filtra y excluye artículos que ya hayan sido usados como noticia detonante en los últimos N días.
+
+    Compara tanto URL normalizada como titular normalizado con el historial.
+    """
+    if days <= 0:
+        return articles
+
+    items = history if history is not None else load_history(filepath)
+    cutoff = (now or datetime.now(timezone.utc)) - timedelta(days=days)
+
+    recent_urls: Set[str] = set()
+    recent_titles: Set[str] = set()
+
+    for item in items:
+        if item.timestamp.astimezone(timezone.utc) >= cutoff:
+            if item.trigger_article_url:
+                norm_u = normalize_url_for_dedup(item.trigger_article_url)
+                if norm_u:
+                    recent_urls.add(norm_u)
+            if item.trigger_article_title:
+                norm_t = normalize_title_for_dedup(item.trigger_article_title)
+                if norm_t:
+                    recent_titles.add(norm_t)
+
+    if not recent_urls and not recent_titles:
+        return articles
+
+    kept: List[Any] = []
+    for art in articles:
+        link = getattr(art, "link", "") or (art.get("link", "") if isinstance(art, dict) else "")
+        title = getattr(art, "title", "") or (art.get("title", "") if isinstance(art, dict) else "")
+
+        norm_link = normalize_url_for_dedup(link)
+        norm_title = normalize_title_for_dedup(title)
+
+        if norm_link and norm_link in recent_urls:
+            continue
+        if norm_title and norm_title in recent_titles:
+            continue
+
+        kept.append(art)
+
+    return kept
 
 
 def generate_next_id(

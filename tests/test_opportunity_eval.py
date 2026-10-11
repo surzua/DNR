@@ -155,6 +155,83 @@ def test_filter_and_rank_opportunities_sanitizes_unsafe_trigger_url():
     assert filtered[0].trigger_article_url is None
 
 
+def test_filter_and_rank_opportunities_intra_run_deduplication():
+    """Verifica que si dos oportunidades tienen la misma noticia detonante en una misma corrida, conserve la de mayor score."""
+    opp_high = Opportunity(
+        headline="Ángulo A (Mayor Score)",
+        category="Economía & Finanzas",
+        why_is_trending="Tema",
+        contrarian_or_curious_angle="Ángulo A",
+        suggested_deliverable="Gráfico Estático de Alto Impacto",
+        data_sources=[],
+        virality_score=9,
+        technical_feasibility_score=8,
+        fast_execution_strategy="Paso 1, 2, 3",
+        trigger_article_title="Personas con estudios universitarios demoran más en encontrar empleo",
+        trigger_article_url="https://latercera.com/empleo-2026",
+    )
+    opp_lower = Opportunity(
+        headline="Ángulo B (Menor Score de la misma noticia)",
+        category="Economía & Finanzas",
+        why_is_trending="Tema",
+        contrarian_or_curious_angle="Ángulo B",
+        suggested_deliverable="Gráfico Estático de Alto Impacto",
+        data_sources=[],
+        virality_score=8,
+        technical_feasibility_score=7,
+        fast_execution_strategy="Paso 1, 2, 3",
+        trigger_article_title="Personas con estudios universitarios demoran más en encontrar empleo",
+        trigger_article_url="https://latercera.com/empleo-2026",
+    )
+    opp_other = Opportunity(
+        headline="Noticia Diferente",
+        category="Sociedad & Tendencias",
+        why_is_trending="Tema",
+        contrarian_or_curious_angle="Ángulo C",
+        suggested_deliverable="Gráfico Estático de Alto Impacto",
+        data_sources=[],
+        virality_score=7,
+        technical_feasibility_score=7,
+        fast_execution_strategy="Paso 1, 2, 3",
+        trigger_article_title="Lluvias en la zona central",
+        trigger_article_url="https://biobiochile.cl/lluvia",
+    )
+
+    filtered = filter_and_rank_opportunities([opp_lower, opp_high, opp_other])
+    assert len(filtered) == 2
+    assert filtered[0].headline == "Ángulo A (Mayor Score)"
+    assert filtered[1].headline == "Noticia Diferente"
+
+
+def test_filter_and_rank_opportunities_excludes_history_triggers():
+    """Verifica que descarte oportunidades cuyo detonante coincida con historial reciente."""
+    opp = Opportunity(
+        headline="Oportunidad con noticia de ayer",
+        category="Economía & Finanzas",
+        why_is_trending="Tema",
+        contrarian_or_curious_angle="Ángulo",
+        suggested_deliverable="Gráfico Estático de Alto Impacto",
+        data_sources=[],
+        virality_score=9,
+        technical_feasibility_score=8,
+        fast_execution_strategy="Paso 1, 2, 3",
+        trigger_article_title="Aluvión en Las Condes deja cortes de luz",
+        trigger_article_url="https://latercera.com/nacional/aluvion-las-condes",
+    )
+
+    filtered_by_url = filter_and_rank_opportunities(
+        [opp],
+        exclude_trigger_urls={"latercera.com/nacional/aluvion-las-condes"},
+    )
+    assert len(filtered_by_url) == 0
+
+    filtered_by_title = filter_and_rank_opportunities(
+        [opp],
+        exclude_trigger_titles={"aluvion en las condes deja cortes de luz"},
+    )
+    assert len(filtered_by_title) == 0
+
+
 def test_evaluate_opportunities_empty():
     """Verifica que con lista vacía retorne inmediatamente sin llamar a la API."""
     result = evaluate_opportunities(articles=[])
