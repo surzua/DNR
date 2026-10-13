@@ -702,5 +702,57 @@
     "trigger_article_title": "Cuidados sanitarios no remunerados: el 87,8% de quienes atienden a mayores dependientes son mujeres",
     "trigger_article_url": "https://www.latercera.com/nacional/noticia/cuidados-sanitarios-no-remunerados-el-878-de-queines-atienden-a-mayores-dependientes-son-mujeres/",
     "status": "candidate"
+  },
+  {
+    "id": "2026-10-13-001",
+    "timestamp": "2026-10-13T14:37:35.996672Z",
+    "topic": "El mito del ahorro en el TAG: ¿Cuánto realmente ahorras vs. el costo de extender la concesión?",
+    "category": "Economía & Finanzas",
+    "viral_hook_type": "Contrarian / Curious Hook",
+    "analytical_angle": "El usuario promedio cree que ahorrará dinero, pero el costo de oportunidad de extender la concesión por casi dos años podría superar con creces el ahorro mensual en la cuenta del TAG.",
+    "data_sources": [
+      {
+        "name": "MOP - Informe de Concesiones",
+        "type": "Portal Abierto",
+        "potential_url_or_query": "https://www.concesiones.cl/proyectos/Paginas/AutopistaCentral.aspx",
+        "friction_level": "Baja (Horas)"
+      },
+      {
+        "name": "Calculadora de tarifas TAG",
+        "type": "Scraping HTML",
+        "potential_url_or_query": "https://www.autopistacentral.cl/tarifas",
+        "friction_level": "Baja (Horas)"
+      }
+    ],
+    "feasibility_score": 8,
+    "virality_score": 9,
+    "recommended_deliverable": "App Interactiva (Streamlit)",
+    "fast_execution_strategy": "1. Extraer tarifas actuales y proyecciones de flujo vehicular de informes públicos. 2. Crear un modelo simple en Python que compare el ahorro mensual del usuario vs. el valor presente neto de los ingresos extra de la concesionaria por 20 meses. 3. Desplegar en Streamlit con un slider de 'Gasto mensual en TAG'.",
+    "trigger_article_title": "Gobierno logra acuerdo con Autopista Central para rebajar en hasta un 25% el TAG y mete presión al resto de las concesionarias",
+    "trigger_article_url": "http://www.df.cl/empresas/construccion/gobierno-logra-acuerdo-con-autopista-central-para-rebajar-en-hasta-un-25",
+    "status": "candidate"
+  },
+  {
+    "id": "2026-10-13-002",
+    "timestamp": "2026-10-13T14:37:35.996986Z",
+    "topic": "El mapa de la inseguridad: ¿Qué tan probable es que tu comuna sea el próximo foco de delitos violentos?",
+    "category": "Sociedad & Tendencias",
+    "viral_hook_type": "Contrarian / Curious Hook",
+    "analytical_angle": "Desmitificar que la inseguridad es un fenómeno exclusivo de comunas periféricas, mostrando cómo el delito se ha desplazado hacia zonas céntricas y residenciales consolidadas.",
+    "data_sources": [
+      {
+        "name": "Centro de Estudios y Análisis del Delito (CEAD)",
+        "type": "Dataset Descargable",
+        "potential_url_or_query": "http://cead.spd.gov.cl/estadisticas-delictuales/",
+        "friction_level": "Baja (Horas)"
+      }
+    ],
+    "feasibility_score": 9,
+    "virality_score": 8,
+    "recommended_deliverable": "Gráfico Estático de Alto Impacto",
+    "fast_execution_strategy": "1. Descargar los datos de delitos de mayor connotación social (DMCS) por comuna del último año desde el CEAD. 2. Normalizar los datos por población comunal (INE). 3. Generar un mapa de calor (choropleth) usando Plotly o Datawrapper que destaque el cambio porcentual de delitos en los últimos 6 meses.",
+    "trigger_article_title": "Investigan violento asalto en Santiago: hombre fue baleado en la boca para robar sus pertenencias",
+    "trigger_article_url": "https://www.biobiochile.cl/noticias/nacional/region-metropolitana/2026/10/13/investigan-violento-asalto-en-santiago-hombre-fue-baleado-en-la-boca-para-robar-sus-pertenencias.shtml",
+    "status": "candidate"
   }
 ]
