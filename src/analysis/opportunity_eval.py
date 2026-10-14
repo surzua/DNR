@@ -185,7 +185,7 @@ def evaluate_opportunities(
         articles: Lista de objetos NewsArticle o diccionarios con noticias.
         recent_history_topics: Lista opcional de temas de los últimos días para deduplicar.
         api_key: Gemini API Key opcional (usa GEMINI_API_KEY del entorno por defecto).
-        model_name: Nombre del modelo a usar (por defecto gemini-3.1-flash-lite con fallbacks).
+        model_name: Nombre del modelo a usar (por defecto gemini-3.8-flash con fallbacks automáticos).
         client: Cliente de Gemini inyectable (útil para pruebas unitarias).
         min_virality: Puntaje mínimo de viralidad requerido (defecto: 7).
         min_feasibility: Puntaje mínimo de factibilidad técnica requerido (defecto: 6).
@@ -202,16 +202,18 @@ def evaluate_opportunities(
     # Resolver cliente y credenciales
     resolved_key = api_key or os.getenv("GEMINI_API_KEY")
     default_candidates = [
-        "gemini-3.1-flash-lite",
-        "gemini-3.5-flash-lite",
         "gemini-3.8-flash",
+        "gemini-3.7-flash",
+        "gemini-3.6-flash",
         "gemini-3.5-flash",
-        "gemini-flash-latest",
+        "gemini-3.5-flash-lite",
+        "gemini-3.1-flash-lite",
     ]
     if model_name:
-        candidate_models = [model_name]
+        candidate_models = [model_name] + [m for m in default_candidates if m != model_name]
     elif os.getenv("GEMINI_MODEL"):
-        candidate_models = [os.getenv("GEMINI_MODEL")]
+        env_model = os.getenv("GEMINI_MODEL")
+        candidate_models = [env_model] + [m for m in default_candidates if m != env_model]
     else:
         candidate_models = default_candidates
 

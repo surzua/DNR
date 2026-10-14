@@ -30,7 +30,7 @@ reddit:
 
 pipeline:
   max_hours_lookback: 24
-  history_days_lookback: 7
+  history_days_lookback: 2
   max_opportunities_to_notify: 3
   min_virality_score: 7
   min_feasibility_score: 6

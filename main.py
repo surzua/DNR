@@ -46,8 +46,14 @@ def main() -> None:
     parser.add_argument(
         "--cooldown-days",
         type=int,
-        default=7,
-        help="Días de gracia para evitar repetir noticias que ya generaron oportunidades (por defecto 7 días). Usa 0 para desactivar",
+        default=2,
+        help="Días de gracia para evitar repetir noticias que ya generaron oportunidades (por defecto 2 días). Usa 0 para desactivar",
+    )
+    parser.add_argument(
+        "--model",
+        type=str,
+        default=None,
+        help="Modelo de Gemini a utilizar (por defecto gemini-3.8-flash con fallbacks automáticos)",
     )
     parser.add_argument(
         "--use-cache",
@@ -119,8 +125,8 @@ def main() -> None:
     logger.info("--------------------------------------------------")
 
     history = load_history()
-    cooldown_days = max(0, args.cooldown_days) if args.cooldown_days is not None else 7
-    history_lookback_days = max(cooldown_days, lookback_days) if cooldown_days > 0 else lookback_days
+    cooldown_days = max(0, args.cooldown_days) if args.cooldown_days is not None else 2
+    history_lookback_days = cooldown_days if cooldown_days > 0 else 1
     recent_topics = get_recent_topics(history, days=history_lookback_days)
     recent_trigger_titles = get_recent_trigger_titles(history, days=history_lookback_days)
     recent_trigger_urls = get_recent_trigger_urls(history, days=history_lookback_days)
@@ -154,6 +160,7 @@ def main() -> None:
             recent_history_topics=recent_topics,
             recent_trigger_titles=recent_trigger_titles,
             exclude_trigger_urls=recent_trigger_urls,
+            model_name=args.model,
         )
     except Exception as e:
         logger.error("Error durante la evaluación de oportunidades con Gemini: %s", e)

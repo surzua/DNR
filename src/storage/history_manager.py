@@ -127,7 +127,7 @@ def save_history(history: List[HistoryEntry], filepath: Path = HISTORY_FILE_PATH
 
 def get_recent_topics(
     history: Optional[List[HistoryEntry]] = None,
-    days: int = 7,
+    days: int = 2,
     now: Optional[datetime] = None,
     filepath: Path = HISTORY_FILE_PATH,
 ) -> List[str]:
@@ -166,7 +166,7 @@ def normalize_title_for_dedup(title: Optional[str]) -> str:
 
 def get_recent_trigger_urls(
     history: Optional[List[HistoryEntry]] = None,
-    days: int = 7,
+    days: int = 2,
     now: Optional[datetime] = None,
     filepath: Path = HISTORY_FILE_PATH,
 ) -> Set[str]:
@@ -184,7 +184,7 @@ def get_recent_trigger_urls(
 
 def get_recent_trigger_titles(
     history: Optional[List[HistoryEntry]] = None,
-    days: int = 7,
+    days: int = 2,
     now: Optional[datetime] = None,
     filepath: Path = HISTORY_FILE_PATH,
 ) -> List[str]:
@@ -206,7 +206,7 @@ def get_recent_trigger_titles(
 def filter_articles_by_history(
     articles: List[Any],
     history: Optional[List[HistoryEntry]] = None,
-    days: int = 7,
+    days: int = 2,
     now: Optional[datetime] = None,
     filepath: Path = HISTORY_FILE_PATH,
 ) -> List[Any]:

@@ -71,7 +71,7 @@ def test_format_article_snippet_and_build_prompt():
 
     recent_topics = ["Debate sobre tarifas eléctricas", "Crisis habitacional en el centro"]
     prompt = build_evaluation_prompt([art], recent_topics=recent_topics)
-    assert "TEMAS YA ANALIZADOS EN LOS ÚLTIMOS 7 DÍAS" in prompt
+    assert "TEMAS Y ÁNGULOS YA ANALIZADOS RECIENTEMENTE" in prompt
     assert "Debate sobre tarifas eléctricas" in prompt
     assert "[1] [EMOL] [Economía]" in prompt
 
@@ -375,3 +375,44 @@ def test_history_entry_from_opportunity_with_trigger():
     assert entry.topic == "Simulador de crédito hipotecario"
     assert entry.trigger_article_title == "Bancos ajustan condiciones hipotecarias"
     assert entry.trigger_article_url == "https://df.cl/hipotecarios"
+
+
+def test_evaluate_opportunities_prioritizes_gemini_3_8_flash():
+    """Verifica que el modelo por defecto llamado en primera instancia sea gemini-3.8-flash."""
+    mock_client = MagicMock()
+    mock_response = MagicMock()
+    mock_response.parsed = RadarResponse(evaluated_topics_count=5, top_opportunities=[])
+    mock_client.models.generate_content.return_value = mock_response
+
+    evaluate_opportunities(
+        articles=[{"title": "Test", "link": "https://test.cl"}],
+        client=mock_client,
+    )
+
+    first_call_kwargs = mock_client.models.generate_content.call_args.kwargs
+    assert first_call_kwargs["model"] == "gemini-3.8-flash"
+
+
+def test_evaluate_opportunities_cascades_fallback_on_failure():
+    """Verifica que si el primer modelo falla, intente con el siguiente modelo de fallback."""
+    mock_client = MagicMock()
+    mock_response = MagicMock()
+    mock_response.parsed = RadarResponse(evaluated_topics_count=5, top_opportunities=[])
+
+    # El primer intento con gemini-3.8-flash falla (ej. 503), el segundo con gemini-3.7-flash tiene éxito
+    mock_client.models.generate_content.side_effect = [
+        RuntimeError("503 Service Unavailable"),
+        mock_response,
+    ]
+
+    res = evaluate_opportunities(
+        articles=[{"title": "Test", "link": "https://test.cl"}],
+        client=mock_client,
+    )
+
+    assert mock_client.models.generate_content.call_count == 2
+    calls = mock_client.models.generate_content.call_args_list
+    assert calls[0].kwargs["model"] == "gemini-3.8-flash"
+    assert calls[1].kwargs["model"] == "gemini-3.7-flash"
+    assert res.evaluated_topics_count == 5
+
