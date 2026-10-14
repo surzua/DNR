@@ -754,5 +754,51 @@
     "trigger_article_title": "Investigan violento asalto en Santiago: hombre fue baleado en la boca para robar sus pertenencias",
     "trigger_article_url": "https://www.biobiochile.cl/noticias/nacional/region-metropolitana/2026/10/13/investigan-violento-asalto-en-santiago-hombre-fue-baleado-en-la-boca-para-robar-sus-pertenencias.shtml",
     "status": "candidate"
+  },
+  {
+    "id": "2026-10-14-001",
+    "timestamp": "2026-10-14T14:37:40.455185Z",
+    "topic": "El costo oculto del Fondo E: Simulador de pérdidas por swaps de tasas en los fondos de pensiones",
+    "category": "Economía & Finanzas",
+    "viral_hook_type": "Contrarian / Curious Hook",
+    "analytical_angle": "Todo el mundo culpa a la renta fija tradicional por la caída, pero la data de la Superintendencia muestra que el verdadero motor del desastre fue una apuesta financiera derivada de swaps.",
+    "data_sources": [
+      {
+        "name": "Superintendencia de Pensiones - Cartera de Fondos de Pensiones",
+        "type": "Portal Abierto",
+        "potential_url_or_query": "https://www.spensiones.cl",
+        "friction_level": "Baja (Horas)"
+      }
+    ],
+    "feasibility_score": 8,
+    "virality_score": 9,
+    "recommended_deliverable": "App Interactiva (Streamlit)",
+    "fast_execution_strategy": "1. Descargar la planilla mensual de rentabilidad y composición de carteras desde la Superintendencia de Pensiones. 2. Construir un script rápido en Python (Pandas/Streamlit) que permita al usuario ingresar su fondo y saldo para calcular el impacto monetario estimado de los swaps en su cuenta individual. 3. Desplegar la app en Streamlit Community Cloud para su difusión pública.",
+    "trigger_article_title": "Swaps de tasas de las AFP les cuestan más de US$ 11.000 millones aos afiliados y explican el 80% de la caída del fondo E",
+    "trigger_article_url": "http://www.df.cl/senal-df/swaps-de-tasas-de-las-afp-les-cuestan-mas-de-us-11-000-millones-a-los",
+    "status": "candidate"
+  },
+  {
+    "id": "2026-10-14-002",
+    "timestamp": "2026-10-14T14:37:40.455432Z",
+    "topic": "Radiografía al riesgo de anegamientos y tornados en Santiago: ¿Qué tan vulnerable es tu comuna ante el nuevo régimen climático?",
+    "category": "Sociedad & Tendencias",
+    "viral_hook_type": "Contrarian / Curious Hook",
+    "analytical_angle": "La narrativa oficial culpa solo al evento meteorológico aislado, pero los registros históricos de pasos bajo nivel colapsados y eventos extremos revelan que las comunas más ricas y las más vulnerables sufren por déficits distintos de infraestructura.",
+    "data_sources": [
+      {
+        "name": "Dirección Meteorológica de Chile (DMC) - Archivo Climatológico",
+        "type": "Portal Abierto",
+        "potential_url_or_query": "https://www.meteochile.gob.cl",
+        "friction_level": "Baja (Horas)"
+      }
+    ],
+    "feasibility_score": 9,
+    "virality_score": 8,
+    "recommended_deliverable": "Gráfico Estático de Alto Impacto",
+    "fast_execution_strategy": "1. Recopilar el listado de comunas afectadas por cortes de luz, anegamientos y suspensión de clases informadas por Senapred y municipios. 2. Cruzar los datos con información censal comunal y de áreas verdes en Python o R. 3. Diseñar un gráfico estático comparativo de alta calidad visual utilizando Plotly o Seaborn para redes sociales.",
+    "trigger_article_title": "Región Metropolitana en alerta roja por inusual tormenta eléctrica con violenta granizada que causó anegamientos y cortes de energía",
+    "trigger_article_url": "http://www.df.cl/economia-y-politica/actualidad/tormenta-con-violenta-granizada-afecta-a-la-zona-central-de-chile",
+    "status": "candidate"
   }
 ]
