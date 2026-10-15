@@ -800,5 +800,98 @@
     "trigger_article_title": "Región Metropolitana en alerta roja por inusual tormenta eléctrica con violenta granizada que causó anegamientos y cortes de energía",
     "trigger_article_url": "http://www.df.cl/economia-y-politica/actualidad/tormenta-con-violenta-granizada-afecta-a-la-zona-central-de-chile",
     "status": "candidate"
+  },
+  {
+    "id": "2026-10-15-001",
+    "timestamp": "2026-10-15T14:37:56.497050Z",
+    "topic": "El mapa de la desigualdad tarifaria: Por qué la anunciada baja de 4,3% en la luz subirá las cuentas hasta 6% en el sur",
+    "category": "Economía & Finanzas",
+    "viral_hook_type": "Contrarian / Curious Hook",
+    "analytical_angle": "El discurso oficial celebra un alivio nacional, pero los números muestran una brecha geográfica crítica: mientras el centro del país ve reducciones, usuarios en Los Ríos (+6,2%), Los Lagos (+4,9%) y Magallanes (+2,4%) pagarán más por las mismas condiciones de consumo.",
+    "data_sources": [
+      {
+        "name": "Comisión Nacional de Energía (CNE)",
+        "type": "Portal Abierto",
+        "potential_url_or_query": "https://www.cne.cl/tarificacion/electrica/ Informe Técnico Preliminar de Fijación de Precios Nudo Promedio (PNP)",
+        "friction_level": "Baja (Horas)"
+      },
+      {
+        "name": "INE - Índice de Precios al Consumidor (Suministro de Electricidad)",
+        "type": "Dataset Descargable",
+        "potential_url_or_query": "https://www.ine.gob.cl/estadisticas/economia/indices-de-precios-e-inflacion/indice-de-precios-al-consumidor",
+        "friction_level": "Baja (Horas)"
+      }
+    ],
+    "feasibility_score": 8,
+    "virality_score": 9,
+    "recommended_deliverable": "App Interactiva (Streamlit)",
+    "fast_execution_strategy": "1. Extraer en Python las tablas comunales y regionales del Informe Técnico Preliminar de Precios Nudo publicado por la CNE. 2. Diseñar un calculador en Streamlit donde el usuario introduce su región y consumo en kWh mensual para calcular su variación neta en pesos. 3. Desplegar un mapa coroplético de calor que visibilice el contraste entre comunas beneficiadas y comunas castigadas.",
+    "trigger_article_title": "¿Llegó por fin un alivio en las cuentas de la luz? CNE publica informe preliminar que prevé baja promedio de 4,3% en las boletas a partir de 2027",
+    "trigger_article_url": "http://www.df.cl/empresas/energia/llego-por-fin-un-alivio-en-las-cuentas-de-la-luz-cne-publica-informe",
+    "status": "candidate"
+  },
+  {
+    "id": "2026-10-15-002",
+    "timestamp": "2026-10-15T14:37:56.497323Z",
+    "topic": "La caída de los gigantes del retail: Radiografía a cómo los hipermercados perdieron el 50% de su mercado en una década",
+    "category": "Economía & Finanzas",
+    "viral_hook_type": "Contrarian / Curious Hook",
+    "analytical_angle": "El consenso popular asumía que las grandes cadenas de retail asfixiarían y extinguirían al comercio minorista barrial; la data histórica prueba que el formato hipermercado perdió tracción ante la cercanía barrial y el hard discount familiar.",
+    "data_sources": [
+      {
+        "name": "United States Department of Agriculture (USDA) - Foreign Agricultural Service",
+        "type": "Dataset Descargable",
+        "potential_url_or_query": "USDA GAIN Report Chile Retail Foods 2025-2026",
+        "friction_level": "Baja (Horas)"
+      },
+      {
+        "name": "INE - Índice de Ventas de Supermercados (ISUP)",
+        "type": "Portal Abierto",
+        "potential_url_or_query": "https://www.ine.gob.cl/estadisticas/economia/comercio-y-servicios/indice-de-ventas-de-supermercados",
+        "friction_level": "Baja (Horas)"
+      },
+      {
+        "name": "Comisión para el Mercado Financiero (CMF)",
+        "type": "Portal Abierto",
+        "potential_url_or_query": "https://www.cmfchile.cl Fichas de estadísticas de ingresos operacionales Cencosud, SMU y Falabella Retail",
+        "friction_level": "Baja (Horas)"
+      }
+    ],
+    "feasibility_score": 8,
+    "virality_score": 8,
+    "recommended_deliverable": "Gráfico Estático de Alto Impacto",
+    "fast_execution_strategy": "1. Descargar las series históricas de participación por canal minorista del informe USDA y cruzar con la serie del ISUP desestacionalizado del INE (2014-2026). 2. Generar un gráfico de áreas apiladas (stacked area chart) comparando hipermercados vs. discount stores y locales de conveniencia. 3. Publicar una infografía sintética lista para Twitter/LinkedIn con las tres claves económicas del cambio de hábito de compra.",
+    "trigger_article_title": "Participación de grandes supermercados en Chile cae a la mitad en 10 años",
+    "trigger_article_url": "http://www.df.cl/empresas/industria/participacion-de-grandes-supermercados-en-chile-cae-a-la-mitad-en-10-anos",
+    "status": "candidate"
+  },
+  {
+    "id": "2026-10-15-003",
+    "timestamp": "2026-10-15T14:37:56.497561Z",
+    "topic": "El rebote inesperado de las Isapres: ¿Quiénes están frenando una sangría de 53 meses consecutivos?",
+    "category": "Sociedad & Tendencias",
+    "viral_hook_type": "Contrarian / Curious Hook",
+    "analytical_angle": "Mientras el debate público y político daba por desmantelado o inviable el modelo Isapre, la cartera de afiliados quebró la tendencia a la baja; analizar el perfil etario y salarial de los nuevos entrantes muestra si se trata de jóvenes o de retornos forzados por el colapso del sistema público.",
+    "data_sources": [
+      {
+        "name": "Superintendencia de Salud de Chile - Estadísticas de Cartera de Afiliados",
+        "type": "Portal Abierto",
+        "potential_url_or_query": "https://www.superdesalud.gob.cl/difusion/665/w3-propertyvalue-1962.html Cartera de Cotizantes y Cargas por Isapre",
+        "friction_level": "Baja (Horas)"
+      },
+      {
+        "name": "Fonasa - Base de Datos de Beneficiarios Históricos",
+        "type": "Portal Abierto",
+        "potential_url_or_query": "https://www.fonasa.cl/sites/fonasa/datos-abiertos Estadísticas mensuales de asegurados tramos A, B, C y D",
+        "friction_level": "Baja (Horas)"
+      }
+    ],
+    "feasibility_score": 7,
+    "virality_score": 8,
+    "recommended_deliverable": "Gráfico Estático de Alto Impacto",
+    "fast_execution_strategy": "1. Bajar en formato Excel/CSV las series de cartera mensual 2020-2026 de la Superintendencia de Salud. 2. Calcular la tasa de variación neta intermensual para aislar el cambio de tendencia de los últimos cuatro meses desagregado por Isapre abierta. 3. Elaborar una visualización en Altair/Matplotlib contrastando el piso histórico de la fuga vs. el perfil demográfico del repunte.",
+    "trigger_article_title": "Isapres detienen la fuga de afiliados y logran un punto de inflexión: encadenan cuatro meses sumando cotizantes",
+    "trigger_article_url": "https://www.latercera.com/pulso/noticia/isapres-detienen-la-fuga-de-afiliados-y-logran-un-punto-de-inflexion-encadenan-cuatro-meses-sumando-cotizantes/",
+    "status": "candidate"
   }
 ]
