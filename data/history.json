@@ -1351,5 +1351,92 @@
     "trigger_article_title": "Subtel ordena bloquear 143 sitios de apuestas y senadores presionan a Hacienda por indicaciones a proyecto",
     "trigger_article_url": "http://www.df.cl/empresas/industria/subtel-ordena-bloquear-143-sitios-de-apuestas-y-senadores-presionan-a",
     "status": "candidate"
+  },
+  {
+    "id": "2026-10-15-004",
+    "timestamp": "2026-10-15T13:53:28.207314Z",
+    "topic": "La trampa del 'fondo seguro': el descalabro del Fondo E y la exposición oculta a derivados",
+    "category": "Economía & Finanzas",
+    "viral_hook_type": "Contrarian / Curious Hook",
+    "analytical_angle": "El Fondo E siempre fue promovido como el refugio sin riesgo para quienes están a punto de jubilar, pero el análisis de cartera demuestra que la exposición agresiva a derivados de tasas internacionales provocó volatilidades superiores a las de la renta variable local.",
+    "data_sources": [
+      {
+        "name": "Superintendencia de Pensiones - Cartera de Inversiones de Fondos de Pensiones",
+        "type": "Portal Abierto",
+        "potential_url_or_query": "spensiones.cl estadisticas cartera inversion fondos de pensiones derivados",
+        "friction_level": "Baja (Horas)"
+      },
+      {
+        "name": "Superintendencia de Pensiones - Series Históricas Valor Cuota",
+        "type": "Dataset Descargable",
+        "potential_url_or_query": "spensiones.cl estadisticas valores cuota y patrimonio fondo E",
+        "friction_level": "Baja (Horas)"
+      }
+    ],
+    "feasibility_score": 8,
+    "virality_score": 9,
+    "recommended_deliverable": "App Interactiva (Streamlit)",
+    "fast_execution_strategy": "1. Descargar las series mensuales de valor cuota del Fondo E y la distribución de instrumentos de renta fija/swaps desde spensiones.cl. 2. Calcular la pérdida real neta acumulada en pesos según saldo simulado ($10M a $100M). 3. Montar una calculadora interactiva en Streamlit donde cada usuario ingresa su fondo y ve cuánto dinero perdió debido al diferencial de tasas.",
+    "trigger_article_title": "Pérdidas en el fondo E: AFP defienden estrategia de inversiones y superintendente se muestra “preocupado”",
+    "trigger_article_url": "https://www.latercera.com/pulso/noticia/perdidas-en-el-fondo-e-afp-defienden-estrategia-de-inversiones-y-superintendente-se-muestra-preocupado/",
+    "status": "candidate"
+  },
+  {
+    "id": "2026-10-15-005",
+    "timestamp": "2026-10-15T13:53:28.207601Z",
+    "topic": "El espejismo del 4,3%: ¿cuánta plata real ahorras tras las alzas acumuladas de la luz?",
+    "category": "Economía & Finanzas",
+    "viral_hook_type": "Contrarian / Curious Hook",
+    "analytical_angle": "Aunque el titular celebra una baja tarifaria, la modelación temporal muestra que esta disminución apenas compensa entre un 6% y un 8% del impacto acumulado que los hogares sufrieron tras los descongelamientos masivos de 2024-2025.",
+    "data_sources": [
+      {
+        "name": "Comisión Nacional de Energía (CNE)",
+        "type": "Portal Abierto",
+        "potential_url_or_query": "cne.cl informes tecnicos precio nudo promedio preliminar fijacion tarifaria",
+        "friction_level": "Baja (Horas)"
+      },
+      {
+        "name": "Instituto Nacional de Estadísticas (INE) - Índice de Precios al Consumidor",
+        "type": "Dataset Descargable",
+        "potential_url_or_query": "ine.gob.cl series historicas ipc division electricidad",
+        "friction_level": "Baja (Horas)"
+      }
+    ],
+    "feasibility_score": 8,
+    "virality_score": 8,
+    "recommended_deliverable": "Gráfico Estático de Alto Impacto",
+    "fast_execution_strategy": "1. Extraer la curva del IPC de suministro eléctrico 2023-2026 del INE y las resoluciones de precio nudo de la CNE. 2. Proyectar la tarifa a enero 2027 aplicando el factor -4,3% para clientes residenciales promedio (150-250 kWh/mes). 3. Diseñar un gráfico de cascada o área que visualice cómo queda la factura real respecto a la línea base previa al descongelamiento tarifario.",
+    "trigger_article_title": "Gobierno proyecta baja promedio de 4,3% en las cuentas de la luz a partir de enero",
+    "trigger_article_url": "https://www.cooperativa.cl/noticias/pais/servicios-basicos/electricidad/gobierno-proyecta-baja-promedio-de-4-3-en-las-cuentas-de-la-luz-a/2026-10-15/103242.html",
+    "status": "candidate"
+  },
+  {
+    "id": "2026-10-15-006",
+    "timestamp": "2026-10-15T13:53:28.208142Z",
+    "topic": "Vivir al borde del aluvión: cruce de las 44 quebradas críticas de Santiago con el boom inmobiliario",
+    "category": "Sociedad & Tendencias",
+    "viral_hook_type": "Contrarian / Curious Hook",
+    "analytical_angle": "Se suele atribuir el desastre a una fuerza mayor impredecible del clima, pero el cruce geoespacial evidencia que durante la última década de megasequía se autorizó la expansión habitacional directamente sobre conos de deyección y cauces históricos de alto riesgo.",
+    "data_sources": [
+      {
+        "name": "Infraestructura de Datos Espaciales (IDE Chile) y Minvu",
+        "type": "Portal Abierto",
+        "potential_url_or_query": "ide.cl capas georriesgos quebradas precordillera santiago minvu",
+        "friction_level": "Baja (Horas)"
+      },
+      {
+        "name": "Instituto Nacional de Estadísticas (INE) - Permisos de Edificación",
+        "type": "Dataset Descargable",
+        "potential_url_or_query": "ine.gob.cl estadisticas economia edificacion permisos superficie comuna",
+        "friction_level": "Baja (Horas)"
+      }
+    ],
+    "feasibility_score": 7,
+    "virality_score": 8,
+    "recommended_deliverable": "Gráfico Estático de Alto Impacto",
+    "fast_execution_strategy": "1. Cargar el shapefile/GeoJSON de zonas de remoción en masa y quebradas precordilleranas del geoportal IDE Minvu. 2. Cruzar con el polígono urbano comunal y los datos censales/edificación 2017-2024 en Geopandas. 3. Generar un mapa coroplético de calor que cuantifique el número estimado de hogares levantados en el cono de peligro de las 10 quebradas rojas.",
+    "trigger_article_title": "Minvu adelanta estudio de riesgos en la precordillera de Santiago: identifican 44 quebradas y diez de ellas son de “alto riesgo”",
+    "trigger_article_url": "https://www.latercera.com/nacional/noticia/minvu-adelanta-estudio-de-risgos-en-la-precordillera-de-santiago-identifican-44-quebradas-y-diez-de-ellas-son-de-alto-riesgo/",
+    "status": "candidate"
   }
 ]
