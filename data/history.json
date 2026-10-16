@@ -893,5 +893,98 @@
     "trigger_article_title": "Isapres detienen la fuga de afiliados y logran un punto de inflexión: encadenan cuatro meses sumando cotizantes",
     "trigger_article_url": "https://www.latercera.com/pulso/noticia/isapres-detienen-la-fuga-de-afiliados-y-logran-un-punto-de-inflexion-encadenan-cuatro-meses-sumando-cotizantes/",
     "status": "candidate"
+  },
+  {
+    "id": "2026-10-16-001",
+    "timestamp": "2026-10-16T14:38:34.597624Z",
+    "topic": "Licencias express: Modelando la imposibilidad humana de los 70 mil exámenes aprobados en segundos",
+    "category": "Política & Estado",
+    "viral_hook_type": "Contrarian / Curious Hook",
+    "analytical_angle": "Mientras un conductor promedio tarda semanas en conseguir hora y 35 minutos en rendir el test Conaset de 35 preguntas complejas, los datos de auditoría prueban matemáticamente que leer y responder cada pregunta tomó menos de 1,7 segundos, fijando un umbral algorítmico indiscutible de fraude municipal.",
+    "data_sources": [
+      {
+        "name": "Contraloría General de la República (Auditoría Municipalidad de Antofagasta)",
+        "type": "Portal Abierto",
+        "potential_url_or_query": "Portal de Informes de Auditoría CGR Antofagasta licencias de conducir 2026",
+        "friction_level": "Baja (Horas)"
+      },
+      {
+        "name": "CONASET - Comisión Nacional de Seguridad de Tránsito",
+        "type": "Portal Abierto",
+        "potential_url_or_query": "https://www.conaset.cl/examen-teorico-clase-b/",
+        "friction_level": "Baja (Horas)"
+      }
+    ],
+    "feasibility_score": 8,
+    "virality_score": 9,
+    "recommended_deliverable": "Gráfico Estático de Alto Impacto",
+    "fast_execution_strategy": "1) Descargar el informe consolidado de Contraloría y tabular las distribuciones de tiempos de examen por examinador. 2) Calcular la distribución de velocidad mínima de lectura por palabra y compararla con el promedio humano de lectura comprensiva (200-250 ppm). 3) Generar un histograma de densidad de tiempos con seaborn/matplotlib destacando el 'pico imposible' en cero segundos.",
+    "trigger_article_title": "Contraloría detecta más de 70 mil exámenes para licencias de conducir aprobados en menos de un minuto en Antofagasta",
+    "trigger_article_url": "https://www.latercera.com/nacional/noticia/contraloria-detecta-mas-de-70-mil-examenes-para-licencias-de-conducir-aprobados-en-menos-de-un-minuto-en-antofagasta/",
+    "status": "candidate"
+  },
+  {
+    "id": "2026-10-16-002",
+    "timestamp": "2026-10-16T14:38:34.598024Z",
+    "topic": "Anatomía del bencinazo: Simulador de cuánto pagas por petróleo real vs. MEPCO, dólar e impuesto específico",
+    "category": "Economía & Finanzas",
+    "viral_hook_type": "Contrarian / Curious Hook",
+    "analytical_angle": "El debate público asume que toda el alza proviene del crudo internacional por la tensión geopolítica, pero el rezago matemático de las bandas del MEPCO y la fluctuación cambiaria local explican gran parte del salto acumulado, alterando drásticamente el peso de los impuestos en la boleta final.",
+    "data_sources": [
+      {
+        "name": "Comisión Nacional de Energía (Bencina en Línea)",
+        "type": "API Pública",
+        "potential_url_or_query": "https://www.bencinaenlinea.cl/",
+        "friction_level": "Baja (Horas)"
+      },
+      {
+        "name": "ENAP (Informes Semanales de Precios de Paridad)",
+        "type": "Portal Abierto",
+        "potential_url_or_query": "https://www.enap.cl/precios-paridad",
+        "friction_level": "Baja (Horas)"
+      },
+      {
+        "name": "Banco Central de Chile (Base de Datos Estadísticos - Tipo de Cambio)",
+        "type": "API Pública",
+        "potential_url_or_query": "https://si3.bcentral.cl/Siete",
+        "friction_level": "Baja (Horas)"
+      }
+    ],
+    "feasibility_score": 8,
+    "virality_score": 8,
+    "recommended_deliverable": "App Interactiva (Streamlit)",
+    "fast_execution_strategy": "1) Extraer las series de precio paridad y subsidio/impuesto MEPCO de los informes semanales de ENAP. 2) Replicar la fórmula de descomposición por litro (costo refinación CIF, componente dólar, impuesto específico e IVA). 3) Publicar un dashboard interactivo donde el usuario ingresa su gasto mensual en combustible y descubre cuántos pesos van al fisco, al subsidio y al petróleo.",
+    "trigger_article_title": "¿Quinto aumento? Mercado asume nuevas alzas de combustibles la próxima semana",
+    "trigger_article_url": "http://www.df.cl/economia-y-politica/macro/quinto-aumento-mercado-asume-nuevas-alzas-de-combustibles-la-proxima",
+    "status": "candidate"
+  },
+  {
+    "id": "2026-10-16-003",
+    "timestamp": "2026-10-16T14:38:34.598431Z",
+    "topic": "La lotería del diagnóstico preventivo: El mapa de los Servicios de Salud donde una endoscopía tarda más que el avance tumoral",
+    "category": "Sociedad & Tendencias",
+    "viral_hook_type": "Contrarian / Curious Hook",
+    "analytical_angle": "La discusión de salud suele concentrarse en las listas quirúrgicas y garantías GES, pero la principal brecha mortal es previa y silenciosa: exámenes No GES ambulatorios. Cruzando datos del DEIS y tiempos de espera, se revela qué provincias tienen sobremortalidad digestiva asociada directamente a cuellos de botella diagnósticos.",
+    "data_sources": [
+      {
+        "name": "DEIS Minsal (Estadísticas Vitales y Defunciones por Causa)",
+        "type": "Dataset Descargable",
+        "potential_url_or_query": "https://deis.minsal.cl/#defunciones",
+        "friction_level": "Baja (Horas)"
+      },
+      {
+        "name": "Subsecretaría de Redes Asistenciales (Reporte Trimestral de Listas de Espera No GES)",
+        "type": "Portal Abierto",
+        "potential_url_or_query": "https://www.minsal.cl/tiempos-de-espera/",
+        "friction_level": "Baja (Horas)"
+      }
+    ],
+    "feasibility_score": 7,
+    "virality_score": 8,
+    "recommended_deliverable": "App Interactiva (Streamlit)",
+    "fast_execution_strategy": "1) Descargar microdatos abiertos de defunciones DEIS (códigos CIE-10 para cáncer gástrico y colon) agregados por servicio de salud. 2) Extraer la mediana de días de espera en endoscopía/colonoscopía del repositorio de Redes Asistenciales. 3) Montar una app interactiva en Streamlit que permita al usuario filtrar por su región y comparar días de espera versus riesgo relativo.",
+    "trigger_article_title": "Las listas silenciosas: más de 218 mil pacientes esperan una endoscopía y casi 95 mil una colonoscopía",
+    "trigger_article_url": "https://www.latercera.com/nacional/noticia/las-listas-silenciosas-mas-de-218-mil-pacientes-esperan-una-endoscopia-y-casi-95-mil-una-colonoscopia/",
+    "status": "candidate"
   }
 ]
