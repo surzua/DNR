@@ -986,5 +986,92 @@
     "trigger_article_title": "Las listas silenciosas: más de 218 mil pacientes esperan una endoscopía y casi 95 mil una colonoscopía",
     "trigger_article_url": "https://www.latercera.com/nacional/noticia/las-listas-silenciosas-mas-de-218-mil-pacientes-esperan-una-endoscopia-y-casi-95-mil-una-colonoscopia/",
     "status": "candidate"
+  },
+  {
+    "id": "2026-10-17-001",
+    "timestamp": "2026-10-17T14:37:49.814490Z",
+    "topic": "El mito del refugio seguro: Cómo los swaps convirtieron al Fondo E en el más volátil para los futuros jubilados",
+    "category": "Economía & Finanzas",
+    "viral_hook_type": "Contrarian / Curious Hook",
+    "analytical_angle": "El Fondo E fue diseñado legalmente como el instrumento conservador para proteger a quienes están a punto de jubilar, pero la composición de derivados (swaps de tasas de interés y cobertura cambiaria) lo ha hecho caer con mayor severidad relativa que multifondos más riesgosos en episodios de estrés financiero.",
+    "data_sources": [
+      {
+        "name": "Superintendencia de Pensiones - Cartera de Inversiones de los Fondos de Pensiones",
+        "type": "Portal Abierto",
+        "potential_url_or_query": "https://www.spensiones.cl/apps/carteras/index.php",
+        "friction_level": "Baja (Horas)"
+      },
+      {
+        "name": "Banco Central de Chile - Base de Datos Estadísticos (Tasas de Interés y Tipo de Cambio)",
+        "type": "API Pública",
+        "potential_url_or_query": "https://si3.bcentral.cl/Siete",
+        "friction_level": "Baja (Horas)"
+      }
+    ],
+    "feasibility_score": 8,
+    "virality_score": 9,
+    "recommended_deliverable": "Gráfico Estático de Alto Impacto",
+    "fast_execution_strategy": "1. Descargar las planillas mensuales históricas de composición de cartera y rentabilidad del Fondo E desde la Superintendencia de Pensiones en formato Excel/CSV. 2. Aislar la exposición neta en contratos de derivados y deuda soberana versus multifondos A y C. 3. Generar una visualización comparativa de drawdown histórico y volatilidad que demuestre cuándo el Fondo E dejó de comportarse como un activo libre de riesgo.",
+    "trigger_article_title": "Qué son y cómo funcionan los derivados, el instrumento que generó el derrumbe del fondo E de las AFP",
+    "trigger_article_url": "https://www.latercera.com/pulso/noticia/que-son-y-como-funcionan-los-derivados-el-instrumento-que-genero-el-derrumbe-del-fondo-e-de-las-afp/",
+    "status": "candidate"
+  },
+  {
+    "id": "2026-10-17-002",
+    "timestamp": "2026-10-17T14:37:49.814901Z",
+    "topic": "La paradoja de la gratuidad: Radiografía al déficit de $1,85 billones versus el descalce socioeconómico de beneficiarios",
+    "category": "Sociedad & Tendencias",
+    "viral_hook_type": "Contrarian / Curious Hook",
+    "analytical_angle": "Aunque la política pública se diseñó con un techo arancelario estricto para cerrar brechas de vulnerabilidad, los planteles universitarios acumulan un déficit estructural crítico generado por la fijación de aranceles regulados que no cubren costos operativos reales, mientras miles de estudiantes pertenecientes a deciles altos conservan la cobertura por desfases de actualización del Registro Social de Hogares.",
+    "data_sources": [
+      {
+        "name": "Servicio de Información de Educación Superior (SIES - Mineduc) - Matrícula y Beneficios",
+        "type": "Dataset Descargable",
+        "potential_url_or_query": "https://www.mifuturo.cl/bases-de-datos-matricula/",
+        "friction_level": "Baja (Horas)"
+      },
+      {
+        "name": "DIPRES - Informes de Ejecución Presupuestaria de Educación Superior",
+        "type": "Portal Abierto",
+        "potential_url_or_query": "https://www.dipres.gob.cl/598/w3-propertyvalue-15199.html",
+        "friction_level": "Baja (Horas)"
+      }
+    ],
+    "feasibility_score": 7,
+    "virality_score": 8,
+    "recommended_deliverable": "App Interactiva (Streamlit)",
+    "fast_execution_strategy": "1. Descargar las bases abiertas de matrícula de SIES con cruce de quintiles y asignación de gratuidad por institución. 2. Calcular la brecha financiera anual por alumno entre el arancel real publicado por la institución y el arancel regulado fijado por el Mineduc. 3. Montar un tablero interactivo en Streamlit donde el usuario elija su universidad o carrera y observe el déficit acumulado y la distribución socioeconómica de los beneficiados.",
+    "trigger_article_title": "Acción Educar cifra en $1,85 billones el déficit acumulado de las universidades por la gratuidad",
+    "trigger_article_url": "https://www.cooperativa.cl/noticias/pais/educacion/beneficios/accion-educar-cifra-en-1-85-billones-el-deficit-acumulado-de-las/2026-10-17/092336.html",
+    "status": "candidate"
+  },
+  {
+    "id": "2026-10-17-003",
+    "timestamp": "2026-10-17T14:37:49.815300Z",
+    "topic": "El embudo de la justicia a 7 años del 18-O: El colapso del 96% de las denuncias por violencia institucional",
+    "category": "Política & Estado",
+    "viral_hook_type": "Contrarian / Curious Hook",
+    "analytical_angle": "A pesar de la retórica política de persecución exhaustiva o impunidad generalizada, el dato objetivo revela un embudo procesal de archivo masivo: solo 1,5% de las 11.504 causas terminó en condena efectiva, no principalmente por absoluciones en juicio, sino por la incapacidad técnica y pericial del sistema procesal penal de individualizar autores en escenarios de conmoción pública.",
+    "data_sources": [
+      {
+        "name": "Ministerio Público de Chile - Boletines Estadísticos Anuales y Reportes de Causas de Violencia Institucional",
+        "type": "Portal Abierto",
+        "potential_url_or_query": "http://www.fiscaliadechile.cl/Fiscalia/estadisticas/index.do",
+        "friction_level": "Baja (Horas)"
+      },
+      {
+        "name": "Instituto Nacional de Derechos Humanos (INDH) - Informes de Seguimiento Judicial",
+        "type": "Portal Abierto",
+        "potential_url_or_query": "https://www.indh.cl/informacion-institucional/estadisticas-y-balances/",
+        "friction_level": "Media (1-2 días)"
+      }
+    ],
+    "feasibility_score": 6,
+    "virality_score": 8,
+    "recommended_deliverable": "Gráfico Estático de Alto Impacto",
+    "fast_execution_strategy": "1. Extraer los datos desagregados de términos de causas del Ministerio Público para las 11.504 causas abiertas entre octubre de 2019 y marzo de 2020. 2. Clasificar los motivos de término (archivo provisional, facultad de no iniciar investigación, sobreseimiento definitivo y sentencias). 3. Construir un diagrama de Sankey o gráfico de embudo (funnel chart) que muestre visualmente cómo más de 11.000 denuncias se redujeron a apenas unas decenas de sentencias condenatorias.",
+    "trigger_article_title": "A siete años del 18-O: 1,5% de las causas por violación a los DD.HH. terminó en condena a uniformados",
+    "trigger_article_url": "https://www.latercera.com/nacional/noticia/a-siete-anos-del-18-o-15-de-las-causas-por-violacion-a-los-ddhh-termino-en-condena-a-uniformados/",
+    "status": "candidate"
   }
 ]
