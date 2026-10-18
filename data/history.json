@@ -1073,5 +1073,92 @@
     "trigger_article_title": "A siete años del 18-O: 1,5% de las causas por violación a los DD.HH. terminó en condena a uniformados",
     "trigger_article_url": "https://www.latercera.com/nacional/noticia/a-siete-anos-del-18-o-15-de-las-causas-por-violacion-a-los-ddhh-termino-en-condena-a-uniformados/",
     "status": "candidate"
+  },
+  {
+    "id": "2026-10-18-001",
+    "timestamp": "2026-10-18T14:38:24.390743Z",
+    "topic": "El fantasma infundado de la Visa Waiver: La data del DHS que desmiente la supuesta crisis de sobreestadía",
+    "category": "Sociedad & Tendencias",
+    "viral_hook_type": "Contrarian / Curious Hook",
+    "analytical_angle": "Frente a las alarmas políticas recurrentes de que Chile perdería el beneficio migratorio por un desborde de 'turismo delictual', las métricas oficiales de EE.UU. revelan que los chilenos tienen tasas de sobreestadía menores que varios países de Europa Occidental y de la OCDE en el mismo programa.",
+    "data_sources": [
+      {
+        "name": "U.S. Department of Homeland Security (Entry/Exit Overstay Reports)",
+        "type": "Dataset Descargable",
+        "potential_url_or_query": "https://www.dhs.gov/publication/entryexit-overstay-report",
+        "friction_level": "Baja (Horas)"
+      },
+      {
+        "name": "Tabla comparativa de países del Visa Waiver Program (Wikipedia)",
+        "type": "Tabla Wikipedia",
+        "potential_url_or_query": "https://en.wikipedia.org/wiki/Visa_Waiver_Program",
+        "friction_level": "Baja (Horas)"
+      }
+    ],
+    "feasibility_score": 9,
+    "virality_score": 8,
+    "recommended_deliverable": "Gráfico Estático de Alto Impacto",
+    "fast_execution_strategy": "1. Extraer del último reporte oficial anual del DHS las tablas de 'Visa Waiver Program Nonimmigrant Overstay Rates' por país. 2. Cruzar con pandas la tasa de Chile (1,5%) versus miembros de la Unión Europea y el umbral de advertencia del DHS (2%). 3. Diseñar un gráfico de barras comparativo destacando la posición de Chile en el ranking de cumplimiento internacional.",
+    "trigger_article_title": "Chile registra su menor tasa en seis años de sobreestadía en Estados Unidos bajo la Visa Waiver",
+    "trigger_article_url": "http://www.df.cl/economia-y-politica/pais/chile-registra-su-menor-tasa-en-seis-anos-de-sobreestadia-en-estados-unidos",
+    "status": "candidate"
+  },
+  {
+    "id": "2026-10-18-002",
+    "timestamp": "2026-10-18T14:38:24.391103Z",
+    "topic": "El cerrojo judicial: De la supuesta 'puerta giratoria' al rechazo del 99% de las libertades condicionales",
+    "category": "Política & Estado",
+    "viral_hook_type": "Contrarian / Curious Hook",
+    "analytical_angle": "Mientras el discurso público y político insiste en la existencia de una 'puerta giratoria' descontrolada en las cárceles chilenas, la data histórica de las actas judiciales demuestra que la tasa de concesión de libertades condicionales se desplomó desde más del 50% hace una década a menos del 2% en múltiples jurisdicciones.",
+    "data_sources": [
+      {
+        "name": "Poder Judicial de Chile (Actas Semestrales de Comisiones de Libertad Condicional)",
+        "type": "Portal Abierto",
+        "potential_url_or_query": "https://www.pjud.cl/prensa-y-comunicaciones/noticias-del-poder-judicial libertad condicional actas semestrales",
+        "friction_level": "Baja (Horas)"
+      },
+      {
+        "name": "Estadísticas Penitenciarias de Gendarmería de Chile",
+        "type": "Dataset Descargable",
+        "potential_url_or_query": "https://html.gendarmeria.gob.cl/estadisticas/poblacion_penal.html",
+        "friction_level": "Baja (Horas)"
+      }
+    ],
+    "feasibility_score": 8,
+    "virality_score": 8,
+    "recommended_deliverable": "Gráfico Estático de Alto Impacto",
+    "fast_execution_strategy": "1. Descargar las actas de resultados semestrales 2018-2026 publicadas por las Cortes de Apelaciones en pjud.cl. 2. Tabular en Python el total de solicitudes presentadas versus aprobadas por región. 3. Crear una infografía longitudinal que contraste la percepción de 'puerta giratoria' contra la curva de rechazo real cercana al 98% a nivel país.",
+    "trigger_article_title": "Aprueban sólo 1 de las 192 solicitudes de libertad condicional realizadas en Puerto Montt",
+    "trigger_article_url": "https://www.biobiochile.cl/noticias/nacional/region-de-los-lagos/2026/10/18/aprueban-1-de-las-192-solicitudes-de-libertad-condicional-realizadas-en-puerto-montt.shtml",
+    "status": "candidate"
+  },
+  {
+    "id": "2026-10-18-003",
+    "timestamp": "2026-10-18T14:38:24.391378Z",
+    "topic": "El arbitraje del sol botado: Cuántos millones rescata el cable Chile-Perú del vertimiento solar en el desierto",
+    "category": "Economía & Finanzas",
+    "viral_hook_type": "Contrarian / Curious Hook",
+    "analytical_angle": "El proyecto no es solo una obra de integración diplomática; resuelve matemáticamente la gran paradoja de la transición energética chilena: en el norte se vierten (desperdician) miles de GWh solares a costo marginal cero por congestión de transmisión, mientras al otro lado de la frontera se queman hidrocarburos caros para abastecer industrias.",
+    "data_sources": [
+      {
+        "name": "Coordinador Eléctrico Nacional (CEN API / Portal Datos Abiertos)",
+        "type": "API Pública",
+        "potential_url_or_query": "https://api.coordinador.cl/ costos marginales y vertimientos de energía renovable ERNC",
+        "friction_level": "Baja (Horas)"
+      },
+      {
+        "name": "Comisión Nacional de Energía (CNE) Estadísticas Energéticas",
+        "type": "Portal Abierto",
+        "potential_url_or_query": "https://www.cne.cl/estadisticas/",
+        "friction_level": "Baja (Horas)"
+      }
+    ],
+    "feasibility_score": 7,
+    "virality_score": 7,
+    "recommended_deliverable": "App Interactiva (Streamlit)",
+    "fast_execution_strategy": "1. Consultar la API del CEN para obtener las cifras de vertimiento solar acumuladas en 2025-2026 en nudos clave del Norte Grande (Crucero, Encuentro). 2. Multiplicar la energía recortada en horas solares por los diferenciales de precio spot reportados entre Perú y Chile. 3. Desplegar un simulador en Streamlit donde el usuario calcule cuántos hogares o dólares de vertimiento se recuperarían al conectar la línea de 22 km.",
+    "trigger_article_title": "Perú y Chile preparan una conexión energética que podría generar US$ 170 millones anuales",
+    "trigger_article_url": "https://www.biobiochile.cl/noticias/economia/actualidad-economica/2026/10/18/peru-y-chile-preparan-una-conexion-energetica-que-podria-generar-us-170-millones-anuales.shtml",
+    "status": "candidate"
   }
 ]
