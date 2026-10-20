@@ -1218,5 +1218,51 @@
     "trigger_article_title": "\"Me tiembla todo cuando viene el ajuste\": un cura y la cruz de convivir con el peaje más caro de Chile",
     "trigger_article_url": "https://www.biobiochile.cl/especial/bbcl-investiga/noticias/reportajes/2026/10/19/me-tiembla-todo-cuando-viene-el-ajuste-un-cura-y-la-cruz-de-convivir-con-el-peaje-mas-caro-de-chile.shtml",
     "status": "candidate"
+  },
+  {
+    "id": "2026-10-20-001",
+    "timestamp": "2026-10-20T14:41:34.172219Z",
+    "topic": "Radiografía al desplome del Fondo E: ¿Cuánto perdieron realmente los multifondos más conservadores frente a la historia de rentabilidad de la última década?",
+    "category": "Economía & Finanzas",
+    "viral_hook_type": "Contrarian / Curious Hook",
+    "analytical_angle": "Todo el mundo asume que el Fondo E siempre fue un refugio seguro a prueba de balas, pero la data histórica de la Superintendencia demuestra que su correlación con las tasas de interés globales genera volatilidad sistemática que castiga al afiliado conservador casi al nivel de los fondos más riesgosos en episodios puntuales.",
+    "data_sources": [
+      {
+        "name": "Superintendencia de Pensiones - Estadísticas Históricas de Rentabilidad por Multifondo",
+        "type": "Portal Abierto",
+        "potential_url_or_query": "https://www.spensiones.cl/",
+        "friction_level": "Baja (Horas)"
+      }
+    ],
+    "feasibility_score": 9,
+    "virality_score": 10,
+    "recommended_deliverable": "App Interactiva (Streamlit)",
+    "fast_execution_strategy": "1. Descargar el dataset histórico mensual de rentabilidad de los multifondos desde el sitio de la Superintendencia de Pensiones. 2. Construir un script rápido en Python (Pandas + Streamlit) que permita al usuario calcular cuánto dinero exacto perdió su fondo según su saldo actual simulando el periodo del desplome. 3. Desplegar la aplicación web interactiva en la nube pública y difundir en redes sociales.",
+    "trigger_article_title": "Superintendencia de Pensiones inicia proceso contra las siete AFP por el desplome del fondo E",
+    "trigger_article_url": "https://www.biobiochile.cl/noticias/economia/actualidad-economica/2026/10/20/superintendencia-de-pensiones-inicia-proceso-contra-las-siete-afp-por-el-desplome-de-l-fondo-e.shtml",
+    "status": "candidate"
+  },
+  {
+    "id": "2026-10-20-002",
+    "timestamp": "2026-10-20T14:41:34.172577Z",
+    "topic": "Radiografía a las contrataciones públicas de municipios y autoridades: ¿Cuántas órdenes de compra con el Estado acumulan los líderes comunales bajo la lupa?",
+    "category": "Política & Estado",
+    "viral_hook_type": "Contrarian / Curious Hook",
+    "analytical_angle": "Se suele creer que los controles de Mercado Público bloquean automáticamente cualquier vínculo societario de alcaldes, pero un cruce masivo de datos revela la persistencia de órdenes de compra aprobadas antes de la fiscalización estricta.",
+    "data_sources": [
+      {
+        "name": "Mercado Público - API de Órdenes de Compra y Proveedores del Estado",
+        "type": "API Pública",
+        "potential_url_or_query": "https://www.mercadopublico.cl/",
+        "friction_level": "Baja (Horas)"
+      }
+    ],
+    "feasibility_score": 8,
+    "virality_score": 8,
+    "recommended_deliverable": "Gráfico Estático de Alto Impacto",
+    "fast_execution_strategy": "1. Consultar la API de Mercado Público utilizando Python para extraer el historial de órdenes de compra de comunas específicas bajo investigación. 2. Cruzar los RUT de los representantes legales con las bases de datos de autoridades edilicias. 3. Generar una infografía limpia y estática con el volumen total de transacciones para redes sociales.",
+    "trigger_article_title": "Empresa de la alcaldesa de Hijuelas habría sumado 87 órdenes de compra con el Estado pese a nueva ley",
+    "trigger_article_url": "https://www.biobiochile.cl/noticias/nacional/region-de-valparaiso/2026/10/20/empresa-de-la-alcaldesa-de-hijuelas-habria-sumado-87-ordenes-de-compra-con-el-estado-pese-a-nueva-ley.shtml",
+    "status": "candidate"
   }
 ]
