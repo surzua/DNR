@@ -1264,5 +1264,92 @@
     "trigger_article_title": "Empresa de la alcaldesa de Hijuelas habría sumado 87 órdenes de compra con el Estado pese a nueva ley",
     "trigger_article_url": "https://www.biobiochile.cl/noticias/nacional/region-de-valparaiso/2026/10/20/empresa-de-la-alcaldesa-de-hijuelas-habria-sumado-87-ordenes-de-compra-con-el-estado-pese-a-nueva-ley.shtml",
     "status": "candidate"
+  },
+  {
+    "id": "2026-10-21-001",
+    "timestamp": "2026-10-21T14:38:05.813752Z",
+    "topic": "La pirámide offshore en Chile: Los $3,2 billones no declarados por 33 contribuyentes frente al presupuesto social",
+    "category": "Economía & Finanzas",
+    "viral_hook_type": "Contrarian / Curious Hook",
+    "analytical_angle": "Mientras el debate fiscal nacional suele tensionarse por recortes a programas sociales o controles a pequeñas transacciones informales, esta cifra revela una concentración brutal: cada uno de estos 33 RUTs oculta en promedio $97.000 millones, monto suficiente por individuo para costear la construcción completa de un hospital provincial de alta complejidad.",
+    "data_sources": [
+      {
+        "name": "Servicio de Impuestos Internos (SII)",
+        "type": "Portal Abierto",
+        "potential_url_or_query": "https://www.sii.cl/sobre_el_sii/estadisticas_de_los_ingresos_tributarios.html",
+        "friction_level": "Baja (Horas)"
+      },
+      {
+        "name": "Dirección de Presupuestos (DIPRES)",
+        "type": "Dataset Descargable",
+        "potential_url_or_query": "https://www.dipres.gob.cl/598/w3-propertyvalue-15199.html Ley de Presupuestos sectoriales",
+        "friction_level": "Baja (Horas)"
+      }
+    ],
+    "feasibility_score": 8,
+    "virality_score": 9,
+    "recommended_deliverable": "Gráfico Estático de Alto Impacto",
+    "fast_execution_strategy": "1) Tomar las cifras del comunicado del SII ($3,2 billones, 33 contribuyentes, media de ~$97.000 millones por persona). 2) Descargar las asignaciones presupuestarias 2026 de DIPRES para programas emblemáticos (Fondo de Emergencia, Gratuidad universitaria, Construcción de hospitales). 3) Generar una visualización infográfica en Plotly/Matplotlib que compare las barras de lo no declarado frente al gasto anual de ministerios enteros.",
+    "trigger_article_title": "SII pone foco en contribuyentes con cuentas financieras en el exterior sin declarar por más de $3,2 billones",
+    "trigger_article_url": "https://www.latercera.com/pulso/noticia/sii-pone-foco-en-contribuyentes-con-cuentas-financieras-en-el-exterior-sin-declarar-por-mas-de-32-billones/",
+    "status": "candidate"
+  },
+  {
+    "id": "2026-10-21-002",
+    "timestamp": "2026-10-21T14:38:05.814248Z",
+    "topic": "El colapso invisible de la anchoveta: Radiografía histórica a las crisis de desembarque por eventos de El Niño en Chile",
+    "category": "Economía & Finanzas",
+    "viral_hook_type": "Contrarian / Curious Hook",
+    "analytical_angle": "Mientras la opinión pública asocia El Niño principalmente con lluvias torrenciales urbanas e inundaciones, su impacto económico y productivo más violento y rápido ocurre bajo el agua: la data histórica de biomasa marina revela que el shock de desembarques colapsa meses antes de cualquier precipitación continental, transformando a la pesquería en el canario en la mina del clima.",
+    "data_sources": [
+      {
+        "name": "Servicio Nacional de Pesca y Acuicultura (SERNAPESCA)",
+        "type": "Dataset Descargable",
+        "potential_url_or_query": "http://www.sernapesca.cl/anuarios-estadisticos-de-pesca-y-acuicultura desembarque anchoveta norte historico",
+        "friction_level": "Baja (Horas)"
+      },
+      {
+        "name": "NOAA Climate Prediction Center (CPC)",
+        "type": "Portal Abierto",
+        "potential_url_or_query": "https://origin.cpc.ncep.noaa.gov/products/analysis_monitoring/ensostuff/ONI_v5.php Oceanic Nino Index historical series",
+        "friction_level": "Baja (Horas)"
+      }
+    ],
+    "feasibility_score": 9,
+    "virality_score": 8,
+    "recommended_deliverable": "Gráfico Estático de Alto Impacto",
+    "fast_execution_strategy": "1) Descargar las series anuales y mensuales de desembarque artesanal e industrial de anchoveta de Sernapesca (1997-2024). 2) Cruzar las toneladas descargadas con el índice ONI de anomalía térmica superficial del mar de la NOAA mediante pandas. 3) Construir en Matplotlib/Seaborn un gráfico de doble eje que demuestre los tres grandes colapsos biológicos (1997-1998, 2015-2016 y actual) con anotaciones de pérdidas económicas.",
+    "trigger_article_title": "Crisis por El Niño golpea a Corpesca y Camanchaca: capturas de anchoveta marcan cero y proveedores temen quiebras",
+    "trigger_article_url": "http://www.df.cl/empresas/industria/crisis-por-el-nino-golpea-a-corpesca-y-camanchaca-capturas-de-anchoveta",
+    "status": "candidate"
+  },
+  {
+    "id": "2026-10-21-003",
+    "timestamp": "2026-10-21T14:38:05.814640Z",
+    "topic": "La hidra de las apuestas online: Mapa de evasión, CDN y disponibilidad real de los 143 dominios bloqueados por Subtel",
+    "category": "Sociedad & Tendencias",
+    "viral_hook_type": "Contrarian / Curious Hook",
+    "analytical_angle": "¿Sirven de algo los bloqueos por resolución administrativa? Un escaneo técnico a nivel DNS y HTTP demuestra que más del 60% de los dominios bloqueados replican contenido idéntico a través de subdominios, redes de distribución de contenido (Cloudflare/Fastly) y servidores espejos en jurisdicciones offshore, exponiendo la ineficacia de la fiscalización analógica.",
+    "data_sources": [
+      {
+        "name": "Subsecretaría de Telecomunicaciones (SUBTEL) / SCJ",
+        "type": "Portal Abierto",
+        "potential_url_or_query": "https://www.scj.gob.cl/noticias/bloqueo-sitios-apuestas-ilegales listado oficial 143 dominios",
+        "friction_level": "Baja (Horas)"
+      },
+      {
+        "name": "APIs de Resolución DNS y WHOIS (HackerTarget / IP-API)",
+        "type": "API Pública",
+        "potential_url_or_query": "https://api.hackertarget.com/dnslookup/?q= o libreria dnspython",
+        "friction_level": "Baja (Horas)"
+      }
+    ],
+    "feasibility_score": 7,
+    "virality_score": 8,
+    "recommended_deliverable": "App Interactiva (Streamlit)",
+    "fast_execution_strategy": "1) Extraer la lista de los 143 dominios señalados en la resolución de Subtel/SCJ. 2) Ejecutar un script asíncrono en Python con `dnspython` y `requests` testeando la accesibilidad desde resolvedores públicos (Google 8.8.8.8, Cloudflare 1.1.1.1) y rastreando ASN/país de hosting. 3) Montar un dashboard interactivo en Streamlit con un semáforo de bloqueo efectivo versus evasión técnica.",
+    "trigger_article_title": "Subtel ordena bloquear 143 sitios de apuestas y senadores presionan a Hacienda por indicaciones a proyecto",
+    "trigger_article_url": "http://www.df.cl/empresas/industria/subtel-ordena-bloquear-143-sitios-de-apuestas-y-senadores-presionan-a",
+    "status": "candidate"
   }
 ]
