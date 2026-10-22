@@ -1438,5 +1438,92 @@
     "trigger_article_title": "Minvu adelanta estudio de riesgos en la precordillera de Santiago: identifican 44 quebradas y diez de ellas son de “alto riesgo”",
     "trigger_article_url": "https://www.latercera.com/nacional/noticia/minvu-adelanta-estudio-de-risgos-en-la-precordillera-de-santiago-identifican-44-quebradas-y-diez-de-ellas-son-de-alto-riesgo/",
     "status": "candidate"
+  },
+  {
+    "id": "2026-10-22-001",
+    "timestamp": "2026-10-22T14:38:08.744171Z",
+    "topic": "Calculadora de Impacto MEPCO: ¿Cuánto pagas realmente de impuesto por litro de bencina según tu comuna?",
+    "category": "Economía & Finanzas",
+    "viral_hook_type": "Contrarian / Curious Hook",
+    "analytical_angle": "El sentido común dice que cuando el petróleo sube, la bencina sube inmediatamente por culpa de los distribuidores. La data demuestra que el mecanismo del MEPCO amortigua las alzas pero genera desfases históricos de hasta 4 semanas entre el precio internacional y el surtidor local, actuando como un impuesto encubierto en periodos de baja.",
+    "data_sources": [
+      {
+        "name": "Comisión Nacional de Energía (Bencina en Línea)",
+        "type": "API Pública",
+        "potential_url_or_query": "http://api.cne.cl/servicios/combustibles",
+        "friction_level": "Baja (Horas)"
+      },
+      {
+        "name": "Servicio de Impuestos Internos - Componentes MEPCO e IPC",
+        "type": "Portal Abierto",
+        "potential_url_or_query": "https://www.sii.cl/valores_y_fechas/mepco/mepco2026.htm",
+        "friction_level": "Baja (Horas)"
+      }
+    ],
+    "feasibility_score": 9,
+    "virality_score": 9,
+    "recommended_deliverable": "App Interactiva (Streamlit)",
+    "fast_execution_strategy": "1. Consumir la API pública de la CNE para obtener precios actualizados por estación y comuna en la RM. 2. Cruzar con la tabla histórica de parámetros MEPCO publicadas por el SII para descomponer el precio por litro (costo base, IVA, impuesto específico y subsidio/impuesto MEPCO). 3. Montar una Streamlit app donde el usuario ingresa su modelo de auto y comuna para ver cuánto de su tanque lleno va directo al fisco vs costo real del crudo.",
+    "trigger_article_title": "Tras nueva alza, bencinas quedan ad portas de máximo histórico y el diésel marca nuevo peak",
+    "trigger_article_url": "https://www.latercera.com/pulso/noticia/tras-nueva-alza-bencinas-queda-ad-portas-de-maximo-historico-y-en-el-diesel-marca-nuevo-peak/",
+    "status": "candidate"
+  },
+  {
+    "id": "2026-10-22-002",
+    "timestamp": "2026-10-22T14:38:08.744599Z",
+    "topic": "Paradigma Oncológico GES: La brecha entre el alza del gasto estatal (89%) y la espera real de pacientes",
+    "category": "Sociedad & Tendencias",
+    "viral_hook_type": "Contrarian / Curious Hook",
+    "analytical_angle": "Aunque la opinión pública asume que los problemas de las garantías GES se deben a falta de presupuesto, los datos históricos muestran que el financiamiento estatal creció casi el doble (89%) que el costo real por prestación, revelando una ineficiencia estructural en la asignación por tipo de cáncer y región.",
+    "data_sources": [
+      {
+        "name": "DEIS Minsal - Registro de Garantías GES Retrasadas y Egresos Hospitalarios",
+        "type": "Dataset Descargable",
+        "potential_url_or_query": "https://deis.minsal.cl/datos-abiertos/",
+        "friction_level": "Baja (Horas)"
+      },
+      {
+        "name": "Dipres - Reportes de Ejecución Presupuestaria de Salud",
+        "type": "Portal Abierto",
+        "potential_url_or_query": "https://www.dipres.gob.cl/597/w3-propertyvalue-21319.html",
+        "friction_level": "Baja (Horas)"
+      }
+    ],
+    "feasibility_score": 8,
+    "virality_score": 8,
+    "recommended_deliverable": "Gráfico Estático de Alto Impacto",
+    "fast_execution_strategy": "1. Descargar las series históricas de garantías GES retrasadas en oncología desde los datos abiertos del DEIS (2018-2024). 2. Cruzar con el informe de presupuesto ejecutado en Fonasa por programa oncológico disponible en la Dipres. 3. Crear una infografía de alto contraste (Scatter Plot / Dual-axis chart) en Plotly/Seaborn contrastando la curva de inversión vs. la curva de días de espera promedio por tipo de cáncer.",
+    "trigger_article_title": "Estudio revela que el costo real por prestación oncológica GES aumentó 37% entre 2018 y 2024",
+    "trigger_article_url": "https://www.latercera.com/nacional/noticia/estudio-revela-que-el-costo-real-por-prestacion-oncologica-ges-aumento-37-entre-2018-y-2024/",
+    "status": "candidate"
+  },
+  {
+    "id": "2026-10-22-003",
+    "timestamp": "2026-10-22T14:38:08.744970Z",
+    "topic": "La Paradoja del Cobre Chileno: ¿Cuánto dinero fiscal perdió el país en su peor nivel de producción en 23 años?",
+    "category": "Economía & Finanzas",
+    "viral_hook_type": "Contrarian / Curious Hook",
+    "analytical_angle": "A pesar de las noticias celebrando el alto precio internacional del cobre, la caída en volumen de producción contrarrestó las ganancias extraordinarias. El análisis de datos revela exactamente cuántos miles de millones de dólares dejó de recaudar el fisco chileno debido al estancamiento operativo comparado con el escenario proyectado.",
+    "data_sources": [
+      {
+        "name": "Comisión Chilena del Cobre (Cochilco) - Estadísticas Históricas de Producción y Precios",
+        "type": "Portal Abierto",
+        "potential_url_or_query": "https://www.cochilco.cl/Paginas/Estadisticas/Base-de-Datos.aspx",
+        "friction_level": "Baja (Horas)"
+      },
+      {
+        "name": "Dipres - Informe de Finanzas Públicas e Ingresos Mineros",
+        "type": "Dataset Descargable",
+        "potential_url_or_query": "https://www.dipres.gob.cl/597/w3-propertyvalue-15383.html",
+        "friction_level": "Baja (Horas)"
+      }
+    ],
+    "feasibility_score": 8,
+    "virality_score": 8,
+    "recommended_deliverable": "Análisis Predictivo/Optimización",
+    "fast_execution_strategy": "1. Extraer los datos mensuales de producción física de cobre (Cochilco) y recaudación por royalty/impuesto corporativo minero (Dipres) desde 2003 hasta la fecha. 2. Modelar con Python (Statsmodels/Prophet) la recaudación contrafactual que habría obtenido el país si se hubiera mantenido la tendencia de producción proyectada hace una década con los precios actuales. 3. Generar un gráfico de área sombreada que cuantifique la 'fuga de ingresos potenciales' en dólares por habitante.",
+    "trigger_article_title": "Producción de cobre en Chile cerrará 2026 en su nivel más bajo en 23 años y sector prevé repunte desde 2027",
+    "trigger_article_url": "http://www.df.cl/empresas/mineria/produccion-de-cobre-en-chile-cerrara-2026-en-su-nivel-mas-bajo-en-23-anos-y",
+    "status": "candidate"
   }
 ]
