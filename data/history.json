@@ -1525,5 +1525,92 @@
     "trigger_article_title": "Producción de cobre en Chile cerrará 2026 en su nivel más bajo en 23 años y sector prevé repunte desde 2027",
     "trigger_article_url": "http://www.df.cl/empresas/mineria/produccion-de-cobre-en-chile-cerrara-2026-en-su-nivel-mas-bajo-en-23-anos-y",
     "status": "candidate"
+  },
+  {
+    "id": "2026-10-23-001",
+    "timestamp": "2026-10-23T14:39:55.040342Z",
+    "topic": "Simulador de impacto en el Fondo E: ¿Cuántos meses extra debes trabajar para recuperar la pérdida de tu pensión?",
+    "category": "Economía & Finanzas",
+    "viral_hook_type": "Contrarian / Curious Hook",
+    "analytical_angle": "El Fondo E siempre se promocionó como el refugio seguro libre de riesgo para quienes están a punto de jubilarse, pero en los últimos 3 años ha registrado caídas y volatilidad comparables a fondos de mayor riesgo.",
+    "data_sources": [
+      {
+        "name": "Superintendencia de Pensiones - Valor Cuota y Rentabilidad de Multifondos",
+        "type": "Dataset Descargable",
+        "potential_url_or_query": "https://www.spensiones.cl/apps/valoresCuotaFondo/",
+        "friction_level": "Baja (Horas)"
+      },
+      {
+        "name": "Banco Central de Chile - Tasas de Interés y Bonos de Gobierno",
+        "type": "API Pública",
+        "potential_url_or_query": "https://si3.bcentral.cl/SistemasBcentral/Anual",
+        "friction_level": "Baja (Horas)"
+      }
+    ],
+    "feasibility_score": 8,
+    "virality_score": 9,
+    "recommended_deliverable": "App Interactiva (Streamlit)",
+    "fast_execution_strategy": "1. Descargar las series históricas diarias de valor cuota del Fondo E desde el portal de la Superintendencia de Pensiones. 2. Calcular la pérdida porcentual por tramo etario en los últimos 12 meses. 3. Construir una calculadora en Streamlit donde el usuario ingrese su saldo simulado y edad proyectada de retiro para calcular los meses adicionales de cotización necesarios para compensar la caída.",
+    "trigger_article_title": "Ministro Rau llama a la prudencia a las personas próximas a jubilarse ante caída del Fondo E",
+    "trigger_article_url": "https://www.latercera.com/pulso/noticia/ministro-rau-llama-a-la-prudencia-a-las-personas-proximas-a-jubilarse-ante-caida-del-fondo-e/",
+    "status": "candidate"
+  },
+  {
+    "id": "2026-10-23-002",
+    "timestamp": "2026-10-23T14:39:55.040549Z",
+    "topic": "Evolución histórica de rebajas de condena por Ley 19.856: Comparativa por gobierno y tipología de delito",
+    "category": "Política & Estado",
+    "viral_hook_type": "Contrarian / Curious Hook",
+    "analytical_angle": "Aunque la discusión pública actual lo presenta como una medida excepcional del gobierno de turno, el beneficio de rebaja de condena por buena conducta es un mecanismo legal administrativo utilizado anualmente a lo largo de múltiples administraciones.",
+    "data_sources": [
+      {
+        "name": "Diario Oficial de la República de Chile - Publicación de Decretos",
+        "type": "Scraping HTML",
+        "potential_url_or_query": "https://www.diarioficial.cl",
+        "friction_level": "Media (1-2 días)"
+      },
+      {
+        "name": "Poder Judicial de Chile - Jurisprudencia de la Corte Suprema",
+        "type": "Portal Abierto",
+        "potential_url_or_query": "https://www.pjud.cl",
+        "friction_level": "Baja (Horas)"
+      }
+    ],
+    "feasibility_score": 7,
+    "virality_score": 9,
+    "recommended_deliverable": "Gráfico Estático de Alto Impacto",
+    "fast_execution_strategy": "1. Extraer los decretos del Ministerio de Justicia de la Ley 19.856 publicados en el Diario Oficial durante los últimos 8 años. 2. Categorizar los beneficiarios según el tipo de delito (delitos comunes, sexuales, DDHH). 3. Diseñar una infografía comparativa con ggplot2/Seaborn contrastando la evolución de los beneficios otorgados por año y administración.",
+    "trigger_article_title": "Rabat vuelve a defender criterio que benefició a condenados por delitos sexuales y revela que en era Boric hubo 275 casos",
+    "trigger_article_url": "https://www.latercera.com/politica/noticia/rabat-vuelve-a-defender-criterio-que-beneficio-a-condenados-por-delitos-sexuales-y-revela-que-en-era-boric-hubo-275-casos/",
+    "status": "candidate"
+  },
+  {
+    "id": "2026-10-23-003",
+    "timestamp": "2026-10-23T14:39:55.040713Z",
+    "topic": "Hospitales fantasma: El mapa del equipamiento médico de emergencia en bodegas frente a las listas de espera regionales",
+    "category": "Sociedad & Tendencias",
+    "viral_hook_type": "Contrarian / Curious Hook",
+    "analytical_angle": "Mientras los servicios de salud justifican la saturación y el retraso en atenciones por falta de infraestructura, equipamiento clínico de emergencia adquirido por millones de dólares permanece bodega-guardado por trámites burocráticos.",
+    "data_sources": [
+      {
+        "name": "Contraloría General de la República - Informes de Auditoría del Sector Salud",
+        "type": "Portal Abierto",
+        "potential_url_or_query": "https://www.contraloria.cl/portalweb/informes-de-auditoria",
+        "friction_level": "Baja (Horas)"
+      },
+      {
+        "name": "DEIS Minsal - Datos Abiertos de Listas de Espera NO GES",
+        "type": "Portal Abierto",
+        "potential_url_or_query": "https://deis.minsal.cl/",
+        "friction_level": "Baja (Horas)"
+      }
+    ],
+    "feasibility_score": 7,
+    "virality_score": 8,
+    "recommended_deliverable": "Análisis Predictivo/Optimización",
+    "fast_execution_strategy": "1. Consolidar los hallazgos de informes de auditoría de Contraloría sobre insumos e infraestructura de emergencia sin uso. 2. Cruzar con la base de datos de tiempos promedio de listas de espera quirúrgicas y NO GES por servicio de salud regional. 3. Construir un mapa de déficit/capacidad ociosa que muestre qué regiones se habrían beneficiado si dicha infraestructura estuviese desplegada.",
+    "trigger_article_title": "Contraloría detecta que hospital modular del Barros Luco está almacenado en bodega desde 2021",
+    "trigger_article_url": "https://www.latercera.com/nacional/noticia/contraloria-detecta-que-hospital-modular-del-barros-luco-esta-almacenado-en-bodega-desde-2021/",
+    "status": "candidate"
   }
 ]
