@@ -1612,5 +1612,92 @@
     "trigger_article_title": "Contraloría detecta que hospital modular del Barros Luco está almacenado en bodega desde 2021",
     "trigger_article_url": "https://www.latercera.com/nacional/noticia/contraloria-detecta-que-hospital-modular-del-barros-luco-esta-almacenado-en-bodega-desde-2021/",
     "status": "candidate"
+  },
+  {
+    "id": "2026-10-24-001",
+    "timestamp": "2026-10-24T14:39:40.950524Z",
+    "topic": "La Paradoja del Seguro de Cesantía vs. AFP: ¿Por qué la AFC Sí Protegió tu Dinero en Renta Fija?",
+    "category": "Economía & Finanzas",
+    "viral_hook_type": "Contrarian / Curious Hook",
+    "analytical_angle": "Misma renta fija chilena, dos resultados opuestos: ¿Por qué la regulación del Seguro de Cesantía evitó el desplome del Fondo E? Análisis del riesgo de duración de cartera y simulador de portafolio óptimo.",
+    "data_sources": [
+      {
+        "name": "Superintendencia de Pensiones - Cartera de Inversiones de Fondos de Pensiones y AFC",
+        "type": "Portal Abierto",
+        "potential_url_or_query": "https://www.spensiones.cl/apps/centroEstadisticas/",
+        "friction_level": "Baja (Horas)"
+      },
+      {
+        "name": "Banco Central de Chile - Tasas de Interés y Bonos de Gobierno",
+        "type": "API Pública",
+        "potential_url_or_query": "https://si3.bcentral.cl/SistemasBi/api",
+        "friction_level": "Baja (Horas)"
+      }
+    ],
+    "feasibility_score": 8,
+    "virality_score": 9,
+    "recommended_deliverable": "App Interactiva (Streamlit)",
+    "fast_execution_strategy": "1. Descargar la composición por instrumento y duración promedio del Fondo E (AFP) y de los Fondos del Seguro de Cesantía (AFC) desde la Superintendencia de Pensiones. 2. Calcular la sensibilidad ante cambios en la tasa de interés (duration) de ambos portafolios en Python. 3. Desplegar un simulador en Streamlit donde el usuario ingresa su saldo y visualiza la diferencia de rendimiento si el Fondo E utilizara las reglas de inversión del Seguro de Cesantía.",
+    "trigger_article_title": "Mientras el fondo E pierde más de 10% en el año, los fondos del Seguro de Cesantía rentan positivo",
+    "trigger_article_url": "https://www.latercera.com/pulso/noticia/mientras-el-fondo-e-pierde-mas-de-10-en-el-ano-los-fondos-del-seguro-de-cesantia-rentan-positivo/",
+    "status": "candidate"
+  },
+  {
+    "id": "2026-10-24-002",
+    "timestamp": "2026-10-24T14:39:40.950699Z",
+    "topic": "La Sangría de las Fundiciones de Codelco: El Mapa del Déficit acumulado de US$ 1.780 Millones",
+    "category": "Economía & Finanzas",
+    "viral_hook_type": "Contrarian / Curious Hook",
+    "analytical_angle": "Mientras el debate nacional se enfoca en el precio internacional del cobre, el Fisco pierde más de US$ 1,2 millones diarios refinando metal: ¿cuáles fundiciones específicas explican la fuga y qué obras sociales regionales equivalen a ese monto?",
+    "data_sources": [
+      {
+        "name": "Comisión para el Mercado Financiero (CMF) - Estados Financieros Codelco",
+        "type": "Portal Abierto",
+        "potential_url_or_query": "https://www.cmfchile.cl/institucional/mercados/entidad.php?rut=61704000",
+        "friction_level": "Baja (Horas)"
+      },
+      {
+        "name": "Dirección de Presupuestos (DIPRES) - Costo Estándar de Obras Públicas e Hospitales",
+        "type": "Dataset Descargable",
+        "potential_url_or_query": "https://www.dipres.gob.cl/",
+        "friction_level": "Baja (Horas)"
+      }
+    ],
+    "feasibility_score": 8,
+    "virality_score": 8,
+    "recommended_deliverable": "Gráfico Estático de Alto Impacto",
+    "fast_execution_strategy": "1. Extraer el desglose financiero de pérdidas operacionales por división (Ventanas, Chuquicamata, Potrerillos, Caletones) desde las memorias 2022-2025 presentadas a CMF. 2. Calcular la equivalencia del déficit acumulado en unidades de infraestructura pública regional (comisarías, hospitales base, colegios SLEP). 3. Crear una infografía interactiva de cascada (Waterfall Chart) en Python/Plotly exportable a formato estático listo para redes.",
+    "trigger_article_title": "Codelco ha perdido US$ 1.780 millones en fundiciones y refinerías en los últimos cuatro años",
+    "trigger_article_url": "https://www.latercera.com/pulso/noticia/codelco-ha-perdido-us-1780-millones-en-fundiciones-y-refinerias-en-los-ultimos-cuatro-anos/",
+    "status": "candidate"
+  },
+  {
+    "id": "2026-10-24-003",
+    "timestamp": "2026-10-24T14:39:40.950849Z",
+    "topic": "El Mapa del Audit Social: Analizador de Traslape Presupuestario en los 22 Programas Bajo Fiscalización",
+    "category": "Sociedad & Tendencias",
+    "viral_hook_type": "Contrarian / Curious Hook",
+    "analytical_angle": "¿Dónde se concentran los riesgos de doble cobro? Análisis de cobertura, requisitos de vulnerabilidad y brechas de interoperabilidad entre subsidios estatales (PGU, SUF, Subsidio al Empleo).",
+    "data_sources": [
+      {
+        "name": "DIPRES - Registro de Programas Sociales y Evaluaciones de Oferta Programática",
+        "type": "Portal Abierto",
+        "potential_url_or_query": "https://www.dipres.gob.cl/597/w3-propertyvalue-15403.html",
+        "friction_level": "Baja (Horas)"
+      },
+      {
+        "name": "Ministerio de Desarrollo Social - Fichas BPS (Banco de Proyectos y Subsidios)",
+        "type": "Scraping HTML",
+        "potential_url_or_query": "https://nochebuena.registrosocial.gob.cl/",
+        "friction_level": "Media (1-2 días)"
+      }
+    ],
+    "feasibility_score": 7,
+    "virality_score": 8,
+    "recommended_deliverable": "App Interactiva (Streamlit)",
+    "fast_execution_strategy": "1. Descargar de Dipres los presupuestos ejecutados y perfiles de beneficiarios de los 22 programas auditados. 2. Mapear en Pandas los criterios de elegibilidad (RSH, edad, ingresos) para detectar intersecciones normativas entre subsidios. 3. Desplegar una webapp interactiva en Streamlit que permita simular combinaciones de beneficios por tipo de hogar e identificar opacidades de fiscalización.",
+    "trigger_article_title": "Seis ministerios y 22 programas, el foco del gobierno para pesquisar el “fraude social”",
+    "trigger_article_url": "https://www.latercera.com/pulso/noticia/seis-ministerios-y-22-programas-el-foco-del-gobierno-para-pesquisar-el-fraude-social/",
+    "status": "candidate"
   }
 ]
