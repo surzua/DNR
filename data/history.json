@@ -1699,5 +1699,51 @@
     "trigger_article_title": "Seis ministerios y 22 programas, el foco del gobierno para pesquisar el “fraude social”",
     "trigger_article_url": "https://www.latercera.com/pulso/noticia/seis-ministerios-y-22-programas-el-foco-del-gobierno-para-pesquisar-el-fraude-social/",
     "status": "candidate"
+  },
+  {
+    "id": "2026-10-25-001",
+    "timestamp": "2026-10-25T14:37:57.845423Z",
+    "topic": "Comisión Investigadora de Pérdidas de las AFP: ¿Cuánto rentaron realmente los fondos conservadores vs. las comisiones cobradas?",
+    "category": "Economía & Finanzas",
+    "viral_hook_type": "Contrarian / Curious Hook",
+    "analytical_angle": "Todo el foco está puesto en la rentabilidad negativa anual, pero al cruzar la rentabilidad histórica de los últimos 5 años con las comisiones acumuladas cobradas por las administradoras, se revela el saldo neto real que percibieron los afiliados versus las utilidades intactas de las AFP.",
+    "data_sources": [
+      {
+        "name": "Superintendencia de Pensiones - Series Históricas de Rentabilidad y Comisiones",
+        "type": "Portal Abierto",
+        "potential_url_or_query": "https://www.spensiones.cl/",
+        "friction_level": "Baja (Horas)"
+      }
+    ],
+    "feasibility_score": 8,
+    "virality_score": 9,
+    "recommended_deliverable": "App Interactiva (Streamlit)",
+    "fast_execution_strategy": "1. Descargar el archivo consolidado histórico de rentabilidad por tipo de fondo y comisiones desde la web de la Superintendencia de Pensiones. 2. Construir un script rápido en Python (Pandas) para calcular la diferencia neta entre comisiones pagadas y rentabilidad obtenida por fondo. 3. Desplegar una aplicación web en Streamlit donde el usuario ingrese su AFP, fondo y sueldo histórico para visualizar el impacto real.",
+    "trigger_article_title": "Diputados reúnen firmas para crear comisión investigadora por millonarias pérdidas de las AFP",
+    "trigger_article_url": "https://www.latercera.com/politica/noticia/diputados-reunen-firmas-para-crear-comision-investigadora-por-millonarias-perdidas-de-las-afp/",
+    "status": "candidate"
+  },
+  {
+    "id": "2026-10-25-002",
+    "timestamp": "2026-10-25T14:37:57.845895Z",
+    "topic": "El Vuelco en la Primera B: Simulador del Impacto de las Sanciones y Desafiliaciones en la Tabla de Posiciones",
+    "category": "Deportes",
+    "viral_hook_type": "Contrarian / Curious Hook",
+    "analytical_angle": "Más allá del castigo institucional, ¿cómo cambia matemáticamente la lucha por el campeonato y el descenso si se restan los puntos obtenidos ante los equipos desafiliados? Un simulador que recalcula la tabla en tiempo real.",
+    "data_sources": [
+      {
+        "name": "Tablas Históricas y Partidos Liga de Ascenso ANFP (Wikipedia / Portal Deportivo)",
+        "type": "Tabla Wikipedia",
+        "potential_url_or_query": "https://es.wikipedia.org/wiki/Primera_B_de_Chile_2026",
+        "friction_level": "Baja (Horas)"
+      }
+    ],
+    "feasibility_score": 9,
+    "virality_score": 8,
+    "recommended_deliverable": "App Interactiva (Streamlit)",
+    "fast_execution_strategy": "1. Copiar y estructurar la tabla de posiciones actual de la Primera B desde Wikipedia o portales deportivos. 2. Programar un script en Streamlit que permita al usuario simular la anulación de puntos de partidos específicos contra los clubes cuestionados. 3. Mostrar la tabla resultante con el nuevo campeón o los equipos descendidos de forma automática.",
+    "trigger_article_title": "Así queda la tabla del Ascenso si se confirman desafiliaciones",
+    "trigger_article_url": "https://www.cooperativa.cl/noticias/deportes/futbol/liga-de-ascenso/asi-queda-la-tabla-del-ascenso-si-se-confirman-desafiliaciones/2026-10-24/171601.html",
+    "status": "candidate"
   }
 ]
