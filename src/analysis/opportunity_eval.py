@@ -338,6 +338,23 @@ def _article_field(article: Any, field_name: str) -> str:
     return value.strip() if isinstance(value, str) else ""
 
 
+def _opportunity_signature(opportunity: Opportunity) -> str:
+    """Resume producto, necesidad y acción para deduplicar propuestas reales."""
+    parts = (
+        opportunity.product_type,
+        opportunity.user_need,
+        opportunity.user_action,
+        opportunity.product_output,
+    )
+    trigger = normalize_url_for_dedup(opportunity.trigger_article_url) or normalize_title_for_dedup(
+        opportunity.trigger_article_title
+    )
+    # Sin detonante no hay base para fusionar dos respuestas aisladas: preservar
+    # candidatos distintos es más seguro que descartarlos por defaults heredados.
+    trigger = trigger or normalize_title_for_dedup(opportunity.headline)
+    return "|".join((trigger, *(normalize_title_for_dedup(part) for part in parts)))
+
+
 def _verify_opportunity_inputs(opportunity: Opportunity, articles: List[Any]) -> bool:
     """Comprueba trazabilidad del detonante y una fuente mínima utilizable.
 
@@ -461,26 +478,17 @@ def filter_and_rank_opportunities(
         reverse=True,
     )
 
-    # Deduplicación intra-ejecución: si dos oportunidades provienen de la misma noticia detonante,
-    # conservar únicamente la de mayor score.
+    # Deduplicación intra-ejecución por producto y necesidad, no por detonante: un
+    # mismo evento puede justificar alternativas sustancialmente distintas.
     deduped: List[Opportunity] = []
-    seen_run_urls: Set[str] = set()
-    seen_run_titles: Set[str] = set()
+    seen_signatures: Set[str] = set()
     for opp in valid:
-        norm_url = normalize_url_for_dedup(opp.trigger_article_url)
-        norm_title = normalize_title_for_dedup(opp.trigger_article_title)
-
-        if norm_url and norm_url in seen_run_urls:
-            reject(opp, "noticia_detonante_duplicada_en_corrida")
+        signature = _opportunity_signature(opp)
+        if signature and signature in seen_signatures:
+            reject(opp, "producto_y_necesidad_duplicados_en_corrida")
             continue
-        if norm_title and norm_title in seen_run_titles:
-            reject(opp, "titular_detonante_duplicado_en_corrida")
-            continue
-
-        if norm_url:
-            seen_run_urls.add(norm_url)
-        if norm_title:
-            seen_run_titles.add(norm_title)
+        if signature:
+            seen_signatures.add(signature)
         deduped.append(opp)
 
     accepted = deduped[:max_items]

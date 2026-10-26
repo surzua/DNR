@@ -28,6 +28,14 @@ reddit:
     limit: 50
     time_filter: "day"
 
+# RSS público: activar después de comprobar su disponibilidad en cada entorno.
+trends:
+  enabled: false
+  limit: 10
+
+# Señales previsibles añadidas manualmente con fecha y fuente oficial.
+scheduled_events: []
+
 pipeline:
   max_hours_lookback: 24
   history_days_lookback: 2

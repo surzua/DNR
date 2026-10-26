@@ -30,11 +30,17 @@ def format_article_snippet(article: Any, index: int) -> str:
     summary = getattr(article, "summary", "") or (article.get("summary", "") if isinstance(article, dict) else "")
     score = getattr(article, "score", None) or (article.get("score") if isinstance(article, dict) else None)
     comments = getattr(article, "comments_count", None) or (article.get("comments_count") if isinstance(article, dict) else None)
+    published_at = getattr(article, "published_at", None) or (article.get("published_at") if isinstance(article, dict) else None)
+    first_detected_at = getattr(article, "first_detected_at", None) or (article.get("first_detected_at") if isinstance(article, dict) else None)
+    updated_at = getattr(article, "updated_at", None) or (article.get("updated_at") if isinstance(article, dict) else None)
+    estimated = getattr(article, "publication_date_is_estimated", False) if not isinstance(article, dict) else article.get("publication_date_is_estimated", False)
+    limitations = getattr(article, "signal_limitations", None) or (article.get("signal_limitations") if isinstance(article, dict) else None)
+    corroborating = getattr(article, "corroborating_sources", None) or (article.get("corroborating_sources") if isinstance(article, dict) else None)
 
-    # Limitar resumen a 180 caracteres para ahorrar tokens manteniendo el sentido
+    # Un finalista necesita más que un titular: se conserva un contexto acotado.
     clean_summary = summary.strip().replace("\n", " ")
-    if len(clean_summary) > 180:
-        clean_summary = clean_summary[:177] + "..."
+    if len(clean_summary) > 600:
+        clean_summary = clean_summary[:597] + "... [resumen truncado]"
 
     header = f"[{index}] [{source}]"
     if category:
@@ -45,6 +51,17 @@ def format_article_snippet(article: Any, index: int) -> str:
     lines = [f"{header} {title}"]
     if clean_summary:
         lines.append(f"    Resumen: {clean_summary}")
+    if published_at:
+        suffix = " (fecha estimada por falta de dato de origen)" if estimated else ""
+        lines.append(f"    Publicación/evento: {published_at}{suffix}")
+    if first_detected_at:
+        lines.append(f"    Primera detección DNR: {first_detected_at}")
+    if updated_at:
+        lines.append(f"    Actualización fuente: {updated_at}")
+    if corroborating:
+        lines.append(f"    Cobertura relacionada: {', '.join(map(str, corroborating))}")
+    if limitations:
+        lines.append(f"    Límite de señal: {limitations}")
     if link:
         lines.append(f"    Link: {link}")
 
@@ -92,7 +109,7 @@ def build_evaluation_prompt(
 </untrusted_news_items>
 
 INSTRUCCIONES DE RESPUESTA:
-1. Evalúa el conjunto de noticias y calcula cuántos temas o clusters relevantes detectaste (evaluated_topics_count).
+1. Evalúa el conjunto de noticias y calcula cuántos temas o clusters relevantes detectaste (evaluated_topics_count). Usa publicación/evento, primera detección y actualización como fechas distintas; una fecha ausente o estimada no demuestra frescura.
 2. Selecciona hasta 3 oportunidades sobresalientes que cumplan virality_score >= 7 y technical_feasibility_score >= 6.
 3. Para cada oportunidad seleccionada, entrega audience, user_need, first_interaction, user_action, product_type, product_inputs, product_output, share_reason, delivery_format, implementation_options y differentiator concretos. Incluye distribution_channel y existing_alternatives. El producto debe responder una tarea o experiencia concreta, no solo describir la noticia.
 4. Para cada oportunidad, fundamenta la viabilidad con evidencia pertinente y un primer plan de investigación y construcción. No prometas un plazo universal de menos de 4 horas. Indica evidence_status con honestidad y validity_note si corresponde.

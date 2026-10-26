@@ -364,7 +364,7 @@ def test_main_retries_only_pending_delivery(mock_radar_opp: Opportunity):
     assert mock_save.call_count == 2
 
 
-def test_main_filters_articles_against_history(mock_radar_opp: Opportunity):
+def test_main_keeps_event_in_context_when_history_has_same_trigger(mock_radar_opp: Opportunity):
     test_args = ["main.py", "--use-cache", "--cooldown-days", "5", "--skip-telegram"]
     radar_resp = RadarResponse(
         evaluated_topics_count=50,
@@ -396,5 +396,5 @@ def test_main_filters_articles_against_history(mock_radar_opp: Opportunity):
                             main()
                             mock_eval.assert_called_once()
                             evaluated_articles = mock_eval.call_args.kwargs["articles"]
-                            assert len(evaluated_articles) == 1
-                            assert evaluated_articles[0].link == "https://df.cl/noticia-fresca"
+                            assert len(evaluated_articles) == 2
+                            assert evaluated_articles[0].link == "https://latercera.com/noticia-vieja"

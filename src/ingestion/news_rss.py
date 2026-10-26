@@ -68,6 +68,7 @@ def parse_feed_entry(
         except Exception:
             pub_dt = None
 
+    publication_date_is_estimated = pub_dt is None
     if pub_dt is None:
         # Fallback a fecha actual en UTC si el feed no entrega fecha
         pub_dt = datetime.now(timezone.utc)
@@ -83,6 +84,8 @@ def parse_feed_entry(
         published_at=pub_dt,
         source=source_name,
         category=category,
+        first_detected_at=datetime.now(timezone.utc),
+        publication_date_is_estimated=publication_date_is_estimated,
     )
 
 

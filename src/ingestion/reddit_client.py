@@ -64,6 +64,9 @@ def parse_reddit_json_post(
         category="Debate & Comunidad",
         score=score,
         comments_count=num_comments,
+        first_detected_at=datetime.now(timezone.utc),
+        signal_type="community",
+        signal_limitations="Conversación pública; no equivale a interés de búsqueda ni confirma hechos.",
     )
 
 
@@ -108,6 +111,9 @@ def parse_reddit_rss_entry(
         published_at=pub_dt,
         source=f"Reddit (r/{subreddit})",
         category="Debate & Comunidad",
+        first_detected_at=datetime.now(timezone.utc),
+        signal_type="community",
+        signal_limitations="Conversación pública; no equivale a interés de búsqueda ni confirma hechos.",
     )
 
 

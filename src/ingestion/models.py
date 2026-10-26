@@ -3,7 +3,7 @@
 from datetime import datetime, timezone
 import html
 import re
-from typing import Optional
+from typing import List, Literal, Optional
 from pydantic import BaseModel, Field, field_validator
 
 HTML_TAG_RE = re.compile(r"<[^>]+>")
@@ -20,6 +20,23 @@ class NewsArticle(BaseModel):
     category: Optional[str] = Field(default=None, description="Categoría o sección de la noticia")
     score: Optional[int] = Field(default=None, description="Métrica de interacción (e.g. upvotes en Reddit)")
     comments_count: Optional[int] = Field(default=None, description="Número de comentarios si aplica")
+    first_detected_at: Optional[datetime] = Field(
+        default=None, description="Primera vez que DNR observó la señal, en UTC"
+    )
+    updated_at: Optional[datetime] = Field(
+        default=None, description="Actualización indicada por la fuente, si existe"
+    )
+    publication_date_is_estimated: bool = Field(
+        default=False, description="Indica que published_at fue estimada por falta de fecha de origen"
+    )
+    signal_type: Literal["news", "community", "search_trend", "scheduled_event"] = Field(
+        default="news", description="Naturaleza de la señal; no equipara conversación y búsquedas"
+    )
+    signal_limitations: Optional[str] = Field(default=None, description="Límites conocidos de la señal")
+    event_key: Optional[str] = Field(default=None, description="Identificador aproximado de cobertura del mismo evento")
+    corroborating_sources: List[str] = Field(
+        default_factory=list, description="Medios independientes que cubren el mismo evento"
+    )
 
     @field_validator("title", "summary", mode="before")
     @classmethod
@@ -46,3 +63,10 @@ class NewsArticle(BaseModel):
         if dt.tzinfo is None:
             return dt.replace(tzinfo=timezone.utc)
         return dt.astimezone(timezone.utc)
+
+    @field_validator("first_detected_at", "updated_at", mode="before")
+    @classmethod
+    def normalize_optional_utc(cls, value: datetime | str | None) -> datetime | None:
+        if value is None:
+            return None
+        return cls.ensure_utc(value)

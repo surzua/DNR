@@ -343,27 +343,17 @@ def main() -> int:
         history_lookback_days,
     )
 
-    # Filtrado determinista de artículos para evitar repetir noticias detonantes
-    filtered_articles = filter_articles_by_history(
-        articles=articles,
-        history=history,
-        days=cooldown_days,
-    )
-    if len(filtered_articles) < len(articles):
-        logger.info(
-            "Filtro de novedades: %d de %d artículos excluidos por coincidir con noticias de los últimos %d días (%d artículos a evaluar).",
-            len(articles) - len(filtered_articles),
-            len(articles),
-            cooldown_days,
-            len(filtered_articles),
-        )
+    # El historial informa al modelo, pero no elimina el evento antes de evaluar:
+    # puede existir una necesidad o producto distinto para la misma noticia.
+    filtered_articles = articles
 
     try:
         radar_result = evaluate_opportunities(
             articles=filtered_articles,
             recent_history_topics=recent_topics,
             recent_trigger_titles=recent_trigger_titles,
-            exclude_trigger_urls=recent_trigger_urls,
+            exclude_trigger_urls=None,
+            exclude_trigger_titles=None,
             model_name=args.model,
             min_virality=pipeline_config.min_virality_score,
             min_feasibility=pipeline_config.min_feasibility_score,
