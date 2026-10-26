@@ -160,6 +160,69 @@ def _is_safe_http_url(url: Optional[str]) -> bool:
     return parsed.scheme in ("http", "https") and bool(parsed.netloc)
 
 
+def _article_field(article: Any, field_name: str) -> str:
+    """Lee un campo textual desde un artículo tipado o diccionario."""
+    value = article.get(field_name, "") if isinstance(article, dict) else getattr(article, field_name, "")
+    return value.strip() if isinstance(value, str) else ""
+
+
+def _verify_opportunity_inputs(opportunity: Opportunity, articles: List[Any]) -> bool:
+    """Comprueba trazabilidad del detonante y una fuente mínima utilizable.
+
+    No consulta la red: confirma que el LLM no inventó la noticia detonante y que
+    existe al menos una fuente con URL HTTP(S) o una consulta de búsqueda concreta.
+    La evidencia solo se eleva hasta ``Fuente localizada`` cuando se recibió una
+    URL válida; una URL no prueba que el dataset sea correcto o esté vigente.
+    """
+    trigger_url = opportunity.trigger_article_url
+    trigger_title = opportunity.trigger_article_title
+    if not _is_safe_http_url(trigger_url) or not trigger_title:
+        logger.info("Oportunidad descartada: detonante incompleto o URL no segura (%s).", opportunity.headline)
+        return False
+
+    normalized_url = normalize_url_for_dedup(trigger_url)
+    normalized_title = normalize_title_for_dedup(trigger_title)
+    matching_article = next(
+        (
+            article
+            for article in articles
+            if normalize_url_for_dedup(_article_field(article, "link")) == normalized_url
+            and normalize_title_for_dedup(_article_field(article, "title")) == normalized_title
+        ),
+        None,
+    )
+    if matching_article is None:
+        logger.info("Oportunidad descartada: detonante no corresponde a la ingesta (%s).", opportunity.headline)
+        return False
+
+    valid_sources: List[DataSource] = []
+    has_located_url = False
+    for source in opportunity.data_sources:
+        reference = source.potential_url_or_query.strip()
+        parsed_reference = urlparse(reference)
+        if parsed_reference.scheme:
+            if not _is_safe_http_url(reference):
+                logger.info("Fuente descartada por URL no segura: %s.", source.name)
+                continue
+            has_located_url = True
+        elif len(reference) < 3 or not any(char.isalnum() for char in reference):
+            logger.info("Fuente descartada por referencia insuficiente: %s.", source.name)
+            continue
+        valid_sources.append(source)
+
+    if not valid_sources:
+        logger.info("Oportunidad descartada: no tiene una fuente o consulta utilizable (%s).", opportunity.headline)
+        return False
+
+    opportunity.data_sources = valid_sources
+    opportunity.trigger_article_title = _article_field(matching_article, "title")
+    opportunity.trigger_article_url = _article_field(matching_article, "link")
+    opportunity.evidence_status = (
+        "Fuente localizada" if has_located_url else "Propuesta (no verificada)"
+    )
+    return True
+
+
 def filter_and_rank_opportunities(
     opportunities: List[Opportunity],
     min_virality: int = 7,
@@ -167,8 +230,13 @@ def filter_and_rank_opportunities(
     max_items: int = 3,
     exclude_trigger_urls: Optional[Set[str]] = None,
     exclude_trigger_titles: Optional[Set[str]] = None,
+    source_articles: Optional[List[Any]] = None,
 ) -> List[Opportunity]:
-    """Aplica filtros deterministas de umbral, sanitiza URLs, deduplica y ordena por score descendente."""
+    """Filtra por umbrales, trazabilidad, fuentes mínimas, historial y duplicados.
+
+    ``source_articles`` debe entregarse en producción para exigir que el detonante
+    provenga de la ingesta; se mantiene opcional para reutilizar el filtro aislado.
+    """
     valid: List[Opportunity] = []
     for opp in opportunities:
         if opp.virality_score >= min_virality and opp.technical_feasibility_score >= min_feasibility:
@@ -189,6 +257,9 @@ def filter_and_rank_opportunities(
                 continue
             if exclude_trigger_titles and norm_title and norm_title in exclude_trigger_titles:
                 logger.info("Oportunidad descartada por coincidir con titular de historial reciente: %s", opp.trigger_article_title)
+                continue
+
+            if source_articles is not None and not _verify_opportunity_inputs(opp, source_articles):
                 continue
 
             valid.append(opp)
@@ -357,6 +428,7 @@ def evaluate_opportunities(
         max_items=max_opportunities,
         exclude_trigger_urls=exclude_trigger_urls,
         exclude_trigger_titles=exclude_trigger_titles,
+        source_articles=articles,
     )
     radar_response.top_opportunities = filtered
 

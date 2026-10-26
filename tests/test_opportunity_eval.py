@@ -243,6 +243,46 @@ def test_filter_and_rank_opportunities_excludes_history_triggers():
     assert len(filtered_by_title) == 0
 
 
+def test_filter_and_rank_verifies_trigger_and_minimum_source():
+    article = {
+        "title": "Ministerio anuncia nueva tarifa eléctrica",
+        "link": "https://energia.gob.cl/noticias/tarifa-electrica",
+    }
+    source = DataSource(
+        name="Ministerio de Energía",
+        type="Portal Abierto",
+        potential_url_or_query="https://energia.gob.cl/tarifas",
+        friction_level="Baja (Horas)",
+    )
+    valid = Opportunity(
+        headline="Calculadora de tarifa",
+        category="Economía & Finanzas",
+        why_is_trending="Nueva tarifa anunciada",
+        contrarian_or_curious_angle="Comparar escenarios de consumo",
+        suggested_deliverable="App Interactiva (Streamlit)",
+        data_sources=[source],
+        virality_score=8,
+        technical_feasibility_score=8,
+        fast_execution_strategy="Implementar fórmula",
+        trigger_article_title=article["title"],
+        trigger_article_url=article["link"],
+        evidence_status="Verificada",
+    )
+    fake_trigger = valid.model_copy(
+        update={"headline": "Titular inventado", "trigger_article_title": "Noticia que no fue ingerida"}
+    )
+    no_source = valid.model_copy(update={"headline": "Sin fuente", "data_sources": []})
+
+    filtered = filter_and_rank_opportunities(
+        [fake_trigger, no_source, valid],
+        source_articles=[article],
+    )
+
+    assert filtered == [valid]
+    assert valid.trigger_article_url == article["link"]
+    assert valid.evidence_status == "Fuente localizada"
+
+
 def test_evaluate_opportunities_empty():
     """Verifica que con lista vacía retorne inmediatamente sin llamar a la API."""
     result = evaluate_opportunities(articles=[])
@@ -356,7 +396,12 @@ def test_evaluate_opportunities_fallback_json_parsing():
     mock_client.models.generate_content.return_value = mock_response
 
     res = evaluate_opportunities(
-        articles=[{"title": "Noticia de prueba", "link": "https://test.com"}],
+        articles=[
+            {
+                "title": "Autoridades evalúan refuerzo policial",
+                "link": "https://latercera.com/seguridad",
+            }
+        ],
         client=mock_client,
     )
 

@@ -250,7 +250,7 @@ class RadarResponse(BaseModel):
 1. **Buscar datos no estructurados:** No limitarse a portales de gobierno (`.gob`). Buscar activamente tablas históricas de Wikipedia (e.g. resultados de elecciones, planteles deportivos, datos censales comunales) o sitios con HTML estructurado (Transfermarkt, CMF, Banco Central).  
 2. **Pensar en utilidad y gancho ("Hook"):** Para cada propuesta, definir audiencia, necesidad, acción y producto. El producto resuelve una tarea concreta y no queda restringido a un framework.
 3. **Filtro de umbral:** Solo retornar oportunidades donde `virality_score >= 7` y `technical_feasibility_score >= 6`. Máximo 3 por ejecución para no saturar.
-4. **Honestidad de evidencia:** Diferenciar fuentes propuestas, localizadas y verificadas; no convertir una hipótesis o una sugerencia de fuente en un hecho comprobado.
+4. **Honestidad de evidencia:** El pipeline contrasta título y URL detonantes con la ingesta y exige una fuente mínima utilizable. Una URL HTTP(S) válida equivale solo a fuente localizada, no a un dataset o regla verificada.
 
 ### 4.4 Notification Layer (`telegram_bot.py`)
 

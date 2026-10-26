@@ -84,7 +84,7 @@ mientras comunas del sector oriente toleran más de 40 mm sin interrupciones cr�
 El motor analítico ([src/analysis/opportunity_eval.py](src/analysis/opportunity_eval.py)) evalúa los artículos basándose en directrices estrictas:
 
 1. **Utilidad y gancho:** Además de un ángulo curioso, cada propuesta especifica audiencia, necesidad, acción, entradas y resultado. El tipo de producto describe lo que resuelve —no la tecnología— y puede ser una calculadora, comparador, guía, planificador, simulador, verificador, visualización o análisis.
-2. **Fuentes abiertas y evidencia honesta:** Identifica fuentes accesibles en horas y distingue entre una propuesta no verificada, una fuente localizada y evidencia comprobada. No presenta como hechos los resultados todavía hipotéticos.
+2. **Fuentes abiertas y evidencia honesta:** Antes de notificar, el detonante debe coincidir exactamente con una noticia ingerida y debe existir al menos una URL HTTP(S) o consulta concreta para la fuente. Una URL válida solo se marca como “fuente localizada”; no se presenta como evidencia comprobada.
 3. **Filtro de umbral exigente:** Solo califica si `virality_score >= 7` y `technical_feasibility_score >= 6`. Si no hay temas relevantes un día, despacha una notificación de tranquilidad sin generar spam.
 4. **Plan y vigencia:** Cada tarjeta entrega un roadmap táctico de 3 pasos accionables en menos de 4 horas y puede indicar cuándo una regla, tarifa, plazo o evento debe revisarse.
 
