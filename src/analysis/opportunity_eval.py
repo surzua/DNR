@@ -605,12 +605,12 @@ def evaluate_opportunities(
 
     # Resolver cliente y credenciales
     resolved_key = api_key or os.getenv("GEMINI_API_KEY")
-    # Mantener un modelo estable entre los modelos recientes. Los aliases y
-    # previews cambian de disponibilidad con más frecuencia.
+    # Mantener alternativas que están disponibles para esta API. Los aliases y
+    # modelos retirados para cuentas nuevas no son fallbacks confiables.
     default_candidates = [
         "gemini-3.8-flash",
-        "gemini-2.5-flash",
-        "gemini-2.5-flash-lite",
+        "gemini-3.5-flash",
+        "gemini-3.5-flash-lite",
         "gemini-3.7-flash",
     ]
     if model_name:
@@ -662,6 +662,7 @@ def evaluate_opportunities(
                         response_mime_type="application/json",
                         response_schema=RadarResponse,
                         temperature=0.2,
+                        automatic_function_calling=types.AutomaticFunctionCallingConfig(disable=True),
                     ),
                 )
             except Exception as exc:
@@ -681,6 +682,7 @@ def evaluate_opportunities(
                         system_instruction=SYSTEM_PROMPT,
                         response_mime_type="application/json",
                         temperature=0.2,
+                        automatic_function_calling=types.AutomaticFunctionCallingConfig(disable=True),
                     ),
                 )
             break
