@@ -6,6 +6,7 @@ import pytest
 
 from src.analysis.opportunity_eval import (
     DataSource,
+    EvaluationResponseError,
     Opportunity,
     RadarResponse,
     evaluate_opportunities,
@@ -70,10 +71,17 @@ def test_format_article_snippet_and_build_prompt():
     assert "https://emol.com/economia/ipc" in snippet
 
     recent_topics = ["Debate sobre tarifas eléctricas", "Crisis habitacional en el centro"]
-    prompt = build_evaluation_prompt([art], recent_topics=recent_topics)
+    prompt = build_evaluation_prompt(
+        [art],
+        recent_topics=recent_topics,
+        lookback_hours=72,
+        history_days=5,
+    )
     assert "TEMAS Y ÁNGULOS YA ANALIZADOS RECIENTEMENTE" in prompt
     assert "Debate sobre tarifas eléctricas" in prompt
     assert "[1] [EMOL] [Economía]" in prompt
+    assert "últimas 72 horas" in prompt
+    assert "ÚLTIMOS 5 DÍAS" in prompt
 
 
 def test_filter_and_rank_opportunities():
@@ -354,6 +362,20 @@ def test_evaluate_opportunities_fallback_json_parsing():
     assert res.top_opportunities[0].virality_score == 8
 
 
+def test_evaluate_opportunities_raises_for_invalid_structured_response():
+    mock_response = MagicMock()
+    mock_response.parsed = None
+    mock_response.text = '{"evaluated_topics_count": "not a number"}'
+    mock_client = MagicMock()
+    mock_client.models.generate_content.return_value = mock_response
+
+    with pytest.raises(EvaluationResponseError, match="no cumple el esquema"):
+        evaluate_opportunities(
+            articles=[{"title": "Noticia", "link": "https://test.cl"}],
+            client=mock_client,
+        )
+
+
 def test_history_entry_from_opportunity_with_trigger():
     """Verifica que HistoryEntry capture la información de la noticia detonante."""
     opp = Opportunity(
@@ -415,4 +437,3 @@ def test_evaluate_opportunities_cascades_fallback_on_failure():
     assert calls[0].kwargs["model"] == "gemini-3.8-flash"
     assert calls[1].kwargs["model"] == "gemini-3.7-flash"
     assert res.evaluated_topics_count == 5
-

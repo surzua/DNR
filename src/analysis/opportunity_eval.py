@@ -17,6 +17,10 @@ load_dotenv()
 logger = logging.getLogger("dnr.opportunity_eval")
 
 
+class EvaluationResponseError(RuntimeError):
+    """La respuesta del modelo no pudo convertirse en un resultado utilizable."""
+
+
 class DataSource(BaseModel):
     """Fuente de datos requerida para el desarrollo del análisis."""
 
@@ -177,6 +181,8 @@ def evaluate_opportunities(
     min_virality: int = 7,
     min_feasibility: int = 6,
     max_opportunities: int = 3,
+    lookback_hours: int = 24,
+    history_days: int = 2,
     timeout_ms: int = 90000,
 ) -> RadarResponse:
     """Evalúa candidatos de noticias utilizando Gemini y Structured Outputs Pydantic.
@@ -190,6 +196,8 @@ def evaluate_opportunities(
         min_virality: Puntaje mínimo de viralidad requerido (defecto: 7).
         min_feasibility: Puntaje mínimo de factibilidad técnica requerido (defecto: 6).
         max_opportunities: Máximo de oportunidades a retornar (defecto: 3).
+        lookback_hours: Ventana de ingesta efectiva que se comunica al modelo.
+        history_days: Ventana efectiva del historial que se comunica al modelo.
         timeout_ms: Timeout máximo por petición HTTP en milisegundos (defecto: 90000 ms).
 
     Returns:
@@ -236,6 +244,8 @@ def evaluate_opportunities(
         articles,
         recent_topics=recent_history_topics,
         recent_trigger_titles=recent_trigger_titles,
+        lookback_hours=lookback_hours,
+        history_days=history_days,
     )
 
     response = None
@@ -264,26 +274,24 @@ def evaluate_opportunities(
 
     if response is None:
         logger.error("Todos los modelos candidatos de Gemini fallaron: %s", last_error)
-        raise last_error
+        raise RuntimeError("Todos los modelos candidatos de Gemini fallaron.") from last_error
 
     # Extracción y validación del modelo Pydantic
-    radar_response: Optional[RadarResponse] = None
-    if hasattr(response, "parsed") and isinstance(response.parsed, RadarResponse):
-        radar_response = response.parsed
-    elif hasattr(response, "text") and response.text:
-        try:
-            radar_response = RadarResponse.model_validate_json(response.text)
-        except ValidationError as val_err:
-            logger.warning(
-                "Fallo al validar schema Pydantic directamente desde response.text: %s",
-                val_err,
-            )
-            data = json.loads(response.text)
-            radar_response = RadarResponse.model_validate(data)
-
-    if radar_response is None:
-        logger.error("No se pudo obtener una respuesta estructurada válida de Gemini.")
-        return RadarResponse(evaluated_topics_count=len(articles), top_opportunities=[])
+    try:
+        parsed_response = getattr(response, "parsed", None)
+        if isinstance(parsed_response, RadarResponse):
+            radar_response = parsed_response
+        elif parsed_response is not None:
+            radar_response = RadarResponse.model_validate(parsed_response)
+        else:
+            response_text = getattr(response, "text", None)
+            if not response_text:
+                raise EvaluationResponseError("Gemini no devolvió contenido estructurado.")
+            radar_response = RadarResponse.model_validate_json(response_text)
+    except (ValidationError, ValueError, TypeError, json.JSONDecodeError) as exc:
+        raise EvaluationResponseError(
+            "La respuesta de Gemini no cumple el esquema RadarResponse."
+        ) from exc
 
     # Post-procesamiento y filtrado determinista
     original_count = len(radar_response.top_opportunities)

@@ -2,6 +2,7 @@
 
 from src.analysis.opportunity_eval import (
     DataSource,
+    EvaluationResponseError,
     Opportunity,
     RadarResponse,
     evaluate_opportunities,
@@ -15,6 +16,7 @@ from src.analysis.prompt_templates import (
 
 __all__ = [
     "DataSource",
+    "EvaluationResponseError",
     "Opportunity",
     "RadarResponse",
     "evaluate_opportunities",

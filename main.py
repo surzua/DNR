@@ -8,6 +8,7 @@ import sys
 from dotenv import load_dotenv
 
 from src.analysis import evaluate_opportunities
+from src.config import PipelineConfigError, load_pipeline_config
 from src.ingestion import gather_all_sources
 from src.notifiers import send_batch_alerts
 from src.storage import (
@@ -33,21 +34,35 @@ logging.basicConfig(
 
 logger = logging.getLogger("dnr.main")
 
+EXIT_SUCCESS = 0
+EXIT_CONFIGURATION_ERROR = 2
+EXIT_EVALUATION_ERROR = 3
+EXIT_NOTIFICATION_ERROR = 4
 
-def main() -> None:
+
+def _dispatch_succeeded(dispatch_results: dict) -> bool:
+    """Determina si Telegram completó el briefing y todas las alertas requeridas."""
+    return (
+        not dispatch_results.get("skipped", False)
+        and dispatch_results.get("briefing_sent", False)
+        and dispatch_results.get("failed", 0) == 0
+    )
+
+
+def main() -> int:
     """Ejecuta el pipeline principal de Data Newsjacking Radar."""
     parser = argparse.ArgumentParser(description="Data Newsjacking Radar (DNR)")
     parser.add_argument(
         "--days",
         type=int,
-        default=1,
-        help="Ventana de días hacia atrás para recolectar noticias (ej: 1, 3, 7). Por defecto 1 día (24h)",
+        default=None,
+        help="Ventana de días hacia atrás para recolectar noticias (ej: 1, 3, 7). Por defecto usa pipeline.max_hours_lookback.",
     )
     parser.add_argument(
         "--cooldown-days",
         type=int,
-        default=2,
-        help="Días de gracia para evitar repetir noticias que ya generaron oportunidades (por defecto 2 días). Usa 0 para desactivar",
+        default=None,
+        help="Días de gracia para evitar repetir noticias que ya generaron oportunidades. Por defecto usa pipeline.history_days_lookback; 0 desactiva el filtro.",
     )
     parser.add_argument(
         "--model",
@@ -77,8 +92,18 @@ def main() -> None:
     )
     args = parser.parse_args()
 
-    lookback_days = max(1, args.days) if args.days else 1
-    lookback_hours = lookback_days * 24
+    try:
+        pipeline_config = load_pipeline_config()
+    except PipelineConfigError as exc:
+        logger.error("Configuración inválida del pipeline: %s", exc)
+        return EXIT_CONFIGURATION_ERROR
+
+    lookback_hours = (
+        max(1, args.days) * 24
+        if args.days is not None
+        else pipeline_config.max_hours_lookback
+    )
+    lookback_days = (lookback_hours + 23) // 24
 
     logger.info("==================================================")
     logger.info("Iniciando Data Newsjacking Radar (DNR)")
@@ -109,7 +134,7 @@ def main() -> None:
     # Fase 2 y 3: Evaluación de oportunidades con Gemini Flash
     if args.skip_llm:
         logger.info("Bandera --skip-llm activa: Omitiendo fase de evaluación LLM.")
-        return
+        return EXIT_SUCCESS
 
     gemini_key = os.getenv("GEMINI_API_KEY")
     if not gemini_key:
@@ -118,15 +143,19 @@ def main() -> None:
             "Para ejecutar la evaluación de oportunidades, configura tu API key en .env. "
             "Si deseas probar sin LLM, utiliza la bandera --skip-llm."
         )
-        sys.exit(1)
+        return EXIT_CONFIGURATION_ERROR
 
     logger.info("--------------------------------------------------")
     logger.info("Fase 3: Evaluando oportunidades con Gemini Flash...")
     logger.info("--------------------------------------------------")
 
     history = load_history()
-    cooldown_days = max(0, args.cooldown_days) if args.cooldown_days is not None else 2
-    history_lookback_days = cooldown_days if cooldown_days > 0 else 1
+    cooldown_days = (
+        max(0, args.cooldown_days)
+        if args.cooldown_days is not None
+        else pipeline_config.history_days_lookback
+    )
+    history_lookback_days = cooldown_days
     recent_topics = get_recent_topics(history, days=history_lookback_days)
     recent_trigger_titles = get_recent_trigger_titles(history, days=history_lookback_days)
     recent_trigger_urls = get_recent_trigger_urls(history, days=history_lookback_days)
@@ -161,10 +190,15 @@ def main() -> None:
             recent_trigger_titles=recent_trigger_titles,
             exclude_trigger_urls=recent_trigger_urls,
             model_name=args.model,
+            min_virality=pipeline_config.min_virality_score,
+            min_feasibility=pipeline_config.min_feasibility_score,
+            max_opportunities=pipeline_config.max_opportunities_to_notify,
+            lookback_hours=lookback_hours,
+            history_days=history_lookback_days,
         )
     except Exception as e:
-        logger.error("Error durante la evaluación de oportunidades con Gemini: %s", e)
-        return
+        logger.exception("Error durante la evaluación de oportunidades con Gemini: %s", e)
+        return EXIT_EVALUATION_ERROR
 
     opportunities = radar_result.top_opportunities
     logger.info(
@@ -176,12 +210,15 @@ def main() -> None:
         logger.info("No se detectaron oportunidades que superaran los umbrales de viabilidad y viralidad hoy.")
         if not args.skip_telegram:
             logger.info("Despachando notificación de estado a Telegram (0 oportunidades)...")
-            send_batch_alerts(
+            dispatch_results = send_batch_alerts(
                 opportunities=[],
                 total_articles=len(articles),
                 dry_run=args.dry_run,
             )
-        return
+            if not _dispatch_succeeded(dispatch_results):
+                logger.error("No se pudo entregar el briefing de estado a Telegram.")
+                return EXIT_NOTIFICATION_ERROR
+        return EXIT_SUCCESS
 
     # Guardado de oportunidades en historial
     for opp in opportunities:
@@ -199,8 +236,18 @@ def main() -> None:
         for ds in opp.data_sources:
             logger.info("      • Fuente: %s (%s, Fricción: %s)", ds.name, ds.type, ds.friction_level)
 
-    save_history(history)
-    logger.info("\nHistorial actualizado exitosamente en data/history.json con %d oportunidades nuevas.", len(opportunities))
+    if args.dry_run:
+        logger.info("[DRY-RUN] Historial no modificado.")
+    else:
+        try:
+            save_history(history)
+        except Exception as exc:
+            logger.exception("No se pudo guardar el historial de oportunidades: %s", exc)
+            return EXIT_EVALUATION_ERROR
+        logger.info(
+            "\nHistorial actualizado exitosamente en data/history.json con %d oportunidades nuevas.",
+            len(opportunities),
+        )
 
     # Fase 4: Despacho de alertas a Telegram
     if args.skip_telegram:
@@ -223,7 +270,12 @@ def main() -> None:
                 dispatch_results.get("failed", 0),
                 dispatch_results.get("briefing_sent", False),
             )
+        if not _dispatch_succeeded(dispatch_results):
+            logger.error("El despacho a Telegram no se completó correctamente.")
+            return EXIT_NOTIFICATION_ERROR
+
+    return EXIT_SUCCESS
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

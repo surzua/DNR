@@ -4,6 +4,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from main import main
+from src.config import PipelineConfig
 from src.analysis.opportunity_eval import Opportunity, RadarResponse
 from src.storage.history_manager import HistoryEntry
 
@@ -33,14 +34,12 @@ def test_main_with_skip_llm():
                     mock_eval.assert_not_called()
 
 
-def test_main_missing_gemini_key_exits():
+def test_main_missing_gemini_key_returns_configuration_error():
     test_args = ["main.py", "--use-cache"]
     with patch.object(sys, "argv", test_args):
         with patch.dict("os.environ", {}, clear=True):
             with patch("main.load_articles_cache", return_value=[]):
-                with pytest.raises(SystemExit) as exc_info:
-                    main()
-                assert exc_info.value.code == 1
+                assert main() == 2
 
 
 def test_main_with_dry_run_and_opportunities(mock_radar_opp: Opportunity):
@@ -65,7 +64,7 @@ def test_main_with_dry_run_and_opportunities(mock_radar_opp: Opportunity):
                                 main()
                                 mock_batch.assert_called_once()
                                 assert mock_batch.call_args.kwargs["dry_run"] is True
-                                mock_save.assert_called_once()
+                                mock_save.assert_not_called()
 
 
 def test_main_with_skip_telegram(mock_radar_opp: Opportunity):
@@ -103,6 +102,65 @@ def test_main_default_days_propagates_24_hours():
                 mock_gather.return_value = []
                 main()
                 mock_gather.assert_called_once_with(lookback_hours=24)
+
+
+def test_main_propagates_effective_pipeline_config(mock_radar_opp: Opportunity):
+    test_args = ["main.py", "--use-cache", "--skip-telegram"]
+    radar_resp = RadarResponse(evaluated_topics_count=1, top_opportunities=[mock_radar_opp])
+    pipeline_config = PipelineConfig(
+        max_hours_lookback=36,
+        history_days_lookback=4,
+        max_opportunities_to_notify=2,
+        min_virality_score=8,
+        min_feasibility_score=7,
+    )
+
+    with patch.object(sys, "argv", test_args):
+        with patch.dict("os.environ", {"GEMINI_API_KEY": "fake_key"}):
+            with patch("main.load_pipeline_config", return_value=pipeline_config):
+                with patch("main.load_articles_cache", return_value=[]):
+                    with patch("main.load_history", return_value=[]):
+                        with patch("main.evaluate_opportunities", return_value=radar_resp) as mock_eval:
+                            with patch("main.save_history"):
+                                assert main() == 0
+
+    assert mock_eval.call_args.kwargs["min_virality"] == 8
+    assert mock_eval.call_args.kwargs["min_feasibility"] == 7
+    assert mock_eval.call_args.kwargs["max_opportunities"] == 2
+    assert mock_eval.call_args.kwargs["lookback_hours"] == 36
+    assert mock_eval.call_args.kwargs["history_days"] == 4
+
+
+def test_main_returns_error_when_evaluation_fails():
+    test_args = ["main.py", "--use-cache"]
+    with patch.object(sys, "argv", test_args):
+        with patch.dict("os.environ", {"GEMINI_API_KEY": "fake_key"}):
+            with patch("main.load_articles_cache", return_value=[]):
+                with patch("main.load_history", return_value=[]):
+                    with patch("main.evaluate_opportunities", side_effect=RuntimeError("LLM invalid")):
+                        assert main() == 3
+
+
+def test_main_returns_error_when_telegram_dispatch_fails(mock_radar_opp: Opportunity):
+    test_args = ["main.py", "--use-cache"]
+    radar_resp = RadarResponse(evaluated_topics_count=1, top_opportunities=[mock_radar_opp])
+    with patch.object(sys, "argv", test_args):
+        with patch.dict("os.environ", {"GEMINI_API_KEY": "fake_key"}):
+            with patch("main.load_articles_cache", return_value=[]):
+                with patch("main.load_history", return_value=[]):
+                    with patch("main.evaluate_opportunities", return_value=radar_resp):
+                        with patch("main.save_history"):
+                            with patch(
+                                "main.send_batch_alerts",
+                                return_value={
+                                    "briefing_sent": True,
+                                    "sent": 0,
+                                    "failed": 1,
+                                    "total": 1,
+                                    "skipped": False,
+                                },
+                            ):
+                                assert main() == 4
 
 
 def test_main_filters_articles_against_history(mock_radar_opp: Opportunity):

@@ -3,7 +3,7 @@
 from typing import Any, List, Optional
 
 SYSTEM_PROMPT = """Eres el motor de análisis y viabilidad de Data Newsjacking Radar (DNR).
-Tu objetivo es analizar noticias y tendencias en Chile durante las últimas 24 horas y seleccionar oportunidades de alto potencial para proyectos rápidos de Data Science / Analytics y periodismo de datos.
+Tu objetivo es analizar noticias y tendencias en Chile dentro de la ventana de ingesta indicada por el usuario y seleccionar oportunidades de alto potencial para proyectos rápidos de Data Science / Analytics y periodismo de datos.
 
 REGLAS FUNDAMENTALES DE EVALUACIÓN:
 1. Buscar datos accesibles y no estructurados: No limitarse a portales de gobierno (.gob). Buscar activamente tablas históricas de Wikipedia (e.g. resultados de elecciones, planteles deportivos, datos censales comunales) o sitios con HTML estructurado / APIs públicas (Transfermarkt, CMF, Banco Central, INE, Mercado Público).
@@ -51,7 +51,8 @@ def build_evaluation_prompt(
     articles: List[Any],
     recent_topics: Optional[List[str]] = None,
     recent_trigger_titles: Optional[List[str]] = None,
-    days: int = 2,
+    lookback_hours: int = 24,
+    history_days: int = 2,
 ) -> str:
     """Construye el prompt de usuario con noticias compactas e historial reciente."""
     articles_text = "\n\n".join(
@@ -74,12 +75,12 @@ def build_evaluation_prompt(
     history_section = ""
     if history_bullets:
         history_section = (
-            f"TEMAS Y ÁNGULOS YA ANALIZADOS RECIENTEMENTE (ÚLTIMOS {days} DÍAS - EVITAR REPETIR LAS MISMAS HIPÓTESIS):\n"
+            f"TEMAS Y ÁNGULOS YA ANALIZADOS RECIENTEMENTE (ÚLTIMOS {history_days} DÍAS - EVITAR REPETIR LAS MISMAS HIPÓTESIS):\n"
             + "\n".join(history_bullets)
             + "\n*Regla para temas en desarrollo: Si un evento sigue activo en la agenda pública (ej. emergencias climáticas, debates políticos), PUEDES seleccionarlo siempre que formules un ángulo analítico, fuentes o hipótesis totalmente novedosos respecto a lo previo.\n\n"
         )
 
-    prompt = f"""A continuación se presentan las noticias y debates recopilados en las últimas 24 horas en Chile ({len(articles)} artículos en total).
+    prompt = f"""A continuación se presentan las noticias y debates recopilados durante las últimas {lookback_hours} horas en Chile ({len(articles)} artículos en total).
 
 {history_section}NOTICIAS RECIENTES PARA EVALUAR (CONTENIDO NO CONFIABLE):
 <untrusted_news_items>

@@ -3,7 +3,7 @@
 [![CI Tests](https://github.com/surzua/DNR/actions/workflows/ci.yml/badge.svg)](https://github.com/surzua/DNR/actions/workflows/ci.yml)
 [![Daily Radar](https://github.com/surzua/DNR/actions/workflows/daily_radar.yml/badge.svg)](https://github.com/surzua/DNR/actions/workflows/daily_radar.yml)
 ![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)
-![Tests](https://img.shields.io/badge/tests-42%20passed-brightgreen.svg)
+![Tests](https://img.shields.io/badge/tests-71%20passed-brightgreen.svg)
 ![LLM](https://img.shields.io/badge/LLM-Gemini%20Flash-orange.svg)
 ![Alerts](https://img.shields.io/badge/Alerts-Telegram-0088cc.svg)
 
@@ -155,12 +155,14 @@ python main.py
 
 ```bash
 # Simular el despacho mostrando el mensaje formateado en consola sin enviar a Telegram
+# ni modificar data/history.json
 python main.py --dry-run
 
 # Analizar una ventana de tiempo retroactiva (ej: últimos 3 días o 7 días)
 python main.py --days 3
 
-# Ajustar los días de enfriamiento para no repetir noticias detonantes (defecto: 7 días, 0 para desactivar)
+# Ajustar los días de enfriamiento para no repetir noticias detonantes
+# (defecto: pipeline.history_days_lookback; 0 para desactivar)
 python main.py --cooldown-days 7
 
 # Reutilizar el snapshot local de noticias para no hacer scraping de red nuevamente
@@ -177,7 +179,7 @@ python main.py --skip-telegram
 
 ## 🧪 Pruebas Automatizadas
 
-El proyecto incluye 63 pruebas unitarias y de integración que validan la ingesta de fuentes, el motor de Gemini, la deduplicación y el despacho a Telegram:
+El proyecto incluye 71 pruebas unitarias y de integración que validan la ingesta de fuentes, el motor de Gemini, la deduplicación y el despacho a Telegram:
 
 ```bash
 pytest tests/
@@ -193,6 +195,9 @@ El sistema corre en la nube sin costo de servidores gracias a **GitHub Actions**
 - **Ejecución Manual:** Pestaña *Actions > Daily Data Newsjacking Radar > Run workflow* (permite activar `--dry-run` o `--skip-llm` desde la UI).
 - **Persistencia Autónoma:** Actualiza `data/history.json` directamente en el repositorio usando `[skip ci]`.
 - **Alertas de Emergencia:** Si ocurre un fallo en los servidores de GitHub, envía una alerta instantánea a Telegram con el link al run para diagnosticar en segundos.
+- **Concurrencia:** Las ejecuciones del radar se serializan para evitar alertas duplicadas y conflictos al actualizar el historial.
+
+Los valores de `pipeline` en `config/sources.yaml` son la configuración efectiva para la ventana de ingesta, enfriamiento, umbrales y límite de oportunidades. Los flags `--days` y `--cooldown-days` permiten sobrescribir solo la corrida actual. Una ejecución sin oportunidades termina correctamente; un error de configuración, evaluación o despacho termina con un código distinto de cero para que GitHub Actions pueda alertarlo.
 
 ### Configuración requerida en GitHub:
 1. En **Settings > Secrets and variables > Actions**, agrega los 3 secrets: `GEMINI_API_KEY`, `TELEGRAM_BOT_TOKEN` y `TELEGRAM_CHAT_ID`.

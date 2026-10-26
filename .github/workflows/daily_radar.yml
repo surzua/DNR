@@ -19,6 +19,10 @@ on:
         required: false
         default: false
 
+concurrency:
+  group: daily-data-newsjacking-radar
+  cancel-in-progress: false
+
 jobs:
   run-radar:
     runs-on: ubuntu-latest
