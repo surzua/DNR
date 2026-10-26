@@ -4,7 +4,7 @@
 
 **Estado:** las seis etapas están implementadas en DNR v0.2 y cubiertas por validación determinista. La revisión editorial de oportunidades concretas sigue siendo manual.
 
-**Próximo paso:** revisar los briefs reales antes de construirlos y activar Google Trends solo después de comprobar su disponibilidad en el entorno.
+**Próximo paso:** revisar los briefs reales antes de construirlos y monitorear cambios del RSS de Trends sin convertir sus intervalos en volúmenes exactos.
 
 Este documento reemplaza el análisis estratégico y las prioridades anteriores. Es la referencia del roadmap a partir de este punto. Actualizarlo no modifica el pipeline ni significa que las mejoras ya estén implementadas.
 
@@ -61,7 +61,7 @@ La revisión actual considera código, configuración y 65 registros históricos
 | Contexto | La ingesta conserva fechas y resúmenes | El fragmento enviado al modelo recorta el resumen a 180 caracteres y omite la fecha |
 | Selección | Rúbrica por dimensiones, confianza y descartes deterministas | Justificar puntajes y contemplar valor lúdico, aprendizaje y esfuerzo manual |
 | Novedad | Exclusión por título/URL de detonantes recientes | No bloquear otro producto útil solo por partir de la misma noticia |
-| Búsquedas | Archivo trends_client.py | Placeholder con NotImplementedError; no aporta señales al pipeline |
+| Búsquedas | RSS público opcional de Google Trends para Chile, con fecha, etiqueta de tráfico y límites | El feed puede faltar o cambiar; conservar intervalos y procedencia sin inventar volúmenes |
 
 Los problemas operativos del análisis anterior no se arrastran como pendientes sin revisar el código. Actualmente existen códigos de salida para errores, dry-run sin persistencia del historial, estado/reintento de entrega a Telegram y concurrencia en el workflow. Esto no garantiza entrega exactamente una vez, pero evita proponer de nuevo esas capacidades como si no existieran.
 
@@ -226,7 +226,7 @@ El resultado esperado es una propuesta que permita decidir: **«esta interacció
 ## 7. Referencias y límites de la evidencia externa
 
 - [Berger y Milkman: What Makes Online Content Viral?](https://jonahberger.com/wp-content/uploads/2013/02/ViralityB.pdf). Investigación sobre difusión que vincula utilidad, interés, sorpresa y activación emocional con transmisión de contenido. Orienta hipótesis de diseño; no valida el potencial de una app concreta ni permite trasladar resultados automáticamente a Chile o a un canal actual.
-- [Google Trends: explorar búsquedas en tendencia](https://support.google.com/trends/answer/3076011?hl=en). Documenta contexto temporal, volumen agrupado y exportación, incluido RSS. Comprobar disponibilidad para Chile antes de implementar; no asumir que todos los campos de la interfaz estén en el feed.
+- [Google Trends: explorar búsquedas en tendencia](https://support.google.com/trends/answer/3076011?hl=en). Documenta contexto temporal, volumen agrupado y exportación, incluido RSS. El endpoint para Chile se comprobó el 26 de octubre de 2026: HTTP 200, `text/xml`, XML válido y 10 entradas; `approx_traffic` se conserva como intervalo, no como cifra exacta.
 - [Vite en Vercel](https://vercel.com/docs/frameworks/frontend/vite) y [frontends en Vercel](https://vercel.com/docs/frameworks/frontend). Respaldan esa ruta técnica para apps web. No implican que todas las oportunidades necesiten ese stack ni que DNR deba automatizar despliegues.
 
 Estas decisiones combinan antecedentes externos, revisión del repositorio y preferencias explícitas del creador. Son criterios de producto y trabajo; no resultados demostrados de viralidad.

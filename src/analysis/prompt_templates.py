@@ -37,6 +37,9 @@ def format_article_snippet(article: Any, index: int) -> str:
     estimated = getattr(article, "publication_date_is_estimated", False) if not isinstance(article, dict) else article.get("publication_date_is_estimated", False)
     limitations = getattr(article, "signal_limitations", None) or (article.get("signal_limitations") if isinstance(article, dict) else None)
     corroborating = getattr(article, "corroborating_sources", None) or (article.get("corroborating_sources") if isinstance(article, dict) else None)
+    traffic_label = getattr(article, "search_traffic_label", None) or (article.get("search_traffic_label") if isinstance(article, dict) else None)
+    related_urls = getattr(article, "related_news_urls", None) or (article.get("related_news_urls") if isinstance(article, dict) else None)
+    signal_source_url = getattr(article, "signal_source_url", None) or (article.get("signal_source_url") if isinstance(article, dict) else None)
 
     # Un finalista necesita más que un titular: se conserva un contexto acotado.
     clean_summary = summary.strip().replace("\n", " ")
@@ -63,6 +66,12 @@ def format_article_snippet(article: Any, index: int) -> str:
         lines.append(f"    Cobertura relacionada: {', '.join(map(str, corroborating))}")
     if limitations:
         lines.append(f"    Límite de señal: {limitations}")
+    if traffic_label:
+        lines.append(f"    Tráfico aproximado reportado (intervalo, no cifra exacta): {traffic_label}")
+    if related_urls:
+        lines.append(f"    Noticias relacionadas: {len(related_urls)} enlaces editoriales")
+    if signal_source_url:
+        lines.append(f"    Procedencia de la señal: {signal_source_url}")
     if link:
         lines.append(f"    Link: {link}")
 

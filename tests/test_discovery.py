@@ -61,3 +61,25 @@ def test_trends_failure_degrades_without_stopping(tmp_path):
     response = MagicMock(status_code=503)
     with patch("src.ingestion.trends_client.requests.get", return_value=response):
         assert fetch_trending_topics(str(config)) == []
+
+
+def test_trends_keeps_interval_date_and_editorial_limit(tmp_path):
+    config = tmp_path / "sources.yaml"
+    config.write_text("trends:\n  enabled: true\n  limit: 3\n", encoding="utf-8")
+    xml = b'''<?xml version="1.0"?><rss xmlns:ht="https://trends.google.com/trending/rss"><channel><item>
+      <title>tema en Chile</title><link>https://trends.google.com/trending/rss?geo=CL</link>
+      <pubDate>Mon, 26 Oct 2026 00:00:00 GMT</pubDate><ht:approx_traffic>100+</ht:approx_traffic>
+      <ht:news_item_title>Noticia relacionada</ht:news_item_title>
+      <ht:news_item_url>https://medio.cl/noticia</ht:news_item_url>
+      <ht:news_item_source>Medio</ht:news_item_source>
+    </item></channel></rss>'''
+    response = MagicMock(status_code=200, headers={"content-type": "text/xml"}, content=xml)
+    with patch("src.ingestion.trends_client.requests.get", return_value=response):
+        topics = fetch_trending_topics(str(config))
+    assert len(topics) == 1
+    assert topics[0].search_traffic_label == "100+"
+    assert topics[0].publication_date_is_estimated is False
+    assert topics[0].link == "https://medio.cl/noticia"
+    assert topics[0].related_news_urls == ["https://medio.cl/noticia"]
+    assert topics[0].signal_source_url == "https://trends.google.com/trending/rss?geo=CL"
+    assert "no confirma hechos" in (topics[0].signal_limitations or "")

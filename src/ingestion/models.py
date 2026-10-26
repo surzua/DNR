@@ -33,6 +33,14 @@ class NewsArticle(BaseModel):
         default="news", description="Naturaleza de la señal; no equipara conversación y búsquedas"
     )
     signal_limitations: Optional[str] = Field(default=None, description="Límites conocidos de la señal")
+    search_traffic_label: Optional[str] = Field(
+        default=None, description="Intervalo textual entregado por una fuente de búsquedas, no un volumen exacto"
+    )
+    related_news_urls: List[str] = Field(default_factory=list, description="Enlaces editoriales relacionados con una tendencia")
+    related_news_sources: List[str] = Field(default_factory=list, description="Fuentes editoriales relacionadas con una tendencia")
+    signal_source_url: Optional[str] = Field(
+        default=None, description="URL de la señal agregadora (por ejemplo, el RSS de Trends)"
+    )
     event_key: Optional[str] = Field(default=None, description="Identificador aproximado de cobertura del mismo evento")
     corroborating_sources: List[str] = Field(
         default_factory=list, description="Medios independientes que cubren el mismo evento"

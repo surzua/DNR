@@ -28,9 +28,9 @@ reddit:
     limit: 50
     time_filter: "day"
 
-# RSS público: activar después de comprobar su disponibilidad en cada entorno.
+# RSS público comprobado para Chile (HTTP 200, XML válido y entradas con fecha).
 trends:
-  enabled: false
+  enabled: true
   limit: 10
 
 # Señales previsibles añadidas manualmente con fecha y fuente oficial.
