@@ -722,7 +722,8 @@ def test_evaluate_opportunities_cascades_fallback_on_failure():
     mock_response = MagicMock()
     mock_response.parsed = RadarResponse(evaluated_topics_count=5, top_opportunities=[])
 
-    # El primer intento con gemini-3.8-flash falla (ej. 503), el segundo con gemini-3.7-flash tiene éxito
+    # El primer intento con gemini-3.8-flash falla (ej. 503), el modelo estable
+    # gemini-2.5-flash responde en el segundo intento.
     mock_client.models.generate_content.side_effect = [
         RuntimeError("503 Service Unavailable"),
         mock_response,
@@ -736,5 +737,27 @@ def test_evaluate_opportunities_cascades_fallback_on_failure():
     assert mock_client.models.generate_content.call_count == 2
     calls = mock_client.models.generate_content.call_args_list
     assert calls[0].kwargs["model"] == "gemini-3.8-flash"
-    assert calls[1].kwargs["model"] == "gemini-3.7-flash"
+    assert calls[1].kwargs["model"] == "gemini-2.5-flash"
     assert res.evaluated_topics_count == 5
+
+
+def test_evaluate_opportunities_retries_without_response_schema_on_invalid_argument():
+    """La validación local mantiene el contrato si Gemini rechaza el schema."""
+    mock_response = MagicMock(parsed=RadarResponse(evaluated_topics_count=5, top_opportunities=[]))
+    mock_client = MagicMock()
+    mock_client.models.generate_content.side_effect = [
+        RuntimeError("400 INVALID_ARGUMENT"),
+        mock_response,
+    ]
+
+    result = evaluate_opportunities(
+        articles=[{"title": "Test", "link": "https://test.cl"}],
+        client=mock_client,
+    )
+
+    calls = mock_client.models.generate_content.call_args_list
+    assert len(calls) == 2
+    assert calls[0].kwargs["model"] == calls[1].kwargs["model"] == "gemini-3.8-flash"
+    assert calls[0].kwargs["config"].response_schema is RadarResponse
+    assert calls[1].kwargs["config"].response_schema is None
+    assert result.evaluated_topics_count == 5

@@ -605,13 +605,13 @@ def evaluate_opportunities(
 
     # Resolver cliente y credenciales
     resolved_key = api_key or os.getenv("GEMINI_API_KEY")
+    # Mantener un modelo estable entre los modelos recientes. Los aliases y
+    # previews cambian de disponibilidad con más frecuencia.
     default_candidates = [
         "gemini-3.8-flash",
+        "gemini-2.5-flash",
+        "gemini-2.5-flash-lite",
         "gemini-3.7-flash",
-        "gemini-3.6-flash",
-        "gemini-3.5-flash",
-        "gemini-3.5-flash-lite",
-        "gemini-3.1-flash-lite",
     ]
     if model_name:
         candidate_models = [model_name] + [m for m in default_candidates if m != model_name]
@@ -653,16 +653,36 @@ def evaluate_opportunities(
                 model,
                 len(articles),
             )
-            response = genai_client.models.generate_content(
-                model=model,
-                contents=prompt,
-                config=types.GenerateContentConfig(
-                    system_instruction=SYSTEM_PROMPT,
-                    response_mime_type="application/json",
-                    response_schema=RadarResponse,
-                    temperature=0.2,
-                ),
-            )
+            try:
+                response = genai_client.models.generate_content(
+                    model=model,
+                    contents=prompt,
+                    config=types.GenerateContentConfig(
+                        system_instruction=SYSTEM_PROMPT,
+                        response_mime_type="application/json",
+                        response_schema=RadarResponse,
+                        temperature=0.2,
+                    ),
+                )
+            except Exception as exc:
+                # Algunos modelos del Developer API rechazan esquemas Pydantic
+                # válidos con un 400 genérico. Pedir JSON y validarlo abajo con
+                # RadarResponse conserva el contrato sin bloquear el radar.
+                if "INVALID_ARGUMENT" not in str(exc):
+                    raise
+                logger.warning(
+                    "El modelo %s rechazó la salida estructurada; se reintenta con JSON validado localmente.",
+                    model,
+                )
+                response = genai_client.models.generate_content(
+                    model=model,
+                    contents=prompt,
+                    config=types.GenerateContentConfig(
+                        system_instruction=SYSTEM_PROMPT,
+                        response_mime_type="application/json",
+                        temperature=0.2,
+                    ),
+                )
             break
         except Exception as e:
             logger.warning("Fallo al consultar modelo %s: %s", model, e)
