@@ -3,6 +3,7 @@
 import json
 import logging
 import os
+from datetime import datetime
 from typing import Any, List, Literal, Optional, Set
 from urllib.parse import urlparse
 from dotenv import load_dotenv
@@ -11,6 +12,7 @@ from google.genai import types
 from pydantic import BaseModel, Field, ValidationError
 
 from src.analysis.prompt_templates import SYSTEM_PROMPT, build_evaluation_prompt
+from src.analysis.source_verification import verify_opportunities_sources
 from src.storage.history_manager import normalize_title_for_dedup, normalize_url_for_dedup
 
 load_dotenv()
@@ -40,6 +42,15 @@ class DataSource(BaseModel):
         "Media (1-2 días)",
         "Alta (Requiere peticiones de transparencia)",
     ] = Field(description="Estimación del tiempo y complejidad para obtener el dataset")
+    verification_status: Literal["not_checked", "not_checkable", "verified", "failed"] = Field(
+        default="not_checked",
+        description="Resultado de la comprobación HTTP realizada por el pipeline",
+    )
+    verification_checked_at: Optional[datetime] = Field(default=None)
+    verification_url: Optional[str] = Field(default=None)
+    verification_http_status: Optional[int] = Field(default=None)
+    verification_content_type: Optional[str] = Field(default=None)
+    verification_error: Optional[str] = Field(default=None)
 
 
 class Opportunity(BaseModel):
@@ -310,6 +321,9 @@ def evaluate_opportunities(
     lookback_hours: int = 24,
     history_days: int = 2,
     timeout_ms: int = 90000,
+    verify_sources: bool = False,
+    require_verified_source: bool = False,
+    source_verification_timeout_seconds: int = 10,
 ) -> RadarResponse:
     """Evalúa candidatos de noticias utilizando Gemini y Structured Outputs Pydantic.
 
@@ -325,6 +339,9 @@ def evaluate_opportunities(
         lookback_hours: Ventana de ingesta efectiva que se comunica al modelo.
         history_days: Ventana efectiva del historial que se comunica al modelo.
         timeout_ms: Timeout máximo por petición HTTP en milisegundos (defecto: 90000 ms).
+        verify_sources: Comprueba técnicamente las URLs de datos antes de retornar.
+        require_verified_source: Descarta oportunidades sin una fuente accesible.
+        source_verification_timeout_seconds: Límite por consulta de fuente.
 
     Returns:
         RadarResponse con la cantidad de temas evaluados y las mejores oportunidades filtradas.
@@ -430,6 +447,28 @@ def evaluate_opportunities(
         exclude_trigger_titles=exclude_trigger_titles,
         source_articles=articles,
     )
+    if require_verified_source and not verify_sources:
+        raise ValueError("require_verified_source necesita verify_sources=True.")
+    if verify_sources and filtered:
+        verified_by_opportunity = verify_opportunities_sources(
+            filtered,
+            timeout_seconds=source_verification_timeout_seconds,
+        )
+        if require_verified_source:
+            before_verification = len(filtered)
+            filtered = [
+                opp for opp in filtered if verified_by_opportunity.get(id(opp), False)
+            ]
+            if len(filtered) < before_verification:
+                logger.info(
+                    "Verificación de fuentes descartó %d oportunidades sin una fuente accesible.",
+                    before_verification - len(filtered),
+                )
+        for opportunity in filtered:
+            if verified_by_opportunity.get(id(opportunity), False):
+                # "Verificada" significa accesible y con contenido legible; no
+                # reemplaza la revisión editorial de la interpretación del dato.
+                opportunity.evidence_status = "Verificada"
     radar_response.top_opportunities = filtered
 
     logger.info(

@@ -13,6 +13,7 @@ from src.analysis.opportunity_eval import (
     filter_and_rank_opportunities,
 )
 from src.analysis.prompt_templates import (
+    SYSTEM_PROMPT,
     build_evaluation_prompt,
     format_article_snippet,
 )
@@ -85,6 +86,7 @@ def test_format_article_snippet_and_build_prompt():
     assert "últimas 72 horas" in prompt
     assert "ÚLTIMOS 5 DÍAS" in prompt
     assert "audience, user_need, user_action" in prompt
+    assert "al menos una URL HTTP(S) pública y directa" in SYSTEM_PROMPT
 
 
 def test_filter_and_rank_opportunities():
@@ -357,6 +359,47 @@ def test_evaluate_opportunities_with_mock_client():
     assert len(res.top_opportunities) == 1
     assert res.top_opportunities[0].headline == "Desmitificando el alza del pasaje con datos históricos"
     assert res.top_opportunities[0].trigger_article_url == "https://df.cl/tarifas"
+
+
+def test_evaluate_opportunities_can_require_a_verified_source():
+    """Una fuente no accesible excluye la oportunidad antes de que se notifique."""
+    source = DataSource(
+        name="Fuente directa",
+        type="API Pública",
+        potential_url_or_query="https://datos.gob.cl/serie.json",
+        friction_level="Baja (Horas)",
+    )
+    opp = Opportunity(
+        headline="Oportunidad verificable",
+        category="Economía & Finanzas",
+        why_is_trending="Tema vigente",
+        contrarian_or_curious_angle="Comparar escenarios",
+        suggested_deliverable="App Interactiva (Streamlit)",
+        data_sources=[source],
+        virality_score=8,
+        technical_feasibility_score=8,
+        fast_execution_strategy="Construir MVP",
+        trigger_article_title="Nueva medida anunciada",
+        trigger_article_url="https://prensa.cl/medida",
+    )
+    response = MagicMock(parsed=RadarResponse(evaluated_topics_count=1, top_opportunities=[opp]))
+    client = MagicMock()
+    client.models.generate_content.return_value = response
+    source.verification_status = "verified"
+
+    with patch(
+        "src.analysis.opportunity_eval.verify_opportunities_sources",
+        return_value={id(opp): True},
+    ):
+        result = evaluate_opportunities(
+            articles=[{"title": "Nueva medida anunciada", "link": "https://prensa.cl/medida"}],
+            client=client,
+            verify_sources=True,
+            require_verified_source=True,
+        )
+
+    assert result.top_opportunities == [opp]
+    assert result.top_opportunities[0].evidence_status == "Verificada"
 
 
 def test_evaluate_opportunities_fallback_json_parsing():

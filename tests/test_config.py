@@ -37,6 +37,9 @@ def test_load_pipeline_config_uses_declared_values():
     assert config.max_opportunities_to_notify == 3
     assert config.min_virality_score == 7
     assert config.min_feasibility_score == 6
+    assert config.verify_source_urls is True
+    assert config.require_verified_source is True
+    assert config.source_verification_timeout_seconds == 10
 
 
 def test_load_pipeline_config_rejects_invalid_values(tmp_path: Path):
@@ -52,4 +55,22 @@ def test_load_pipeline_config_rejects_invalid_values(tmp_path: Path):
     )
 
     with pytest.raises(PipelineConfigError, match="max_hours_lookback"):
+        load_pipeline_config(config_path)
+
+
+def test_load_pipeline_config_rejects_verified_source_requirement_without_check(tmp_path: Path):
+    config_path = tmp_path / "sources.yaml"
+    config_path.write_text(
+        "pipeline:\n"
+        "  max_hours_lookback: 24\n"
+        "  history_days_lookback: 2\n"
+        "  max_opportunities_to_notify: 3\n"
+        "  min_virality_score: 7\n"
+        "  min_feasibility_score: 6\n"
+        "  verify_source_urls: false\n"
+        "  require_verified_source: true\n",
+        encoding="utf-8",
+    )
+
+    with pytest.raises(PipelineConfigError, match="require_verified_source"):
         load_pipeline_config(config_path)

@@ -3,7 +3,7 @@
 [![CI Tests](https://github.com/surzua/DNR/actions/workflows/ci.yml/badge.svg)](https://github.com/surzua/DNR/actions/workflows/ci.yml)
 [![Daily Radar](https://github.com/surzua/DNR/actions/workflows/daily_radar.yml/badge.svg)](https://github.com/surzua/DNR/actions/workflows/daily_radar.yml)
 ![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)
-![Tests](https://img.shields.io/badge/tests-75%20passed-brightgreen.svg)
+![Tests](https://img.shields.io/badge/tests-passing-brightgreen.svg)
 ![LLM](https://img.shields.io/badge/LLM-Gemini%20Flash-orange.svg)
 ![Alerts](https://img.shields.io/badge/Alerts-Telegram-0088cc.svg)
 
@@ -84,9 +84,9 @@ mientras comunas del sector oriente toleran más de 40 mm sin interrupciones cr�
 El motor analítico ([src/analysis/opportunity_eval.py](src/analysis/opportunity_eval.py)) evalúa los artículos basándose en directrices estrictas:
 
 1. **Utilidad y gancho:** Además de un ángulo curioso, cada propuesta especifica audiencia, necesidad, acción, entradas y resultado. El tipo de producto describe lo que resuelve —no la tecnología— y puede ser una calculadora, comparador, guía, planificador, simulador, verificador, visualización o análisis.
-2. **Fuentes abiertas y evidencia honesta:** Antes de notificar, el detonante debe coincidir exactamente con una noticia ingerida y debe existir al menos una URL HTTP(S) o consulta concreta para la fuente. Una URL válida solo se marca como “fuente localizada”; no se presenta como evidencia comprobada.
-3. **Filtro de umbral exigente:** Solo califica si `virality_score >= 7` y `technical_feasibility_score >= 6`. Si no hay temas relevantes un día, despacha una notificación de tranquilidad sin generar spam.
-4. **Plan y vigencia:** Cada tarjeta entrega un roadmap táctico de 3 pasos accionables en menos de 4 horas y puede indicar cuándo una regla, tarifa, plazo o evento debe revisarse.
+2. **Fuentes abiertas y evidencia honesta:** Antes de notificar, el detonante debe coincidir exactamente con una noticia ingerida y al menos una URL de datos debe responder con contenido legible. La comprobación registra accesibilidad técnica; no presenta la fuente como evidencia editorial comprobada.
+3. **Filtro de umbral y fuente disponible:** Solo califica si `virality_score >= 7`, `technical_feasibility_score >= 6` y al menos una fuente de datos URL responde correctamente con un contenido legible. Si no hay temas relevantes un día, despacha una notificación de tranquilidad sin generar spam.
+4. **Plan y vigencia:** Cada tarjeta entrega un roadmap táctico de 3 pasos accionables en menos de 4 horas y puede indicar cuándo una regla, tarifa, plazo o evento debe revisarse. El historial guarda el estado, fecha, código HTTP y tipo de contenido de cada verificación.
 
 ---
 
@@ -111,7 +111,7 @@ DNR/
 │   ├── models/                    # Modelos de datos fuertemente tipados
 │   ├── notifiers/                 # Despachador seguro de Telegram (HTML + fallback)
 │   └── storage/                   # Persistencia, control de duplicados y rotación
-├── tests/                         # Batería de 42 pruebas unitarias y de integración
+├── tests/                         # Batería de pruebas unitarias y de integración
 ├── main.py                        # Entrypoint CLI del pipeline
 ├── pyproject.toml / requirements.txt
 └── README.md
@@ -179,7 +179,7 @@ python main.py --skip-telegram
 
 ## 🧪 Pruebas Automatizadas
 
-El proyecto incluye 71 pruebas unitarias y de integración que validan la ingesta de fuentes, el motor de Gemini, la deduplicación y el despacho a Telegram:
+El proyecto incluye pruebas unitarias y de integración que validan la ingesta de fuentes, el motor de Gemini, la deduplicación, la verificación HTTP de fuentes y el despacho a Telegram:
 
 ```bash
 pytest tests/
@@ -197,7 +197,7 @@ El sistema corre en la nube sin costo de servidores gracias a **GitHub Actions**
 - **Alertas de Emergencia:** Si ocurre un fallo en los servidores de GitHub, envía una alerta instantánea a Telegram con el link al run para diagnosticar en segundos.
 - **Concurrencia:** Las ejecuciones del radar se serializan para evitar alertas duplicadas y conflictos al actualizar el historial.
 
-Los valores de `pipeline` en `config/sources.yaml` son la configuración efectiva para la ventana de ingesta, enfriamiento, umbrales y límite de oportunidades. Los flags `--days` y `--cooldown-days` permiten sobrescribir solo la corrida actual. Una ejecución sin oportunidades termina correctamente; un error de configuración, evaluación o despacho termina con un código distinto de cero para que GitHub Actions pueda alertarlo.
+Los valores de `pipeline` en `config/sources.yaml` son la configuración efectiva para la ventana de ingesta, enfriamiento, umbrales, límite de oportunidades y verificación de fuentes. `verify_source_urls`, `require_verified_source` y `source_verification_timeout_seconds` controlan el gate previo a Telegram. La verificación confirma que una URL pública responde sin redirecciones con contenido legible; no reemplaza la revisión editorial de sus variables, licencia o interpretación. Los flags `--days` y `--cooldown-days` permiten sobrescribir solo la corrida actual. Una ejecución sin oportunidades termina correctamente; un error de configuración, evaluación o despacho termina con un código distinto de cero para que GitHub Actions pueda alertarlo.
 
 ### Configuración requerida en GitHub:
 1. En **Settings > Secrets and variables > Actions**, agrega los 3 secrets: `GEMINI_API_KEY`, `TELEGRAM_BOT_TOKEN` y `TELEGRAM_CHAT_ID`.

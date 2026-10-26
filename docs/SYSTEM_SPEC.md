@@ -208,6 +208,14 @@ class DataSource(BaseModel):
 
     friction\_level: Literal\["Baja (Horas)", "Media (1-2 días)", "Alta (Requiere peticiones de transparencia)"\]
 
+    # Resultado de la verificación HTTP; se persiste junto a la oportunidad
+    verification\_status: Literal["not_checked", "not_checkable", "verified", "failed"]
+    verification\_checked\_at: Optional[datetime]
+    verification\_url: Optional[str]
+    verification\_http\_status: Optional[int]
+    verification\_content\_type: Optional[str]
+    verification\_error: Optional[str]
+
 class Opportunity(BaseModel):
 
     headline: str
@@ -250,7 +258,7 @@ class RadarResponse(BaseModel):
 1. **Buscar datos no estructurados:** No limitarse a portales de gobierno (`.gob`). Buscar activamente tablas históricas de Wikipedia (e.g. resultados de elecciones, planteles deportivos, datos censales comunales) o sitios con HTML estructurado (Transfermarkt, CMF, Banco Central).  
 2. **Pensar en utilidad y gancho ("Hook"):** Para cada propuesta, definir audiencia, necesidad, acción y producto. El producto resuelve una tarea concreta y no queda restringido a un framework.
 3. **Filtro de umbral:** Solo retornar oportunidades donde `virality_score >= 7` y `technical_feasibility_score >= 6`. Máximo 3 por ejecución para no saturar.
-4. **Honestidad de evidencia:** El pipeline contrasta título y URL detonantes con la ingesta y exige una fuente mínima utilizable. Una URL HTTP(S) válida equivale solo a fuente localizada, no a un dataset o regla verificada.
+4. **Honestidad de evidencia:** El pipeline contrasta título y URL detonantes con la ingesta. Antes de notificar, consulta las URLs de datos públicas sin seguir redirecciones y registra fecha, código HTTP y tipo de contenido. Una comprobación exitosa equivale a una fuente técnicamente accesible; no prueba por sí sola que el dataset, regla, licencia o interpretación sea correcto.
 
 ### 4.4 Notification Layer (`telegram_bot.py`)
 

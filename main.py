@@ -196,6 +196,9 @@ def main() -> int:
             max_opportunities=pipeline_config.max_opportunities_to_notify,
             lookback_hours=lookback_hours,
             history_days=history_lookback_days,
+            verify_sources=pipeline_config.verify_source_urls,
+            require_verified_source=pipeline_config.require_verified_source,
+            source_verification_timeout_seconds=pipeline_config.source_verification_timeout_seconds,
         )
     except Exception as e:
         logger.exception("Error durante la evaluación de oportunidades con Gemini: %s", e)

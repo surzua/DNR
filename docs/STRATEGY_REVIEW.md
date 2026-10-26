@@ -21,7 +21,7 @@ La ampliación abre oportunidades plausibles. No permite cuantificar cuántas se
 | Prompt centrado en ángulos contraintuitivos y evidencia cuantitativa | Puede privilegiar una historia llamativa sobre una tarea práctica. Incorporar necesidad, audiencia, acción y motivo para compartir. |
 | Los 54 registros tienen estado `candidate` | El archivo no documenta selección, publicación ni resultados. No se puede evaluar éxito con él; podría existir seguimiento fuera del repositorio. |
 | 37 de 54 combinaciones de puntajes son (9,8), (8,9) u (8,8) | Hay poca discriminación entre seleccionados. Como el historial ya está filtrado, esto no demuestra mala calibración por sí solo. Guardar también descartes y justificaciones. |
-| El modelo propone fuentes, pero la evaluación no consulta esas páginas | «Fuente concreta» no implica dato encontrado o utilizable. Introducir verificación de viabilidad. |
+| El modelo propone fuentes y ahora se comprueba su disponibilidad HTTP | Una respuesta legible confirma acceso técnico, no variables, periodo, licencia ni interpretación. Mantener revisión editorial antes de publicar. |
 | Hay propuestas con cifras, causalidad y conclusiones anticipadas | El generador necesita distinguir hechos de la noticia, hipótesis y hallazgos todavía inexistentes. |
 
 Ejemplos del historial, citados como contenido generado y no como hechos comprobados:
@@ -87,7 +87,7 @@ LinkedIn puede servir para mostrar criterio y capacidad profesional; grupos y co
 
 Separar generación amplia de evaluación. Agrupar noticias del mismo evento y generar alternativas de análisis, herramienta práctica y experiencia interactiva. Después comprobar la fuente, la regla o el dato necesario para cada finalista. Enviar como máximo tres oportunidades sigue siendo razonable; reducir a una cuando solo haya una buena.
 
-La trazabilidad debe ser verificable por código: el título y enlace detonantes tienen que corresponder a un artículo ingerido. Hoy el prompt lo exige, pero el filtro de salida no comprueba pertenencia al conjunto original. Que una URL sea HTTP(S) no demuestra que sea una fuente auténtica.
+La trazabilidad debe ser verificable por código: el título y enlace detonantes tienen que corresponder a un artículo ingerido. El filtro de salida ya comprueba pertenencia al conjunto original y el pipeline consulta las fuentes URL antes de notificar. Que una URL responda no demuestra que sea una fuente auténtica o suficiente.
 
 La validación de datos debe comprobar algo más que un HTTP 200: contenido correcto, variables disponibles, periodo, geografía, unidades, formato, licencia o condiciones de uso, y una muestra mínima utilizable. Registrar «propuesta», «localizada» y «verificada» como estados distintos. Las sugerencias prometedoras pero sin evidencia deben quedar como investigación pendiente.
 

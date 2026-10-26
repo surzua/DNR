@@ -129,6 +129,9 @@ def test_main_propagates_effective_pipeline_config(mock_radar_opp: Opportunity):
     assert mock_eval.call_args.kwargs["max_opportunities"] == 2
     assert mock_eval.call_args.kwargs["lookback_hours"] == 36
     assert mock_eval.call_args.kwargs["history_days"] == 4
+    assert mock_eval.call_args.kwargs["verify_sources"] is True
+    assert mock_eval.call_args.kwargs["require_verified_source"] is True
+    assert mock_eval.call_args.kwargs["source_verification_timeout_seconds"] == 10
 
 
 def test_main_returns_error_when_evaluation_fails():
