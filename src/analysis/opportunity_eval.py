@@ -386,6 +386,81 @@ class RadarResponse(BaseModel):
     )
 
 
+class GeminiDataSource(BaseModel):
+    """Contrato acotado para Structured Output compatible con Gemini Developer API."""
+
+    name: str
+    type: str
+    potential_url_or_query: str
+    friction_level: str
+
+
+class GeminiOpportunity(BaseModel):
+    """Campos esenciales que Gemini debe entregar; Opportunity completa los defaults."""
+
+    headline: str
+    category: str
+    why_is_trending: str
+    contrarian_or_curious_angle: str
+    suggested_deliverable: str
+    data_sources: List[GeminiDataSource]
+    virality_score: int
+    technical_feasibility_score: int
+    fast_execution_strategy: str
+    trigger_article_title: str
+    trigger_article_url: str
+
+
+class GeminiRadarResponse(BaseModel):
+    evaluated_topics_count: int
+    top_opportunities: List[GeminiOpportunity]
+
+
+def _match_choice(value: str, choices: tuple[str, ...], fallback: str) -> str:
+    """Normaliza valores flexibles del modelo al contrato estricto del dominio."""
+    normalized = value.strip().casefold()
+    return next((choice for choice in choices if choice.casefold() == normalized), fallback)
+
+
+def _to_radar_response(gemini_response: GeminiRadarResponse) -> RadarResponse:
+    categories = ("Economía & Finanzas", "Política & Estado", "Deportes", "Sociedad & Tendencias")
+    deliverables = (
+        "Gráfico Estático de Alto Impacto", "App Interactiva (Streamlit)",
+        "Análisis Predictivo/Optimización", "App web", "Experiencia interactiva",
+        "Utilidad local", "Recurso descargable",
+    )
+    source_types = (
+        "API Pública", "Tabla Wikipedia", "Portal Abierto", "Scraping HTML",
+        "Dataset Descargable", "Regla o reglamento", "Documentación oficial",
+        "Mecánica reproducible", "Fuente editorial",
+    )
+    friction_levels = (
+        "Baja (Horas)", "Media (1-2 días)", "Alta (Requiere peticiones de transparencia)",
+    )
+    opportunities = []
+    for candidate in gemini_response.top_opportunities:
+        payload = candidate.model_dump()
+        payload["category"] = _match_choice(payload["category"], categories, "Sociedad & Tendencias")
+        payload["suggested_deliverable"] = _match_choice(
+            payload["suggested_deliverable"], deliverables, "Análisis Predictivo/Optimización"
+        )
+        payload["trigger_article_title"] = payload["trigger_article_title"] or None
+        payload["trigger_article_url"] = payload["trigger_article_url"] or None
+        payload["data_sources"] = [
+            {
+                **source.model_dump(),
+                "type": _match_choice(source.type, source_types, "Portal Abierto"),
+                "friction_level": _match_choice(source.friction_level, friction_levels, "Media (1-2 días)"),
+            }
+            for source in candidate.data_sources
+        ]
+        opportunities.append(Opportunity.model_validate(payload))
+    return RadarResponse(
+        evaluated_topics_count=gemini_response.evaluated_topics_count,
+        top_opportunities=opportunities,
+    )
+
+
 def _is_safe_http_url(url: Optional[str]) -> bool:
     """Verifica que la URL provenga de un protocolo web estándar (http/https)."""
     if not url or not isinstance(url, str):
@@ -660,7 +735,7 @@ def evaluate_opportunities(
                     config=types.GenerateContentConfig(
                         system_instruction=SYSTEM_PROMPT,
                         response_mime_type="application/json",
-                        response_schema=RadarResponse,
+                        response_schema=GeminiRadarResponse,
                         temperature=0.2,
                         automatic_function_calling=types.AutomaticFunctionCallingConfig(disable=True),
                     ),
@@ -699,13 +774,15 @@ def evaluate_opportunities(
         parsed_response = getattr(response, "parsed", None)
         if isinstance(parsed_response, RadarResponse):
             radar_response = parsed_response
+        elif isinstance(parsed_response, GeminiRadarResponse):
+            radar_response = _to_radar_response(parsed_response)
         elif parsed_response is not None:
-            radar_response = RadarResponse.model_validate(parsed_response)
+            radar_response = _to_radar_response(GeminiRadarResponse.model_validate(parsed_response))
         else:
             response_text = getattr(response, "text", None)
             if not response_text:
                 raise EvaluationResponseError("Gemini no devolvió contenido estructurado.")
-            radar_response = RadarResponse.model_validate_json(response_text)
+            radar_response = _to_radar_response(GeminiRadarResponse.model_validate_json(response_text))
     except (ValidationError, ValueError, TypeError, json.JSONDecodeError) as exc:
         raise EvaluationResponseError(
             "La respuesta de Gemini no cumple el esquema RadarResponse."

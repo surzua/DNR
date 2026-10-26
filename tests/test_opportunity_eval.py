@@ -8,6 +8,7 @@ import pytest
 from src.analysis.opportunity_eval import (
     DataSource,
     EvaluationResponseError,
+    GeminiRadarResponse,
     Opportunity,
     OpportunityAssessment,
     RejectedOpportunity,
@@ -64,7 +65,7 @@ def test_opportunity_schemas():
 
 def test_gemini_response_schema_has_no_free_form_maps():
     """Gemini Developer API rechaza los esquemas con additionalProperties."""
-    assert "additionalProperties" not in json.dumps(RadarResponse.model_json_schema())
+    assert "additionalProperties" not in json.dumps(GeminiRadarResponse.model_json_schema())
 
 
 def test_format_article_snippet_and_build_prompt():
@@ -758,6 +759,6 @@ def test_evaluate_opportunities_retries_without_response_schema_on_invalid_argum
     calls = mock_client.models.generate_content.call_args_list
     assert len(calls) == 2
     assert calls[0].kwargs["model"] == calls[1].kwargs["model"] == "gemini-3.8-flash"
-    assert calls[0].kwargs["config"].response_schema is RadarResponse
+    assert calls[0].kwargs["config"].response_schema is GeminiRadarResponse
     assert calls[1].kwargs["config"].response_schema is None
     assert result.evaluated_topics_count == 5
