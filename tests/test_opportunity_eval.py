@@ -377,6 +377,26 @@ def test_open_product_contract_supports_game_utility_and_downloadable():
     assert utility.suggested_deliverable == "Utilidad local"
 
 
+def test_learning_brief_separates_scope_difficulty_and_validation():
+    opp = Opportunity(
+        headline="Calculadora de escenarios", category="Economía & Finanzas", why_is_trending="Cambio de tarifa",
+        contrarian_or_curious_angle="Comparar consumos", suggested_deliverable="App web", data_sources=[],
+        virality_score=8, technical_feasibility_score=8, fast_execution_strategy="Revisar fórmula",
+        scope_class="prototipo_breve", minimum_version="Ingresar consumo y ver desglose",
+        explicit_limits=["Sin cuentas de usuario"], learning_skill="Validar una fórmula y manejar estado local",
+        prior_knowledge="Si no conoces JavaScript, practicar variables y eventos antes.",
+        technical_difficulty="baja", verification_effort="alto",
+        difficulty_reason="La interfaz es pequeña, pero la tarifa debe contrastarse.",
+        manual_steps=["Leer la resolución", "Diseñar entradas", "Probar casos límite"],
+        technical_dependencies=["Ninguna: HTML y JavaScript local"],
+        validation_cases=["Consumo cero", "Consumo con tramo superior"],
+    )
+    assert opp.scope_class == "prototipo_breve"
+    assert opp.technical_difficulty == "baja"
+    assert opp.verification_effort == "alto"
+    assert len(opp.validation_cases) == 2
+
+
 def test_evaluate_opportunities_empty():
     """Verifica que con lista vacía retorne inmediatamente sin llamar a la API."""
     result = evaluate_opportunities(articles=[])

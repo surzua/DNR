@@ -133,6 +133,12 @@ def format_opportunity_html(opportunity: Any) -> str:
     share_mechanism = _extract_field(opportunity, "share_mechanism")
     shareable_artifact = _extract_field(opportunity, "shareable_artifact")
     alternatives_review_status = _extract_field(opportunity, "alternatives_review_status")
+    scope_class = _extract_field(opportunity, "scope_class")
+    minimum_version = _extract_field(opportunity, "minimum_version")
+    learning_skill = _extract_field(opportunity, "learning_skill")
+    technical_difficulty = _extract_field(opportunity, "technical_difficulty")
+    verification_effort = _extract_field(opportunity, "verification_effort")
+    validation_case = _first_text(_extract_field(opportunity, "validation_cases", []))
     evidence_status = _extract_field(opportunity, "evidence_status")
     validity_note = _extract_field(opportunity, "validity_note")
     known_fact = _first_text(_extract_field(opportunity, "known_facts", []))
@@ -217,6 +223,22 @@ def format_opportunity_html(opportunity: Any) -> str:
             lines.append(f"• Canal: {html.escape(str(distribution_channel), quote=False)}")
         if existing_alternatives:
             lines.append(f"• Diferencia: {html.escape(str(existing_alternatives), quote=False)}")
+
+    if scope_class or minimum_version or learning_skill or validation_case:
+        lines.extend(["", "🧠 <b>Brief para construir:</b>"])
+        if scope_class:
+            lines.append(f"• Alcance: {html.escape(str(scope_class).replace('_', ' '), quote=False)}")
+        if minimum_version:
+            lines.append(f"• Primero: {html.escape(str(minimum_version), quote=False)}")
+        if learning_skill:
+            lines.append(f"• Aprender: {html.escape(str(learning_skill), quote=False)}")
+        if technical_difficulty or verification_effort:
+            lines.append(
+                f"• Dificultad técnica: {html.escape(str(technical_difficulty or 'sin estimar'), quote=False)}"
+                f" | Comprobación: {html.escape(str(verification_effort or 'sin estimar'), quote=False)}"
+            )
+        if validation_case:
+            lines.append(f"• Probar: {html.escape(validation_case, quote=False)}")
 
     lines.extend(["", "📊 <b>Fuentes de Datos Sugeridas:</b>"])
 

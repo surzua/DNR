@@ -265,6 +265,40 @@ class Opportunity(BaseModel):
         default_factory=dict,
         description="Justificación breve de puntajes de atención, utilidad y difusión; no probabilidades",
     )
+    scope_class: Literal["prototipo_breve", "varias_sesiones", "demasiado_grande"] = Field(
+        default="prototipo_breve",
+        description="Alcance orientativo, no una promesa de tiempo",
+    )
+    minimum_version: str = Field(
+        default="Una interacción central comprobable con datos, regla o mecánica explícita",
+        description="Qué construir primero para validar la propuesta",
+    )
+    explicit_limits: List[str] = Field(
+        default_factory=list,
+        description="Qué queda fuera de la primera versión",
+    )
+    optional_extension: Optional[str] = Field(default=None)
+    learning_skill: str = Field(
+        default="La habilidad depende de la tecnología y evidencia finalmente elegidas",
+        description="Habilidad concreta que la construcción permitiría practicar",
+    )
+    prior_knowledge: str = Field(
+        default="Si se desconocen las habilidades del creador, indicar requisitos de forma condicional",
+    )
+    technical_difficulty: Literal["baja", "media", "alta"] = Field(default="media")
+    verification_effort: Literal["bajo", "medio", "alto"] = Field(default="medio")
+    difficulty_reason: str = Field(
+        default="Explicar por separado complejidad técnica y trabajo de comprobación",
+    )
+    manual_steps: List[str] = Field(
+        default_factory=list,
+        description="Pasos manuales de investigación, diseño, implementación y validación",
+    )
+    technical_dependencies: List[str] = Field(default_factory=list)
+    validation_cases: List[str] = Field(
+        default_factory=list,
+        description="Casos para comprobar cálculos, reglas o mecánica antes de compartir",
+    )
     evidence_status: Literal[
         "Pendiente de revisión",
         "Respaldo parcial",

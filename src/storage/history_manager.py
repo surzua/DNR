@@ -97,6 +97,18 @@ class HistoryEntry(BaseModel):
     shareable_artifact: Optional[str] = Field(default=None, description="Resultado reproducible o exportable")
     alternatives_review_status: str = Field(default="pending", description="Estado de revisión de alternativas")
     assessment_reasons: Dict[str, str] = Field(default_factory=dict, description="Razones de los puntajes")
+    scope_class: Optional[str] = Field(default=None, description="Alcance estimado del brief")
+    minimum_version: Optional[str] = Field(default=None, description="Primera versión construible")
+    explicit_limits: List[str] = Field(default_factory=list, description="Límites de la primera versión")
+    optional_extension: Optional[str] = Field(default=None, description="Ampliación opcional")
+    learning_skill: Optional[str] = Field(default=None, description="Habilidad a practicar")
+    prior_knowledge: Optional[str] = Field(default=None, description="Conocimientos previos condicionales")
+    technical_difficulty: Optional[str] = Field(default=None)
+    verification_effort: Optional[str] = Field(default=None)
+    difficulty_reason: Optional[str] = Field(default=None)
+    manual_steps: List[str] = Field(default_factory=list)
+    technical_dependencies: List[str] = Field(default_factory=list)
+    validation_cases: List[str] = Field(default_factory=list)
     evidence_status: str = Field(
         default="Propuesta (no verificada)",
         description="Nivel de comprobación de fuentes o reglas",
@@ -190,6 +202,18 @@ class HistoryEntry(BaseModel):
             shareable_artifact=getattr(opportunity, "shareable_artifact", None),
             alternatives_review_status=getattr(opportunity, "alternatives_review_status", "pending"),
             assessment_reasons=getattr(opportunity, "assessment_reasons", {}),
+            scope_class=getattr(opportunity, "scope_class", None),
+            minimum_version=getattr(opportunity, "minimum_version", None),
+            explicit_limits=getattr(opportunity, "explicit_limits", []),
+            optional_extension=getattr(opportunity, "optional_extension", None),
+            learning_skill=getattr(opportunity, "learning_skill", None),
+            prior_knowledge=getattr(opportunity, "prior_knowledge", None),
+            technical_difficulty=getattr(opportunity, "technical_difficulty", None),
+            verification_effort=getattr(opportunity, "verification_effort", None),
+            difficulty_reason=getattr(opportunity, "difficulty_reason", None),
+            manual_steps=getattr(opportunity, "manual_steps", []),
+            technical_dependencies=getattr(opportunity, "technical_dependencies", []),
+            validation_cases=getattr(opportunity, "validation_cases", []),
             evidence_status=getattr(opportunity, "evidence_status", "Propuesta (no verificada)"),
             validity_note=getattr(opportunity, "validity_note", None),
             known_facts=getattr(opportunity, "known_facts", []),

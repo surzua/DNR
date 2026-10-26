@@ -168,6 +168,16 @@ def test_format_opportunity_html_explains_concrete_share_circuit(sample_opportun
     assert "no se afirma unicidad" in formatted
 
 
+def test_format_opportunity_html_includes_compact_learning_brief(sample_opportunity: Opportunity):
+    sample_opportunity.minimum_version = "Elegir un escenario y obtener un resultado"
+    sample_opportunity.learning_skill = "Modelar estados de una interacción"
+    sample_opportunity.validation_cases = ["Escenario límite"]
+    formatted = format_opportunity_html(sample_opportunity)
+    assert "Brief para construir" in formatted
+    assert "Modelar estados" in formatted
+    assert "Escenario límite" in formatted
+
+
 def test_format_opportunity_html_truncation():
     giant_opp = {
         "headline": "Titular Normal",

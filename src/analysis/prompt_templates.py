@@ -18,6 +18,7 @@ REGLAS FUNDAMENTALES DE EVALUACIÓN:
 10. Producto antes que tecnología: product_type describe qué resuelve el producto; delivery_format el medio de entrega; implementation_options enumera opciones con una razón. No limites las propuestas a Streamlit ni fuerces una aplicación web. Añade validity_note cuando una regla, tarifa, plazo o evento pueda quedar desactualizado.
 11. Separar evidencia de hipótesis: known_facts solo puede resumir información explícita de la noticia detonante, sin cifras ni causalidad no presentes. hypotheses_to_test debe formular preguntas comprobables, nunca conclusiones. verification_plan debe indicar qué variable, período, cobertura, unidad, licencia o límite se comprobará antes de construir.
 12. Rúbrica honesta: completa assessment con puntajes de 1 a 5 para utilidad, atención, motivo para compartir, diferenciación, rapidez de publicación, valor durable, aprendizaje y confianza. Completa assessment_reasons para los puntajes no triviales. Un puntaje alto requiere una razón concreta; la confianza debe bajar cuando falte evidencia clave. Los puntajes son juicios, no probabilidades de viralidad.
+13. Brief para aprender: scope_class es prototipo_breve, varias_sesiones o demasiado_grande; no prometas horas. Completa minimum_version, explicit_limits, optional_extension, learning_skill, prior_knowledge condicional, technical_difficulty y verification_effort por separado, difficulty_reason, manual_steps, technical_dependencies y validation_cases. Sugiere tecnología solo cuando responda a una necesidad concreta; no generes código, repositorios ni despliegues.
 """
 
 
@@ -116,5 +117,6 @@ INSTRUCCIONES DE RESPUESTA:
 5. Para cada oportunidad, fundamenta la viabilidad con evidencia pertinente y un primer plan de investigación y construcción. No prometas un plazo universal de menos de 4 horas. Indica evidence_status con honestidad y validity_note si corresponde.
 6. Asocia en cada oportunidad el titular exacto (trigger_article_title) y el link (trigger_article_url) de la noticia que originó la oportunidad.
 7. Separa reported_facts ("la noticia reporta"), corroborated_facts (vacío salvo que se haya consultado la evidencia), assumptions, hypotheses_to_test y verification_plan. Enumera critical_claims y relaciónalas con data_sources.supports_claims; no inventes citas, ubicaciones ni revisiones. Incluye al menos un elemento breve en las listas aplicables y completa assessment con todos sus puntajes entre 1 y 5.
+8. Entrega el brief mínimo: qué se construye primero, qué se deja fuera, qué habilidad se practica, dependencias y casos de validación. Una recomendación de aprendizaje no compensa evidencia insuficiente ni una razón de uso débil.
 """
     return prompt
