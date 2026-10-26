@@ -1,245 +1,103 @@
-# 📡 Data Newsjacking Radar (DNR)
+# 📡 Data Newsjacking Radar (DNR) · v0.2
 
 [![CI Tests](https://github.com/surzua/DNR/actions/workflows/ci.yml/badge.svg)](https://github.com/surzua/DNR/actions/workflows/ci.yml)
 [![Daily Radar](https://github.com/surzua/DNR/actions/workflows/daily_radar.yml/badge.svg)](https://github.com/surzua/DNR/actions/workflows/daily_radar.yml)
 ![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)
-![Tests](https://img.shields.io/badge/tests-passing-brightgreen.svg)
 ![LLM](https://img.shields.io/badge/LLM-Gemini%20Flash-orange.svg)
 ![Alerts](https://img.shields.io/badge/Alerts-Telegram-0088cc.svg)
 
-Sistema autónomo de inteligencia de tendencias diseñado para detectar noticias de alta tracción y viralidad en Chile (políticas, económicas, regulatorias y sociales), evaluando de forma automática su viabilidad como **productos digitales útiles**: proyectos rápidos de Data Science, Analytics, Periodismo de Datos, calculadoras, comparadores, guías, planificadores y simuladores.
+DNR observa noticias y señales públicas, inicialmente en Chile, para proponer productos digitales que alguien pueda querer usar, entender, resolver o experimentar a raíz de un evento. Convierte la señal en un brief para decisión humana; no construye ni publica productos de forma autónoma.
 
-El objetivo es aprovechar la ventana dorada de atención pública (**24 a 72 horas**) publicando análisis cuantitativos, visualizaciones interactivas o simuladores que aporten evidencia empírica y contrasten narrativas públicas.
+Una propuesta puede ser una calculadora, comparador, guía, planificador, simulador, explicador, juego/desafío, utilidad local para archivos, recurso descargable o experiencia creativa. Data Science y Streamlit siguen disponibles cuando sirven, pero ya no son una restricción del radar.
 
----
+## Qué entrega una oportunidad
 
-## 🧭 ¿Cómo Funciona?
+- Audiencia, necesidad, primera interacción, producto, entradas y resultado.
+- Motivo concreto de difusión: quién compartiría qué, con quién y para qué.
+- Evidencia separada entre lo que la noticia reporta, hechos contrastados, supuestos e hipótesis.
+- Estado editorial (`Pendiente de revisión`, `Respaldo parcial`, `Lista para construir`) independiente del acceso HTTP de una URL.
+- Brief de construcción: alcance mínimo, límites, habilidad a practicar, dificultad técnica y de comprobación, dependencias y casos de validación.
 
-Cada día a las **11:37 AM CLT** (14:37 UTC), el radar se ejecuta de forma desatendida mediante **GitHub Actions** en horario de baja demanda global, completando el siguiente pipeline:
+La selección final, la investigación editorial, el diseño, desarrollo, despliegue y publicación pertenecen al creador.
 
-```text
-  [ Cron Diario 11:37 CLT / Manual ]
-                  │
-                  ▼
-   ┌──────────────────────────────┐
-   │ 1. Ingesta Multicanal        │ ◄── Feeds RSS (BioBío, La Tercera, DF, EMOL)
-   │    y Detección de Pulso      │ ◄── Reddit Público (r/chile, r/republicadechile)
-   └──────────────┬───────────────┘
-                  │ Raw Articles & Threads (+100 noticias)
-                  ▼
-   ┌──────────────────────────────┐
-   │ 2. Deduplicación Semántica   │ ◄── Historial data/history.json (últimos 7 días)
-   │    y Filtrado de Novedad     │ ─── Descarta tópicos analizados previamente
-   └──────────────┬───────────────┘
-                  │ Temas Emergentes no Explorados
-                  ▼
-   ┌──────────────────────────────┐
-   │ 3. Motor de Viabilidad LLM   │ ◄── Gemini Flash (Salida estructurada Pydantic)
-   │    (Ganchos & Estrategia)    │ ─── Exige fuentes públicas (APIs, CMF, INE, Wikipedia)
-   └──────────────┬───────────────┘
-                  │ Top Oportunidades (Viralidad >= 7, Viabilidad >= 6)
-                  ▼
-   ┌──────────────────────────────┐
-   │ 4. Despacho & Persistencia   │ ──► Alerta estructurada a Telegram Bot
-   │                              │ ──► Auto-commit y push a data/history.json
-   └──────────────────────────────┘
-```
-
----
-
-## 📱 Ejemplo Real de Alerta en Telegram
-
-Cada mañana recibes un briefing ejecutivo con un máximo de 3 tarjetas de oportunidad priorizadas, con formato HTML limpio y enlaces de 1-clic:
+## Flujo
 
 ```text
-🚀 OPORTUNIDAD DE DATA DETECTADA (Score: 8.5/10)
-
-📌 Tema: El Umbral del Apagón: Con cuántos mm de lluvia colapsa la red comunal
-📂 Categoría: Sociedad & Tendencias
-
-🎯 Gancho Cognitivo:
-Al correlacionar milímetros de agua con clientes sin luz se evidencia que 
-comunas de menores recursos sufren cortes masivos con apenas 10 mm de lluvia, 
-mientras comunas del sector oriente toleran más de 40 mm sin interrupciones críticas.
-
-📊 Fuentes de Datos Sugeridas:
-• Superintendencia de Electricidad y Combustibles (SEC) (Portal Abierto | Fricción: Baja)
-  ↳ https://www.sec.cl/interrupciones-en-linea/
-• Dirección Meteorológica de Chile (DMC) (API Pública | Fricción: Baja)
-  ↳ https://climatologia.meteochile.gob.cl/application/estaciones/datosDescarga/estaciones
-
-⏱️ Entregable: Gráfico Estático de Alto Impacto
-🛠️ Plan Rápido (< 4 horas):
-1. Extraer registros comunales de clientes afectados reportados por la SEC (48h).
-2. Cruzar con precipitaciones acumuladas por estación de la DMC.
-3. Graficar scatter plot y mapa coroplético del 'Índice de Fragilidad Eléctrica'.
-
-📰 Noticia Detonante: Lluvia causa estragos en la RM: miles de clientes sin luz
+RSS + Reddit + eventos fechados + Trends opcional
+                    │
+                    ▼
+  Contexto con fuente, publicación, detección y límites de señal
+                    │
+                    ▼
+  Evaluación estructurada: producto, evidencia, difusión y aprendizaje
+                    │
+                    ▼
+  Filtros deterministas y deduplicación por producto + necesidad
+                    │
+                    ▼
+  Historial trazable + resumen privado por Telegram
 ```
 
----
+Las señales de Reddit, Trends y cobertura repetida no se equiparan entre sí: cada una conserva procedencia y limitaciones. Google Trends usa su RSS público de Chile solo si se activa explícitamente en `config/sources.yaml`; una falla no interrumpe la ingesta principal. Los eventos previsibles se agregan manualmente como `scheduled_events` con fecha y fuente.
 
-## 🧠 Criterios de Evaluación del Motor LLM
+## Evidencia honesta
 
-El motor analítico ([src/analysis/opportunity_eval.py](src/analysis/opportunity_eval.py)) evalúa los artículos basándose en directrices estrictas:
+Una respuesta HTTP satisfactoria se guarda como `accessible`: significa solamente “URL accesible; contenido pendiente de revisión editorial”. No confirma que el contenido sea pertinente, actual, correcto o que respalde una conclusión. Las fuentes pueden registrar afirmaciones respaldadas, ubicación revisada, vigencia y comprobaciones pendientes. Un bloqueo de acceso es incertidumbre, no falsedad.
 
-1. **Utilidad y gancho:** Además de un ángulo curioso, cada propuesta especifica audiencia, necesidad, acción, entradas y resultado. El tipo de producto describe lo que resuelve —no la tecnología— y puede ser una calculadora, comparador, guía, planificador, simulador, verificador, visualización o análisis.
-2. **Fuentes abiertas y evidencia honesta:** Antes de notificar, el detonante debe coincidir exactamente con una noticia ingerida y al menos una URL de datos debe responder con contenido legible. La comprobación registra accesibilidad técnica; no presenta la fuente como evidencia editorial comprobada.
-3. **Filtro de umbral y fuente disponible:** Solo califica si `virality_score >= 7`, `technical_feasibility_score >= 6` y al menos una fuente de datos URL responde correctamente con un contenido legible. Si no hay temas relevantes un día, despacha una notificación de tranquilidad sin generar spam.
-4. **Hipótesis, verificación y prioridad:** Cada tarjeta separa el hecho conocido de la hipótesis por comprobar y del control que falta antes de construir. Además prioriza utilidad, atención, posibilidad de compartir, diferenciación, rapidez, valor durable y confianza; los puntajes no sustituyen los gates de trazabilidad y fuente.
-5. **Plan y vigencia:** Cada tarjeta entrega un roadmap táctico de 3 pasos accionables en menos de 4 horas y puede indicar cuándo una regla, tarifa, plazo o evento debe revisarse. El historial guarda el estado, fecha, código HTTP y tipo de contenido de cada verificación.
-6. **Descartes auditables:** Los candidatos que fallen un filtro determinista se guardan con su motivo, no se envían a Telegram y no bloquean que la misma noticia se reevalúe con nueva evidencia o un ángulo distinto.
+Las ideas con evidencia incompleta pueden quedar como prometedoras pero pendientes; no se presentan como listas para construir. Los casos de regresión documentados están en [docs/REVIEW_CASES.md](docs/REVIEW_CASES.md).
 
----
-
-## 📂 Estructura del Repositorio
-
-```text
-DNR/
-├── .github/
-│   └── workflows/
-│       ├── daily_radar.yml        # Orquestación matutina (07:23 CLT) + alertas de fallo
-│       └── ci.yml                 # CI automático con pytest en cada push/PR
-├── config/
-│   └── sources.yaml               # Catálogo de feeds RSS, subreddits y parámetros
-├── data/
-│   ├── history.json               # Base histórica de oportunidades y deduplicación
-│   └── latest_articles.json       # Cache local de última recolección (ignorado en Git)
-├── docs/
-│   └── SYSTEM_SPEC.md             # Especificación técnica y arquitectura completa
-├── src/
-│   ├── analysis/                  # Evaluación LLM con Gemini y schemas Pydantic
-│   ├── ingestion/                 # Parsers RSS multicanal y cliente ligero de Reddit
-│   ├── models/                    # Modelos de datos fuertemente tipados
-│   ├── notifiers/                 # Despachador seguro de Telegram (HTML + fallback)
-│   └── storage/                   # Persistencia, control de duplicados y rotación
-├── tests/                         # Batería de pruebas unitarias y de integración
-├── main.py                        # Entrypoint CLI del pipeline
-├── pyproject.toml / requirements.txt
-└── README.md
-```
-
----
-
-## ⚙️ Configuración y Variables de Entorno
-
-Crea un archivo local `.env` a partir de la plantilla:
+## Instalación y uso
 
 ```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
 cp .env.example .env
 ```
 
-Define las siguientes credenciales:
-
-| Variable | Descripción | ¿Dónde obtenerla? |
-| :--- | :--- | :--- |
-| `GEMINI_API_KEY` | Llave de API para Gemini Flash | Gratis en [Google AI Studio](https://aistudio.google.com/) |
-| `TELEGRAM_BOT_TOKEN` | Token de acceso del Bot | Chat con [@BotFather](https://t.me/BotFather) en Telegram |
-| `TELEGRAM_CHAT_ID` | Tu ID de usuario de Telegram | Reenviando un mensaje a [@userinfobot](https://t.me/userinfobot) |
-
----
-
-## 🚀 Instalación y Uso Local
+Configura `GEMINI_API_KEY` para evaluar oportunidades. `TELEGRAM_BOT_TOKEN` y `TELEGRAM_CHAT_ID` solo son necesarios para el envío real.
 
 ```bash
-# 1. Crear y activar entorno virtual
-python3 -m venv .venv
-source .venv/bin/activate
-
-# 2. Instalar dependencias
-pip install -r requirements.txt
-
-# 3. Ejecutar el radar completo
-python main.py
-```
-
-### Banderas de la Interfaz de Línea de Comandos (CLI)
-
-```bash
-# Simular el despacho mostrando el mensaje formateado en consola sin enviar a Telegram
-# ni modificar data/history.json
-python main.py --dry-run
-
-# Analizar una ventana de tiempo retroactiva (ej: últimos 3 días o 7 días)
-python main.py --days 3
-
-# Ajustar los días de enfriamiento para no repetir noticias detonantes
-# (defecto: pipeline.history_days_lookback; 0 para desactivar)
-python main.py --cooldown-days 7
-
-# Reutilizar el snapshot local de noticias para no hacer scraping de red nuevamente
-python main.py --use-cache
-
-# Probar únicamente la recolección de noticias sin consumir tokens de Gemini
+# Recolectar fuentes sin usar el modelo ni modificar historial
 python main.py --skip-llm
 
-# Evaluar oportunidades y actualizar data/history.json sin enviar a Telegram
+# Ejecutar evaluación y mostrar el despacho sin enviar ni persistir
+python main.py --dry-run
+
+# Reutilizar el snapshot local de artículos
+python main.py --use-cache --dry-run
+
+# Omitir Telegram y persistir solo el historial de la corrida
 python main.py --skip-telegram
+
+# Ejecutar pruebas deterministas
+pytest -q
 ```
 
-### Seguimiento de publicación y resultados
+## Configuración de señales
 
-El historial también permite registrar qué oportunidades se construyeron y qué resultado tuvieron, sin ejecutar el radar ni requerir credenciales de Gemini o Telegram:
+`config/sources.yaml` contiene feeds RSS, subreddits, umbrales y estas opciones:
 
-```bash
-# Elegir una oportunidad para construir
-python main.py --mark-selected 2026-10-25-001
+- `verify_source_urls`: registra acceso técnico acotado a URLs.
+- `require_accessible_source`: opcional y desactivado por defecto; si se activa, descarta propuestas sin URL accesible, pero no las marca como revisadas editorialmente.
+- `trends.enabled`: activa el RSS público de Google Trends para Chile después de comprobar su disponibilidad en el entorno.
+- `scheduled_events`: lista manual de eventos con `title`, `date` ISO y `source_url`.
 
-# Registrar la publicación de una herramienta
-python main.py --mark-published 2026-10-25-001 \
-  --product-url https://tu-dominio.cl/calculadora \
-  --publication-notes "Publicada en LinkedIn y compartida con la audiencia objetivo"
+El historial es compatible con registros previos: los campos nuevos tienen defaults conservadores y nunca reclasifican una evidencia antigua como revisada.
 
-# Actualizar los totales observados (no incrementos)
-python main.py --record-metrics 2026-10-25-001 \
-  --visits 240 --task-completions 86 --share-clicks 18 --corrections 1 --hours-invested 3.5
+## Automatización
 
-# Archivar una herramienta desactualizada
-python main.py --mark-archived 2026-10-25-001 --publication-notes "Regla reemplazada por una nueva versión"
+GitHub Actions ejecuta el radar diariamente y puede persistir el historial. La ejecución se serializa para evitar solapamientos. No hay cuotas de alerta: pueden existir hasta tres propuestas, una o ninguna. Las alertas de Telegram son privadas y no publican contenido ni miden su rendimiento.
 
-# Revisar publicaciones y métricas de los últimos siete días
-python main.py --publication-report
+## Estructura
 
-# Revisar los candidatos descartados y por qué se descartaron
-python main.py --rejection-report
+```text
+src/analysis/      # Contrato, prompt, selección y evidencia
+src/ingestion/     # RSS, Reddit, Trends opcional y eventos fechados
+src/storage/       # Historial y snapshot compatibles
+src/notifiers/     # Tarjeta privada de Telegram
+tests/             # Pruebas unitarias, integración y casos de revisión
+docs/              # Especificación, roadmap y casos revisados
 ```
 
-Los estados de publicación son `unpublished`, `selected`, `published` y `archived`. El historial además conserva los descartes deterministas como `evaluation_status: rejected`, con su motivo; no se reenvían ni bloquean una futura reevaluación del detonante. El reporte de publicación incluye visitas, resultados completados, clics para compartir, correcciones y horas invertidas de las piezas publicadas durante el período.
-
----
-
-## 🧪 Pruebas Automatizadas
-
-El proyecto incluye pruebas unitarias y de integración que validan la ingesta de fuentes, el motor de Gemini, la deduplicación, la verificación HTTP de fuentes y el despacho a Telegram:
-
-```bash
-pytest tests/
-```
-
----
-
-## ☁️ Automatización en GitHub Actions (Desatendido)
-
-El sistema corre en la nube sin costo de servidores gracias a **GitHub Actions**:
-
-- **Frecuencia:** Ejecución diaria a las **14:37 UTC** (`37 14 * * *`), correspondiente a las **11:37 AM CLT** (horario de verano) / **10:37 AM CLT** (horario de invierno). Diseñado para operar en el valle de menor demanda global de GitHub y tras la publicación de portadas matutinas chilenas.
-- **Ejecución Manual:** Pestaña *Actions > Daily Data Newsjacking Radar > Run workflow* (permite activar `--dry-run` o `--skip-llm` desde la UI).
-- **Persistencia Autónoma:** Actualiza `data/history.json` directamente en el repositorio usando `[skip ci]`.
-- **Alertas de Emergencia:** Si ocurre un fallo en los servidores de GitHub, envía una alerta instantánea a Telegram con el link al run para diagnosticar en segundos.
-- **Concurrencia:** Las ejecuciones del radar se serializan para evitar alertas duplicadas y conflictos al actualizar el historial.
-
-Los valores de `pipeline` en `config/sources.yaml` son la configuración efectiva para la ventana de ingesta, enfriamiento, umbrales, límite de oportunidades y verificación de fuentes. `verify_source_urls`, `require_verified_source` y `source_verification_timeout_seconds` controlan el gate previo a Telegram. La verificación confirma que una URL pública responde sin redirecciones con contenido legible; no reemplaza la revisión editorial de sus variables, licencia o interpretación. Los flags `--days` y `--cooldown-days` permiten sobrescribir solo la corrida actual. Una ejecución sin oportunidades termina correctamente; un error de configuración, evaluación o despacho termina con un código distinto de cero para que GitHub Actions pueda alertarlo.
-
-### Configuración requerida en GitHub:
-1. En **Settings > Secrets and variables > Actions**, agrega los 3 secrets: `GEMINI_API_KEY`, `TELEGRAM_BOT_TOKEN` y `TELEGRAM_CHAT_ID`.
-2. En **Settings > Actions > General > Workflow permissions**, selecciona **"Read and write permissions"** para autorizar el auto-commit del historial.
-
----
-
-## 🛠️ Stack Tecnológico
-
-- **Lenguaje:** Python 3.11+
-- **Motor de Ingesta:** `feedparser`, `requests`, `pyyaml`
-- **Inteligencia Artificial:** Google Gemini Flash (`google-genai`), con schemas estructurados en `pydantic` v2
-- **Mensajería:** Telegram Bot API (HTTP REST con sanitización HTML)
-- **CI/CD & Cloud:** GitHub Actions, Ubuntu runners y `pytest`
+Consulta [docs/STRATEGY_REVIEW.md](docs/STRATEGY_REVIEW.md) para la estrategia, límites y criterios completos de DNR v0.2.

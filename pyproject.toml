@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "data-newsjacking-radar"
-version = "0.1.0"
-description = "Automated trend intelligence system to detect high-traction Chilean news and evaluate Data Science / Analytics feasibility."
+version = "0.2.0"
+description = "Trend radar for Chile that turns public signals into evidence-aware digital product opportunities."
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [

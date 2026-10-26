@@ -1,189 +1,232 @@
-# DNR: ampliar oportunidades y construir alcance con utilidad
+# DNR: estrategia y roadmap vigente
 
-Fecha: 25 de octubre de 2026. Análisis del repositorio actual, sus 54 oportunidades históricas y fuentes externas. Las recomendaciones son propuestas; no modifican el pipeline vigente. La ejecución diaria mediante cron externo se considera resuelta.
+**Actualización:** 26 de octubre de 2026.
 
-## 1. Diagnóstico
+**Estado:** las seis etapas están implementadas en DNR v0.2 y cubiertas por validación determinista. La revisión editorial de oportunidades concretas sigue siendo manual.
 
-Sí conviene ampliar el alcance. El radar ya contempla simuladores y apps, pero los interpreta dentro de un marco de Data Science y periodismo de datos. La limitación principal es la pregunta que intenta responder: «¿qué análisis cuantitativo puedo hacer con esta noticia?». Propongo agregar «¿qué necesita entender, calcular, decidir o hacer una persona a raíz de esta noticia, y qué podemos construir para ayudarla?».
+**Próximo paso:** revisar los briefs reales antes de construirlos y activar Google Trends solo después de comprobar su disponibilidad en el entorno.
 
-Propuesta de misión: **Detectar cambios y conversaciones relevantes en Chile y transformarlos en herramientas y explicaciones digitales útiles, verificables y fáciles de compartir.**
+Este documento reemplaza el análisis estratégico y las prioridades anteriores. Es la referencia del roadmap a partir de este punto. Actualizarlo no modifica el pipeline ni significa que las mejoras ya estén implementadas.
 
-La analítica, la programación web y la IA son capacidades disponibles. El formato se elige según la necesidad y el tiempo; no es necesario encontrar un dataset grande para justificar cada propuesta. Una calculadora con una fórmula pública, un asistente basado en reglas verificadas o un planificador con fechas oficiales también pueden tener valor.
+## 1. Objetivo y límites acordados
 
-La ampliación abre oportunidades plausibles. No permite cuantificar cuántas se perdieron: el historial conserva seleccionados, no todas las alternativas ni sus descartes. Tampoco prueba que una app tenga más alcance que un gráfico. Eso requiere publicar y medir.
+**Misión:** detectar noticias y conversaciones relevantes, inicialmente en Chile, y convertirlas en propuestas de productos digitales con potencial de viralidad, información comprobable y oportunidades concretas de aprendizaje al construirlos.
 
-## 2. Evidencia interna
+La pregunta que guía al radar es: **«¿Qué podría querer hacer, entender, resolver o experimentar alguien a raíz de esta noticia, y qué podemos construir para responder a eso?»**.
 
-| Hallazgo | Interpretación y acción |
+La solución puede ser una app web que viva en Vercel, una calculadora, un simulador, un juego, un explicador, una utilidad para archivos o un recurso descargable. Data Science sigue siendo una capacidad disponible, pero no es un requisito. Tampoco lo son un dataset grande, un backend o una llamada a un LLM.
+
+Las tres condiciones de selección son:
+
+1. **Potencial de difusión:** una audiencia concreta tiene una razón entendible para usar y compartir el producto. Utilidad práctica, curiosidad, entretenimiento, coordinación y expresión personal son vías posibles.
+2. **Honestidad:** las afirmaciones tienen respaldo identificable; supuestos, escenarios y comprobaciones pendientes se muestran como tales. Una conclusión no se elige por lo llamativa que resulte.
+3. **Aprendizaje:** el creador puede elegir, investigar, programar, comprender y validar la solución manualmente. Cada propuesta explica qué habilidad permitiría practicar.
+
+La viralidad es la finalidad, no una promesa ni una propiedad comprobada por un puntaje del modelo. Este roadmap mejora la selección y el diseño de oportunidades; sus verificaciones internas no demuestran alcance real.
+
+### Responsabilidades y fuera de alcance
+
+| DNR automatiza | El creador realiza manualmente |
 |---|---|
-| 31 de 54 candidatos son gráficos; 23 son apps Streamlit | Ya existe interés por interactividad, pero el formato de app está ligado a un framework. Separar producto y tecnología. |
-| El schema solo admite gráfico, app Streamlit y análisis predictivo/optimización | No permite expresar directamente guías interactivas, planificadores, comparadores, juegos, generadores y verificadores basados en reglas. |
-| Prompt centrado en ángulos contraintuitivos y evidencia cuantitativa | Puede privilegiar una historia llamativa sobre una tarea práctica. Incorporar necesidad, audiencia, acción y motivo para compartir. |
-| Los 54 registros tienen estado `candidate` | El archivo no documenta selección, publicación ni resultados. No se puede evaluar éxito con él; podría existir seguimiento fuera del repositorio. |
-| 37 de 54 combinaciones de puntajes son (9,8), (8,9) u (8,8) | Hay poca discriminación entre seleccionados. Como el historial ya está filtrado, esto no demuestra mala calibración por sí solo. Guardar también descartes y justificaciones. |
-| El modelo propone fuentes y ahora se comprueba su disponibilidad HTTP | Una respuesta legible confirma acceso técnico, no variables, periodo, licencia ni interpretación. Mantener revisión editorial antes de publicar. |
-| Hay propuestas con cifras, causalidad y conclusiones anticipadas | El generador necesita distinguir hechos de la noticia, hipótesis y hallazgos todavía inexistentes. |
+| Recolección de noticias y señales públicas | Elección de la oportunidad |
+| Preparación y comparación de propuestas | Investigación y comprobación editorial final |
+| Comprobaciones técnicas acotadas y trazabilidad | Diseño, desarrollo y comprensión del producto |
+| Brief y alerta privada de oportunidad | Validación, despliegue y publicación |
+| Historial de propuestas y motivos de descarte | Seguimiento posterior, si decide hacerlo por su cuenta |
 
-Ejemplos del historial, citados como contenido generado y no como hechos comprobados:
+Quedan fuera de este roadmap:
 
-- Una propuesta afirma que un escaneo «demuestra» que más del 60% de los dominios de apuestas elude bloqueos, cuando ese escaneo es parte del plan pendiente. Además, probar DNS/HTTP desde un resolvedor no demuestra por sí solo el bloqueo efectivo en todos los proveedores.
-- Otra atribuye pérdidas de un fondo previsional a exposición agresiva a derivados, antes de descargar y analizar carteras. La existencia de una pérdida no identifica su causa.
-- Otra equipara ejecución presupuestaria municipal con recursos disponibles para enfrentar emergencias. Ese vínculo requiere validar clasificación contable, compromisos, liquidez y fecha de los datos.
+- Desarrollo autónomo de productos, generación automática de repositorios, agentes que construyen apps o despliegues automáticos desde el radar.
+- Automatización de publicaciones, mensajes a terceros o campañas de distribución.
+- Seguimiento de productos publicados, dashboards de resultados, vistas, likes, visitas, conversiones y atribución profesional.
+- Cuotas de publicación o experimentos que exijan publicar piezas para cerrar una etapa.
+- Más trabajo de programación del cron: la ejecución diaria externa se considera resuelta.
 
-Cambio editorial prioritario: reemplazar «los datos demuestran X» por «comprobar si X, usando Y; si no se verifica, publicar el resultado real». Una conclusión no se elige por su potencial de viralidad.
+Diseñar un motivo para compartir, un resultado exportable o una vista previa sí forma parte de la oportunidad. Publicarlo o medir su rendimiento no es una función nueva de DNR.
 
-## 3. Familias de oportunidad
+El código ya incluye comandos opcionales de publicación y métricas. Este roadmap no exige usarlos, ampliarlos ni borrarlos; su existencia no convierte esas funciones en trabajo pendiente.
 
-Los ejemplos siguientes ilustran respuestas a tipos de noticias y temas del historial; no son afirmaciones de que sean tendencia hoy ni de que sus fuentes ya estén verificadas.
+## 2. Punto de partida confirmado
 
-| Detonante | Necesidad concreta | Producto posible | Motivo para compartir | Condición de viabilidad |
-|---|---|---|---|---|
-| Cambio de tarifa eléctrica | Entender el impacto en mi cuenta | Calculadora de escenarios | Avisar a familiares | Fórmula, componentes y vigencia verificados; no aplicar un porcentaje nacional a toda la boleta sin respaldo |
-| Cambio de peajes o viaje masivo | Presupuestar un trayecto | Comparador de peajes y combustible | Coordinar un viaje | Tarifas, categoría vehicular y supuestos claros; no prometer tráfico en vivo sin datos |
-| Anuncio de beneficio o trámite | Saber requisitos y próximos pasos | Guía interactiva de requisitos | Ayudar a alguien | Reglas oficiales, estado anunciado/aprobado/vigente y enlace de solicitud oficial |
-| Cambio laboral | Entender un horario o preparar una conversación | Planificador de jornada | Comparar escenarios en un equipo | Excepciones y reglas verificadas; no presentar una simulación como dictamen legal |
-| Torneo deportivo | Explorar qué combinaciones clasifican | Simulador de escenarios | Debatir con amigos | Tabla, reglamento y desempates actuales |
-| Debate sobre precios o inflación | Entender mi canasta | Comparador de escenarios de gasto | Comparar hábitos sin publicar datos privados | Canasta y supuestos explícitos; diferenciar precios individuales e índice agregado |
-| Anuncio cultural o espectáculo | Organizar una salida | Calendario o planificador | Coordinar un grupo | Horarios oficiales y estado de actualización |
-| Discusión viral sobre probabilidades | Entender una intuición equivocada | Minijuego o simulación visual | Desafiar a amigos | Resultado reproducible y explicación fiel |
-| Cambio en una plataforma digital | Completar una tarea nueva | Herramienta de migración o checklist | Ayudar a colegas | Acceso permitido y tratamiento mínimo de datos |
+La revisión actual considera código, configuración y 65 registros históricos: 34 gráficos, 29 apps Streamlit y 2 análisis predictivos/optimización. Es una descripción del historial acumulado, no una evaluación de calidad ni una prueba de oportunidades perdidas.
 
-Prioridad inicial sugerida: herramientas de costo de vida y trámites; luego explicaciones y simulaciones profesionales; finalmente experimentos lúdicos ligados a actualidad. Como hipótesis de cartera, probar 60% utilidad cotidiana, 30% explicación analítica y 10% exploración durante un mes, revisando el reparto según resultados. No son cuotas rígidas de alertas diarias.
+| Área | Qué existe | Qué falta o debe corregirse |
+|---|---|---|
+| Operación | RSS, Reddit, evaluación estructurada, Telegram, historial y ejecución diaria externa | Mantener esta base; no replantear el cron |
+| Producto | Audiencia, necesidad, acción, entradas, salida y motivo para compartir | Eliminar restricciones antiguas que siguen forzando el enfoque analítico |
+| Formatos | product_type incluye calculadoras, comparadores, guías y planificadores | suggested_deliverable solo admite gráfico, app Streamlit y análisis predictivo/optimización; faltan juegos y utilidades |
+| Prompt | Separa known_facts, hypotheses_to_test y verification_plan | Aún exige ángulo cuantitativo nuevo en temas recurrentes y planes de menos de cuatro horas |
+| Fuentes | Tipos orientados a APIs, datasets, portales, Wikipedia y scraping | Representar reglas oficiales, reglamentos, documentación y otras evidencias pertinentes |
+| Verificación | Detonante perteneciente a la ingesta y disponibilidad HTTP de fuentes | HTTP y tipo de contenido no comprueban respaldo editorial; «Verificada» es una etiqueta ambigua |
+| Contexto | La ingesta conserva fechas y resúmenes | El fragmento enviado al modelo recorta el resumen a 180 caracteres y omite la fecha |
+| Selección | Rúbrica por dimensiones, confianza y descartes deterministas | Justificar puntajes y contemplar valor lúdico, aprendizaje y esfuerzo manual |
+| Novedad | Exclusión por título/URL de detonantes recientes | No bloquear otro producto útil solo por partir de la misma noticia |
+| Búsquedas | Archivo trends_client.py | Placeholder con NotImplementedError; no aporta señales al pipeline |
 
-En temas de emergencia, una herramienta debe apoyar información oficial y mostrar su fecha. Un mapa histórico no debe declarar una vivienda segura ni sustituir una alerta oficial.
+Los problemas operativos del análisis anterior no se arrastran como pendientes sin revisar el código. Actualmente existen códigos de salida para errores, dry-run sin persistencia del historial, estado/reintento de entrega a Telegram y concurrencia en el workflow. Esto no garantiza entrega exactamente una vez, pero evita proponer de nuevo esas capacidades como si no existieran.
 
-## 4. De atención a uso y difusión
+## 3. Familias de oportunidad abiertas
 
-Una noticia crea un contexto de interés; la herramienta necesita además resolver una tarea. La cadena a diseñar es: alguien ve una promesa concreta, entiende su relevancia, obtiene un resultado y tiene una razón para compartirlo.
+Los ejemplos ilustran tipos de producto. No afirman que los temas sean tendencia hoy ni que sus fuentes ya estén comprobadas.
 
-Preguntas obligatorias para una oportunidad:
-
-1. ¿A quién afecta el cambio y qué pregunta se hace esa persona?
-2. ¿Qué hace hoy para resolverla y qué herramienta existente ya la ayuda?
-3. ¿Qué obtendrá con dos o tres entradas o una interacción breve?
-4. ¿Por qué otra persona querría abrir el resultado o recibir la herramienta?
-5. ¿Dónde se puede alcanzar a esa audiencia de forma pertinente?
-6. ¿Qué evidencia hace confiable la respuesta?
-
-Diseño propuesto para las apps: móvil primero, sin registro salvo necesidad real, ejemplo precargado, resultado temprano, fuentes visibles, fecha de actualización y supuestos editables. El objetivo inicial de obtener valor en menos de un minuto es una meta de diseño que hay que observar en uso, no una afirmación probada.
-
-Cada producto debe incluir un paquete de distribución: promesa, demostración corta, imagen comprensible en un post y enlace. La pieza debe aportar valor incluso si el lector no abre la app. Para el producto, preparar una tarjeta de resultado opcional y un botón para copiar enlace o compartir; verificar que la vista previa funcione en los canales elegidos.
-
-Compartir tiene razones distintas: utilidad («te puede servir»), coordinación («decidamos juntos»), curiosidad («prueba qué pasa») e identidad («este es mi resultado»). Elegir una razón concreta. No publicar sueldo, RUT, dirección u otros datos personales en URLs, imágenes o analítica.
-
-LinkedIn puede servir para mostrar criterio y capacidad profesional; grupos y conversaciones pertinentes pueden distribuir una herramienta cotidiana; periodistas y organizaciones pueden amplificar recursos verificables. Cada oportunidad debe elegir un canal inicial y una audiencia, sin asumir preferencias del algoritmo ni automatizar mensajes a terceros.
-
-## 5. Evidencia externa y límites
-
-- Berger y Milkman estudian qué contenido se comparte y encuentran asociaciones con utilidad práctica, interés, sorpresa y activación emocional. La implicación propuesta para DNR es diseñar valor y una razón para compartir. No es evidencia de que una calculadora chilena en 2026 vaya a volverse viral. El estudio también muestra diferencias por forma de difusión: no conviene trasladar resultados entre canales sin medir. [Investigación original](https://jonahberger.com/wp-content/uploads/2013/02/ViralityB.pdf).
-- El Digital News Report 2025 de Reuters Institute reporta 36% de confianza general en noticias para Chile y 37% que comparte noticias por redes, mensajería o email. Son resultados de esa edición y muestra, no un pronóstico de alcance para DNR. Refuerzan la importancia de confianza y distribución. [Chile 2025](https://reutersinstitute.politics.ox.ac.uk/digital-news-report/2025/chile).
-- Google describe Trending Now como detector de aumentos de búsquedas con contexto temporal. Esa señal puede complementar la cobertura de medios y Reddit. El volumen de titulares no equivale a interés de búsqueda. [Descripción oficial](https://blog.google/products-and-platforms/products/search/google-trends-trending-now-update/).
-- El anuncio de la API de Trends consultado describe acceso alpha limitado y datos hasta dos días atrás. No debe confundirse ese producto con Trending Now ni suponerse acceso irrestricto o idoneidad para detección inmediata. Antes de integrar, comprobar disponibilidad actual para la cuenta y el acceso permitido para Chile. [Anuncio oficial](https://developers.google.com/search/blog/2025/07/trends-api).
-- Vercel documenta alertas y pausa de producción en Spend Management para planes compatibles. Configurar un importe por sí solo no detiene el consumo y la pausa tiene demoras. Esto favorece apps estáticas y cálculo local cuando basten. [Documentación oficial](https://vercel.com/docs/spend-management).
-
-## 6. Cambios al motor de oportunidades
-
-### Descubrimiento y verificación
-
-Separar generación amplia de evaluación. Agrupar noticias del mismo evento y generar alternativas de análisis, herramienta práctica y experiencia interactiva. Después comprobar la fuente, la regla o el dato necesario para cada finalista. Enviar como máximo tres oportunidades sigue siendo razonable; reducir a una cuando solo haya una buena.
-
-La trazabilidad debe ser verificable por código: el título y enlace detonantes tienen que corresponder a un artículo ingerido. El filtro de salida ya comprueba pertenencia al conjunto original y el pipeline consulta las fuentes URL antes de notificar. Que una URL responda no demuestra que sea una fuente auténtica o suficiente.
-
-La validación de datos debe comprobar algo más que un HTTP 200: contenido correcto, variables disponibles, periodo, geografía, unidades, formato, licencia o condiciones de uso, y una muestra mínima utilizable. Registrar «propuesta», «localizada» y «verificada» como estados distintos. Las sugerencias prometedoras pero sin evidencia deben quedar como investigación pendiente.
-
-### Ranking
-
-Separar atención de la noticia, utilidad del producto y posibilidad de distribución. Reemplazar la aparente precisión del único puntaje de viralidad por dimensiones justificadas y una confianza explícita.
-
-Gates previos: detonante real; fuente o regla verificada; alcance seguro y publicable; MVP dentro del presupuesto disponible. Una falla grave de evidencia no se compensa con popularidad.
-
-Ranking inicial propuesto, con todas las dimensiones entre 0 y 5:
-
-| Dimensión | Peso inicial | Evidencia que pedir |
-|---|---:|---|
-| Necesidad o utilidad | 25% | Tarea y audiencia específicas |
-| Atención y oportunidad temporal | 20% | Señales observadas, timestamps y corroboración |
-| Razón para compartir | 15% | Qué se comparte y a quién le sirve |
-| Diferenciación | 15% | Alternativas existentes y mejora concreta |
-| Tiempo hasta publicar | 15% | Trabajo total estimado y dependencias |
-| Valor después de la noticia | 10% | Reutilización o mantenimiento razonable |
-
-Es una rúbrica inicial, no un modelo predictivo validado. Guardar razones, incertidumbre y descartes; ajustarla con publicaciones reales. Cuando falte una señal, registrar ausencia en lugar de inventar una cifra. Normalizar señales dentro de cada fuente: comentarios de Reddit y cobertura periodística no tienen la misma unidad.
-
-### Schema propuesto
-
-Agregar `audience`, `user_need`, `user_action`, `product_type`, `inputs`, `output`, `share_reason`, `distribution_channel`, `existing_alternatives`, `evidence_status`, `verified_sources`, `hypotheses_to_test`, `attention_signals`, `confidence`, `build_hours`, `verification_hours`, `distribution_hours`, `maintenance_cost`, `expires_at` y `rejection_reason` cuando corresponda.
-
-Separar `product_type` de `implementation_stack`: calculadora es un producto; Next.js o Streamlit es una implementación. Incluir rutas sin backend o sin IA. Conservar compatibilidad con el historial y el formateador de Telegram mediante valores predeterminados o una migración explícita.
-
-## 7. Captación y vigencia
-
-- Integrar Google Trends después de ampliar criterios y verificación. Su valor es corroborar demanda, descubrir preguntas y observar evolución; no sustituir el juicio editorial.
-- Mantener RSS y Reddit con métricas de disponibilidad. Que falle una fuente no debe detener todas, pero sí quedar visible que la cobertura fue parcial.
-- Registrar eventos y series temporales: primera detección, última actualización, fuentes independientes, señales y agotamiento. La cantidad de republicaciones no equivale a corroboración independiente.
-- Agregar un calendario de eventos previsibles con fuentes oficiales: cambios con fecha de entrada en vigor, plazos, torneos y anuncios programados. Preparar un prototipo antes del pico puede ser más viable que empezar al día siguiente.
-- El cron diario actual es una buena base. Solo aumentar frecuencia si se demuestra que las oportunidades llegan tarde; se puede probar ingesta barata cada pocas horas y evaluación adicional solo ante cambios importantes, sin convertirlo en requisito inicial.
-- Separar ventana de noticia, vigencia de la regla y vida útil del producto. Un anuncio y una norma vigente merecen tratamientos distintos.
-- Revisar deduplicación: actualmente excluir una noticia reciente antes de generar alternativas puede impedir un segundo producto útil con el mismo detonante. Distinguir evento, necesidad, ángulo, producto y estado de publicación.
-- Alinear el prompt con `--days` y `--cooldown-days`: el texto todavía presenta una ventana fija de 24 horas y no siempre refleja la ventana usada realmente.
-
-## 8. Producción y Vercel
-
-Mantener DNR como radar y construir cada herramienta con un alcance explícito. Compartir componentes y plantillas para calculadoras, comparadores, guías, simuladores y tarjetas de resultados reduce el tiempo de producción.
-
-Vercel es una opción razonable para frontends web. Usar HTML/JavaScript o React/Next.js con datos estáticos versionados cuando sea suficiente. Python puede preparar el dataset previamente; no necesita ejecutarse por visitante. Reservar servicios de backend para necesidades reales. Streamlit sigue siendo una opción válida cuando acelere una pieza analítica.
-
-El presupuesto de tiempo debe incluir evidencia, diseño, pruebas de fórmulas y casos límite, experiencia móvil, despliegue, texto de publicación y verificación de enlaces. «Menos de cuatro horas» no debe significar solo que un prototipo arranca.
-
-Si una noticia exige OCR extenso, geocodificación, modelos nuevos o múltiples fuentes inestables, reducir el alcance, cambiar de formato o descartarla. La IA puede ayudar a desarrollar y preparar contenido; no hace falta poner una llamada LLM por usuario en una herramienta que se resuelve con reglas.
-
-Cada app publicada necesita propietario, fuente, fecha, versión de reglas y criterio de vencimiento. Si el dato deja de estar vigente, mostrar estado desactualizado o archivar la herramienta. Preparar caché y un presupuesto de infraestructura acorde al posible tráfico.
-
-## 9. Observabilidad y fiabilidad pendientes
-
-Hallazgos del flujo actual que conviene corregir al evolucionarlo:
-
-1. **Fallos que parecen éxito:** `main.py` captura excepciones del evaluador y termina con `return`. El proceso puede salir con código 0 y no activar el paso `if: failure()` del workflow. Diferenciar fallo técnico y resultado válido sin oportunidades.
-2. **Historial y envío mezclados:** las oportunidades se guardan antes del despacho. Si Telegram falla, quedan registradas y pueden quedar excluidas en la siguiente corrida. Registrar estado de entrega y reintentar sin duplicar envíos.
-3. **Simulación con efectos:** `--dry-run` simula Telegram, pero sigue guardando candidatos en el historial. Dar a la simulación una semántica clara y aislar sus efectos del seguimiento productivo.
-4. **Respuesta inválida como vacío:** si no se obtiene una estructura usable, el evaluador puede devolver cero oportunidades. Registrar ese caso como error de evaluación, no como ausencia de oportunidades.
-5. **Parámetros dispersos:** los umbrales y límites aparecen en YAML, defaults de funciones y prompt; `main.py` no conecta todos esos valores a la evaluación. Unificar configuración efectiva y registrarla por corrida.
-6. **Fallos de Telegram:** se registran resultados fallidos, pero el flujo no los convierte necesariamente en estado de fallo operativo. Registrar éxito parcial, reintentos y entrega final.
-7. **Ejecuciones solapadas:** incorporar control de concurrencia o idempotencia para evitar notificaciones duplicadas y conflictos del historial si coinciden un disparo diario y uno manual.
-8. **Seguimiento del cron:** la programación está resuelta; agregar un heartbeat permitiría distinguir «no empezó la corrida» de «empezó y falló». Una alerta interna no detecta que nunca se inició el proceso.
-
-## 10. Métricas para aprender
-
-Objetivo operativo recomendado: aumentar la cantidad de personas que obtienen un resultado útil y lo comparten, por hora de trabajo, conservando fuentes y cálculos confiables. Medir aparte el beneficio profesional: visitas al perfil, contactos pertinentes y conversaciones generadas.
-
-| Etapa | Qué registrar |
-|---|---|
-| Descubrimiento | Cobertura de fuentes, candidatos, edad del detonante, señales disponibles |
-| Selección | Aceptados, descartados, razón, incertidumbre y tiempo invertido |
-| Producción | Horas reales hasta publicar, bloqueos y mantenimiento |
-| Adquisición | Impresiones si el canal las ofrece, clics etiquetados y sesiones de llegada |
-| Uso | Inicio y finalización de tarea, tiempo hasta resultado, abandonos |
-| Difusión | Clic en compartir/copiar y visitas referidas cuando sean medibles |
-| Calidad | Correcciones, errores de cálculo y reportes de datos vencidos |
-| Resultado profesional | Contactos relevantes y oportunidades atribuibles con cautela |
-
-Un clic en compartir no prueba una publicación ni una nueva visita. No inferir viralidad a partir de los puntajes del LLM ni confundir impresiones con uso. Parte de la mensajería privada no deja trazabilidad suficiente para atribución.
-
-Experimento inicial de cuatro semanas: publicar 4–6 piezas que puedas verificar y mantener, cubriendo al menos dos formatos. Registrar el canal, la audiencia y el esfuerzo. Comparar finalización, uso y difusión por hora; no atribuir diferencias solo al formato si cambiaron tema, momento y distribución. Con una muestra pequeña, el resultado será aprendizaje direccional, no evidencia causal.
-
-## 11. Prioridades
-
-| Orden | Mejora | Resultado esperado | Tamaño relativo |
+| Detonante | Producto posible | Razón para compartir | Evidencia o límite necesario |
 |---|---|---|---|
-| P0 | Ampliar misión, prompt y schema a tareas y productos digitales | Más alternativas relevantes por noticia | Medio |
-| P0 | Separar hipótesis y hechos; validar detonante y fuente mínima | Candidatos que se puedan defender y construir | Medio |
-| P0 | Estados de evaluación, entrega y publicación; corregir fallos silenciosos | Saber qué pasó realmente en cada corrida | Medio |
-| P1 | Nueva tarjeta Telegram: audiencia, tarea, MVP, evidencia y distribución | Poder elegir una oportunidad con rapidez | Pequeño |
-| P1 | Plantilla reutilizable y primera herramienta publicada con medición | Completar el circuito hasta uso real | Medio |
-| P1 | Ranking por dimensiones y archivo de descartes | Aprender por qué se selecciona cada idea | Medio |
-| P1 | Google Trends y métricas temporales según acceso disponible | Corroborar demanda y vigencia | Medio |
-| P2 | Calendario, seguimiento de eventos y mejor deduplicación | Anticipación y nuevas versiones útiles | Medio |
-| P2 | Portafolio público, mantenimiento y reutilización | Acumular audiencia y activos | Medio |
-| P3 | Generación más automática y nuevas fuentes complejas | Escalar patrones que ya rindan | Grande |
+| Cambio de tarifa o precio | Calculadora de escenarios personales | Avisar a familiares o comparar situaciones | Fórmula, componentes, unidades y vigencia |
+| Torneo o decisión deportiva | Simulador de clasificación o sanciones | Debatir combinaciones con amigos | Tabla y reglamento; escenario hipotético separado del oficial |
+| Anuncio cultural o evento | Planificador o calendario descargable | Coordinar una salida | Fechas, horarios y restricciones oficiales |
+| Debate sobre probabilidades | Juego o desafío educativo | Retar a otra persona | Mecánica reproducible y explicación correcta |
+| Cambio en una plataforma digital | Conversor, checklist o utilidad de migración | Ahorrarle trabajo a un colega | Documentación vigente y capacidades implementables |
+| Información compleja | Explicador o explorador interactivo | Ayudar a comprender o mostrar un hallazgo | Fuente, escala, contexto y límites de interpretación |
+| Nuevo trámite o beneficio | Guía interactiva de próximos pasos | Ayudar a alguien a actuar | Requisitos oficiales y estado anunciado/aprobado/vigente |
+| Conversación cultural | Generador creativo o experiencia personalizable | Mostrar una creación o invitar a probar | Separar ficción de información factual; sin diagnósticos ni percentiles inventados |
 
-La primera iteración debería terminar con una herramienta real, evidencia verificada, distribución concreta y métricas básicas. Cambiar el prompt sin cerrar ese circuito aumentaría el inventario de ideas, pero no demostraría mayor alcance.
+No se fijan porcentajes por familia ni se exige una app en cada alerta. Un recurso pequeño puede ser mejor oportunidad que un proyecto grande. Una idea lúdica no se descarta solo por no resolver un trámite o producir un análisis cuantitativo.
+
+## 4. Roadmap de seis etapas
+
+Las etapas describen cambios al radar, no una cadena de fabricación y publicación de productos. La validación queda registrada con pruebas de contrato, historial, notificación, descubrimiento y casos revisados; cambiar un prompt no basta por sí solo.
+
+| Etapa | Prioridad y dependencia | Entregable | Criterio de cierre |
+|---|---|---|---|
+| 1. Completar la apertura del producto | P0; completada | Esquema, prompt, filtros, historial y Telegram coherentes | Distintas familias se representan sin forzarlas a Data Science o Streamlit; historial anterior legible |
+| 2. Fortalecer la evidencia | P0; completada | Separación entre acceso técnico, respaldo de afirmaciones y revisión pendiente | Ninguna afirmación crítica aparece validada solo porque una URL responde |
+| 3. Mejorar el descubrimiento | P1; completada | Contexto temporal, eventos, cobertura temática más amplia y señales de búsqueda | Cada señal tiene procedencia y fecha; ausencias y fallos parciales visibles |
+| 4. Diseñar el motivo para compartir | P1; completada | Interacción, resultado compartible y razón concreta de difusión | Se explica quién compartiría qué, con quién y para qué |
+| 5. Preparar briefs para aprender construyendo | P1; completada | Alcance manual, habilidad, dificultad, dependencias y casos de validación | El creador entiende qué construir, qué aprenderá y cuáles son los límites antes de programar |
+| 6. Afinar el criterio con ejemplos revisados | P2; completada | Casos revisados y comprobaciones de regresión del radar | Los cambios no reintroducen resultados inventados, formatos forzados o recomendaciones repetitivas |
+
+### Etapa 1. Completar la apertura del producto
+
+**Cambios:**
+
+- Separar tipo de producto, formato de entrega y tecnología. Calculadora describe el producto; app web el formato; React, Next.js y Streamlit son opciones de implementación.
+- Ampliar familias con juegos/desafíos, utilidades para archivos y recursos descargables. Evitar que otro campo obligatorio vuelva a restringirlas.
+- Eliminar la obligación de un ángulo cuantitativo o una conclusión contraintuitiva. Pedir una necesidad o experiencia concreta, una interacción y una diferencia defendible.
+- Admitir evidencia pertinente al producto: regla, reglamento, documentación o mecánica reproducible donde no se necesita un dataset. Mantener la trazabilidad del detonante.
+- Alinear prompt, modelos, selección, persistencia y Telegram. Permitir compatibilidad de registros antiguos sin aceptar campos genéricos como suficientes para propuestas nuevas.
+- Revisar utilidad para reconocer valor educativo, lúdico y de coordinación, además del práctico.
+
+**Validación:** casos de calculadora, simulador, juego, utilidad y descargable sin reclasificarlos como Streamlit ni exigir análisis artificiales. Verificar carga y representación del historial antiguo.
+
+**Archivos principales:** src/analysis/opportunity_eval.py, src/analysis/prompt_templates.py, src/storage/history_manager.py, src/notifiers/telegram_bot.py y pruebas relacionadas.
+
+### Etapa 2. Fortalecer la evidencia
+
+**Cambios:**
+
+- Separar resultado HTTP y respaldo editorial. Usar descripciones inequívocas como «URL accesible; contenido pendiente de revisión». No elevar automáticamente la confianza editorial.
+- Relacionar cada afirmación relevante con su fuente y ubicación cuando estén disponibles. Registrar documento o fragmento revisado, fecha, vigencia y comprobaciones pendientes. No inventar citas o extractos no consultados.
+- Distinguir «la noticia reporta» de una afirmación contrastada con la fuente primaria. Si solo se leyó un titular o resumen, conservar ese límite.
+- Separar hechos reportados, hechos contrastados, supuestos, hipótesis y escenarios. Un cálculo pendiente nunca se describe como hallazgo obtenido.
+- Identificar los respaldos de todas las reglas o datos críticos de la propuesta. Una única URL accesible no valida el conjunto.
+- Admitir ideas prometedoras pendientes de comprobación, claramente diferenciadas de las listas para construir. Las afirmaciones contradichas no se promueven como oportunidades válidas.
+- Mantener comprobaciones acotadas y consultar contenido cuando sea viable, sin exigir fact-checking universal ni sustituir la revisión humana. Un bloqueo de acceso indica incertidumbre, no falsedad.
+- Conservar supuestos, condición hipotética y fecha relevante al diseñar una salida compartible.
+
+**Validación:** casos con HTTP 200 sin información pertinente, respaldo parcial, regla vencida, fuente inaccesible y escenario hipotético. Ninguno obtiene una etiqueta editorial de verificación injustificada. En juegos o experiencias creativas se comprueban el detonante y las afirmaciones/mecánica que efectivamente se presentan.
+
+**Archivos principales:** src/analysis/source_verification.py, modelos y prompt del evaluador, historial, Telegram, configuración y pruebas. Migrar estados sin atribuir revisión editorial a registros antiguos.
+
+### Etapa 3. Mejorar el descubrimiento
+
+**Cambios:**
+
+- Incluir fechas y procedencia en el contexto del modelo. Distinguir publicación, primera detección y actualización del evento; una fecha faltante no acredita frescura.
+- Dar más contexto a finalistas cuando sea necesario y accesible, sin fundamentar toda interpretación en 180 caracteres. Registrar si solo existe resumen.
+- Ampliar cobertura hacia tecnología, cultura, deportes, consumo y tareas cotidianas; elegir fuentes por su aporte, sin acumular feeds redundantes.
+- Agrupar artículos por evento y distinguir cobertura repetida de corroboración independiente.
+- Comparar evento, necesidad y producto para deduplicar. Permitir alternativas sustancialmente distintas sin repetir la misma propuesta con otro título.
+- Comprobar disponibilidad, campos y condiciones del RSS/exportación de Google Trends para Chile antes de integrarlo. No depender de acceso a una API privada o restringida.
+- Conservar procedencia, hora y limitaciones de cada señal. No convertir intervalos de búsquedas en cifras exactas ni equiparar comentarios de Reddit con búsquedas.
+- Admitir eventos previsibles con fecha y fuente, como plazos o torneos, para identificar oportunidades con tiempo de aprender y construir antes del pico de atención.
+
+**Validación:** ausencia de Trends sin caída del radar, señal antigua, fuentes duplicadas, contexto sin fecha y dos productos distintos para el mismo evento. Una tendencia indica interés observado, no la verdad de una afirmación.
+
+**Archivos principales:** src/ingestion/, config/sources.yaml, src/storage/history_manager.py, src/analysis/prompt_templates.py, main.py y pruebas.
+
+### Etapa 4. Diseñar el motivo para compartir
+
+**Cambios:**
+
+- Explicar quién usaría el producto, qué obtiene, con quién lo compartiría y para qué. «Es interesante y viral» no basta.
+- Describir primera interacción y resultado temprano. Evitar registro, formularios largos o pasos sin valor cuando no sean necesarios.
+- Elegir un mecanismo acorde al producto: ayudar, coordinar, desafiar, comparar escenarios o expresar una creación. No imponer tarjetas compartibles a todas las familias.
+- Proponer cuando aporte un enlace reproducible, imagen, archivo o desafío. La salida no expone datos personales ni pierde supuestos relevantes.
+- Contrastar alternativas existentes. Si se desconocen, indicarlo como revisión pendiente; no afirmar que la idea es única sin comprobarlo.
+- Separar atención de la noticia, atractivo del producto y motivo para compartir en el ranking. Los puntajes son juicios explicados, no probabilidades de viralidad.
+
+**Validación:** una revisión humana completa «esta persona comparte este resultado con estas otras personas para este propósito». Si la razón solo es popularidad de la noticia, reformular o bajar prioridad. No se requieren publicaciones ni métricas sociales.
+
+**Archivos principales:** evaluador, prompt, historial y tarjeta Telegram. No se crean campañas ni funciones de publicación.
+
+### Etapa 5. Preparar briefs para aprender construyendo
+
+**Contenido mínimo del brief:**
+
+1. Audiencia, detonante, producto, interacción y resultado.
+2. Evidencia disponible, supuestos, revisión pendiente y vigencia.
+3. Versión mínima, límites explícitos y ampliación opcional separada.
+4. Habilidad a practicar, conocimientos previos y dificultad explicada.
+5. Pasos manuales de investigación, diseño, implementación y validación.
+6. Dependencias técnicas y casos para comprobar cálculos, reglas o mecánica.
+
+**Cambios:**
+
+- Reemplazar el límite universal de cuatro horas por alcances orientativos: prototipo breve, proyecto de varias sesiones o idea demasiado grande para su ventana. Estimar investigación, aprendizaje y validación, sin promesas de tiempo.
+- Separar dificultad técnica y esfuerzo de verificación: una interfaz pequeña puede requerir mucha investigación.
+- Usar aprendizaje como criterio explícito de elección o desempate entre buenas oportunidades. No compensa evidencia insuficiente ni falta de atractivo. Si se desconocen las habilidades actuales, formular la recomendación de aprendizaje de forma condicional.
+- Sugerir tecnología por necesidad. HTML/JavaScript o React con Vite pueden bastar para cálculo local; Next.js, backend, base de datos e IA requieren una razón concreta. Streamlit sigue disponible para casos adecuados.
+- Mantener un brief breve en Telegram y conservar el detalle necesario en el historial. No generar código del producto, repositorios, despliegues ni automatizaciones de desarrollo.
+
+**Validación:** el creador explica qué construirá primero, qué aprenderá, qué deja fuera y cómo comprobará que funciona. Revisar el brief basta; terminar o publicar la app no es requisito de cierre de esta etapa del radar.
+
+**Archivos principales:** modelos y prompt del evaluador, historial, Telegram y documentación de uso. Los campos nuevos se definen al implementar; esta sección no afirma que ya existan.
+
+### Etapa 6. Afinar el criterio con ejemplos revisados
+
+**Cambios:**
+
+- Consolidar un conjunto pequeño de noticias históricas con propuestas buenas, débiles y ambiguas revisadas manualmente. Empezar con casos de las etapas 1 y 2 y ampliarlos al terminar las demás.
+- Incluir formatos distintos, poco contexto, URLs accesibles pero irrelevantes, hipótesis confundidas con hechos, demanda no observada y alcances mayores que la ventana de atención.
+- Documentar criterios y razones aceptables, no un único texto correcto. Una noticia puede admitir varias buenas soluciones.
+- Usar pruebas deterministas para trazabilidad, estados de evidencia, compatibilidad, filtros y representación. Revisar manualmente la calidad de ideas; un LLM de apoyo no es juez único de sus propias propuestas.
+- Comparar cambios contra estos casos sin contactar servicios productivos, publicar piezas ni registrar rendimiento. Consultas reales opcionales deben ser explícitas y no enviar alertas durante la revisión.
+
+**Validación:** no aparecen afirmaciones sin respaldo presentadas como comprobadas, familias forzadas a formatos antiguos, razones genéricas de difusión o repeticiones evitables. El conjunto cubre incertidumbre y diversidad. Aprobarlo no demuestra viralidad real.
+
+**Archivos principales:** tests/, casos de revisión y documentación. Las pruebas cubren comportamientos relevantes; no replican el texto del prompt.
+
+## 5. Reglas transversales de selección
+
+- **La evidencia no se compensa con popularidad.** Una idea pendiente puede proponerse como investigación; una afirmación inventada no obtiene aprobación por su gancho.
+- **El producto ofrece una razón para usarlo.** Práctica, educativa, lúdica o creativa; no basta con resumir una noticia.
+- **La difusión tiene un motivo concreto.** Una etiqueta «viralidad 9/10» no lo sustituye.
+- **La oportunidad temporal sostiene el alcance.** Si el desarrollo manual excede la ventana de interés, reducir el producto, anticiparlo o elegir otra idea.
+- **No hay cuota de alertas.** Hasta tres propuestas sigue siendo un límite razonable; una o ninguna es válido.
+- **La selección final es humana.** El radar explica diferencias, incertidumbre y aprendizaje; no decide autónomamente qué se construye.
+- **Las señales de atención son entradas del radar.** Observar búsquedas o conversación pública para descubrir oportunidades es distinto de seguir productos publicados, que queda fuera del alcance.
+
+No se añade de inmediato una fórmula nueva de ranking. Primero se corrigen restricciones y significado de la evidencia; después se ajustan dimensiones con casos revisados, sin presentar pesos como un modelo predictivo validado.
+
+## 6. Primera iteración: etapas 1 y 2
+
+El primer trabajo de implementación debe producir:
+
+- [x] Contrato de producto abierto y compatible con el historial antiguo.
+- [x] Prompt sin obligación de análisis cuantitativo, conclusión contraintuitiva o formato Streamlit.
+- [x] Separación visible entre acceso HTTP y respaldo editorial, también en registros heredados.
+- [x] Hechos reportados, supuestos e hipótesis sin anticipar resultados.
+- [x] Telegram e historial que conserven esas distinciones y las comprobaciones pendientes.
+- [x] Casos históricos revisados de varias familias y de evidencia insuficiente.
+- [x] Pruebas relevantes del contrato, filtros, persistencia y notificación afectados, sin envíos reales ni cambios al historial productivo durante la validación.
+- [x] README, resumen y especificación alineados en los puntos afectados, distinguiendo funciones implementadas y siguientes etapas.
+
+El resultado esperado es una propuesta que permita decidir: **«esta interacción tiene una razón para compartirse, sé qué debo comprobar y entiendo qué aprenderé al construirla»**. No requiere generar una app, desplegarla, publicarla ni medir su difusión.
+
+## 7. Referencias y límites de la evidencia externa
+
+- [Berger y Milkman: What Makes Online Content Viral?](https://jonahberger.com/wp-content/uploads/2013/02/ViralityB.pdf). Investigación sobre difusión que vincula utilidad, interés, sorpresa y activación emocional con transmisión de contenido. Orienta hipótesis de diseño; no valida el potencial de una app concreta ni permite trasladar resultados automáticamente a Chile o a un canal actual.
+- [Google Trends: explorar búsquedas en tendencia](https://support.google.com/trends/answer/3076011?hl=en). Documenta contexto temporal, volumen agrupado y exportación, incluido RSS. Comprobar disponibilidad para Chile antes de implementar; no asumir que todos los campos de la interfaz estén en el feed.
+- [Vite en Vercel](https://vercel.com/docs/frameworks/frontend/vite) y [frontends en Vercel](https://vercel.com/docs/frameworks/frontend). Respaldan esa ruta técnica para apps web. No implican que todas las oportunidades necesiten ese stack ni que DNR deba automatizar despliegues.
+
+Estas decisiones combinan antecedentes externos, revisión del repositorio y preferencias explícitas del creador. Son criterios de producto y trabajo; no resultados demostrados de viralidad.

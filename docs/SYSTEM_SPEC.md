@@ -1,410 +1,46 @@
-# Data Newsjacking Radar (DNR) \- System Specification
+# DNR v0.2 — Especificación del sistema
 
-## 1\. Executive Summary & Purpose
+## Propósito
 
-El **Data Newsjacking Radar (DNR)** es un sistema automatizado de inteligencia de tendencias diseñado para detectar noticias de alta tracción (políticas, económicas, deportivas o sociales) en Chile y evaluar de forma autónoma su viabilidad como proyectos rápidos de Data Science / Analytics.
+DNR convierte señales públicas de Chile en propuestas de productos digitales que una persona pueda evaluar y construir manualmente. No crea repositorios de productos, no los despliega, no publica campañas ni mide su rendimiento.
 
-El objetivo es maximizar la visibilidad y el alcance profesional mediante la publicación oportuna (dentro de una ventana de 24 a 72 horas) de visualizaciones, análisis exploratorios, simuladores o modelos que aporten evidencia cuantitativa o contrasten narrativas públicas.
+El resultado es una oportunidad trazable: producto, audiencia, evidencia, motivo de difusión y brief de aprendizaje. La elección editorial final sigue siendo humana.
 
----
+## Flujo técnico
 
-## 2\. Architecture & Data Flow
+1. `src/ingestion/` recolecta RSS y Reddit; opcionalmente agrega RSS público de Google Trends y eventos fechados configurados.
+2. Cada `NewsArticle` conserva fuente, fecha de publicación/evento, primera detección, actualización si existe, tipo y límites de señal. La agrupación de cobertura anota medios relacionados sin borrar sus artículos.
+3. `src/analysis/prompt_templates.py` entrega contexto temporal y procedencia a Gemini, con el contenido de noticias delimitado como no confiable.
+4. `src/analysis/opportunity_eval.py` valida la salida Pydantic, traza el detonante a la ingesta y filtra/ordena oportunidades. La deduplicación se basa en detonante + producto + necesidad, por lo que alternativas sustanciales para un mismo evento permanecen posibles.
+5. `src/analysis/source_verification.py` hace una comprobación HTTP acotada y segura. Sus resultados son técnicos, no editoriales.
+6. `src/storage/history_manager.py` persiste oportunidades y descartes de forma atómica y compatible con registros antiguos.
+7. `src/notifiers/telegram_bot.py` entrega un resumen privado, escapado para HTML y con fallback de texto plano.
 
-\[Cron: GitHub Actions (07:23 CLT)\]
+## Contrato principal
 
-                │
+`Opportunity` separa los siguientes conceptos:
 
-                ▼
+- `product_type`, `suggested_deliverable` y `implementation_options`: qué es, cómo se entrega y con qué podría construirse.
+- `reported_facts`, `corroborated_facts`, `assumptions`, `hypotheses_to_test` y `critical_claims`: niveles de certeza distintos.
+- `evidence_status`: `Pendiente de revisión`, `Respaldo parcial` o `Lista para construir`. Los valores históricos se aceptan para lectura, pero no se generan desde una comprobación HTTP.
+- `share_with`, `share_purpose`, `share_mechanism` y `shareable_artifact`: circuito concreto de difusión.
+- `scope_class`, `minimum_version`, `explicit_limits`, `learning_skill`, dificultades separadas y `validation_cases`: brief para construir y aprender.
 
-   ┌────────────────────────┐
+`DataSource` admite datos, reglas/reglamentos, documentación, mecánicas reproducibles y fuentes editoriales. `verification_status="accessible"` significa únicamente que la URL respondió con contenido admisible; `editorial_status` y sus respaldos se completan tras revisión humana.
 
-   │ 1\. Ingestion Layer     │ ◄── RSS Feeds (Emol, DF, La Tercera, BioBio)
+## Configuración
 
-   │    (Sources Scraper)   │ ◄── Reddit JSON API (r/chile, r/republicadechile)
+`config/sources.yaml` define fuentes, límites y `pipeline`:
 
-   │                        │ ◄── Google Trends (Pytrends / Daily Trends)
+- `verify_source_urls`: activa el registro de disponibilidad HTTP.
+- `require_accessible_source`: gate opcional, desactivado por defecto. Si se usa, exige acceso técnico pero no prueba evidencia editorial.
+- `trends.enabled`: activa el RSS público de Trends para Chile. Fallos parciales solo generan warning.
+- `scheduled_events`: eventos previsibles con título, fecha ISO y fuente.
 
-   └────────────┬───────────┘
+## Garantías y límites
 
-                │ Raw Articles & Threads (últimas 24h)
-
-                ▼
-
-   ┌────────────────────────┐
-
-   │ 2\. Deduplication &     │ ◄── Lee \`data/history.json\` (últimos 7 días)
-
-   │    Filtering           │ ─── Descarta tópicos previamente analizados
-
-   └────────────┬───────────┘
-
-                │ Unseen Trending Clusters
-
-                ▼
-
-   ┌────────────────────────┐
-
-   │ 3\. LLM Strategy &      │ ◄── Gemini Flash (Structured JSON Output)
-
-   │    Feasibility Engine  │ ─── Evalúa potencial viral, ángulo analítico y
-
-   │                        │     fuentes públicas (APIs, Wikipedia, .gob)
-
-   └────────────┬───────────┘
-
-                │ Scored Opportunities (Score \>= 7/10)
-
-                ▼
-
-   ┌────────────────────────┐
-
-   │ 4\. Dispatch & Storage  │ ──► Envía alerta formateada a Telegram Bot
-
-   │    Pipeline            │ ──► Actualiza \`data/history.json\` & Git commit
-
-   └────────────────────────┘
-
----
-
-## 3\. Project Structure
-
-data-newsjacking-radar/
-
-├── .github/
-
-│   └── workflows/
-
-│       └── daily\_radar.yml        \# Cron workflow de GitHub Actions
-
-├── config/
-
-│   └── sources.yaml               \# URLs de feeds RSS, subreddits y parámetros
-
-├── data/
-
-│   └── history.json               \# Registro histórico de oportunidades analizadas
-
-├── docs/
-
-│   └── SYSTEM\_SPEC.md             \# Esta especificación
-
-├── src/
-
-│   ├── \_\_init\_\_.py
-
-│   ├── ingestion/
-
-│   │   ├── \_\_init\_\_.py
-
-│   │   ├── news\_rss.py            \# Parser de feeds RSS de prensa chilena
-
-│   │   ├── reddit\_client.py       \# Scraper ligero vía endpoints JSON públicos
-
-│   │   └── trends\_client.py       \# Extractor de tendencias en búsquedas
-
-│   ├── analysis/
-
-│   │   ├── \_\_init\_\_.py
-
-│   │   ├── prompt\_templates.py    \# Prompts del sistema y de análisis
-
-│   │   └── opportunity\_eval.py    \# Integración con Gemini API \+ Pydantic schema
-
-│   ├── storage/
-
-│   │   ├── \_\_init\_\_.py
-
-│   │   └── history\_manager.py     \# Manejo de lectura/escritura y deduplicación
-
-│   └── notifiers/
-
-│       ├── \_\_init\_\_.py
-
-│       └── telegram\_bot.py        \# Despachador de mensajes a Telegram
-
-├── main.py                        \# Entrypoint de ejecución del pipeline
-
-├── pyproject.toml / requirements.txt
-
-└── README.md
-
----
-
-## 4\. Component Details & Technical Requirements
-
-### 4.1 Ingestion Layer
-
-* **`news_rss.py`**: Utiliza `feedparser` y `requests`.  
-  * Fuentes iniciales:  
-    * EMOL (Nacional, Economía, Deportes).  
-    * Diario Financiero (Economía, Empresas, Mercados).  
-    * La Tercera (Nacional, Política, Pulso).  
-    * BioBioChile (Nacional, Economía).  
-  * Extrae: `title`, `link`, `summary`, `published_at`.  
-* **`reddit_client.py`**:  
-  * Consume endpoints públicos `.json` de Reddit (por ejemplo subreddits `chile` y `republicadechile`) usando cabeceras `User-Agent` descriptivas.  
-  * Filtra hilos con alto engagement (`score > 50` o `num_comments > 30`).  
-* **Resiliencia:** Si una fuente falla (HTTP 4xx/5xx o timeout), el scraper registra un warning y continúa con las demás.
-
-### 4.2 Storage & Deduplication (`history_manager.py`)
-
-* Estructura de `data/history.json`:  
-    
-  \[  
-    
-    {  
-    
-      "id": "2026-10-06-001",  
-    
-      "timestamp": "2026-10-06T10:30:00Z",  
-    
-      "topic": "Polémica por licitación de luminarias públicas",  
-    
-      "category": "Política / Transparencia",  
-    
-      "viral\_hook\_type": "Desmitificador",  
-    
-      "analytical\_angle": "Simulador de costo por luminaria vs. presupuesto comunal",  
-    
-      "data\_sources": \[  
-    
-        {"name": "Mercado Público", "type": "API / Portal Abierto", "query": "Licitaciones alumbrado público"},  
-    
-        {"name": "Wikipedia \- Comunas de Chile", "type": "HTML Table", "query": "Población y presupuesto comunal"}  
-    
-      \],  
-    
-      "feasibility\_score": 8,  
-    
-      "virality\_score": 9,  
-    
-      "recommended\_deliverable": "Static chart \+ LinkedIn thread",  
-    
-      "status": "candidate"  
-    
-    }  
-    
-  \]  
-    
-* En cada corrida, inyecta los temas de los últimos 7 días al prompt del LLM para descartar repeticiones.
-
-### 4.3 Evaluation Engine (`opportunity_eval.py`)
-
-Utiliza la API de Gemini con `response_mime_type="application/json"` y un esquema Pydantic estricto.
-
-#### Pydantic Schema:
-
-from pydantic import BaseModel, Field
-
-from typing import List, Literal
-
-class DataSource(BaseModel):
-
-    name: str
-
-    type: Literal\["API Pública", "Tabla Wikipedia", "Portal Abierto", "Scraping HTML", "Dataset Descargable"\]
-
-    potential\_url\_or\_query: str
-
-    friction\_level: Literal\["Baja (Horas)", "Media (1-2 días)", "Alta (Requiere peticiones de transparencia)"\]
-
-    # Resultado de la verificación HTTP; se persiste junto a la oportunidad
-    verification\_status: Literal["not_checked", "not_checkable", "verified", "failed"]
-    verification\_checked\_at: Optional[datetime]
-    verification\_url: Optional[str]
-    verification\_http\_status: Optional[int]
-    verification\_content\_type: Optional[str]
-    verification\_error: Optional[str]
-
-class Opportunity(BaseModel):
-
-    headline: str
-
-    category: Literal\["Economía & Finanzas", "Política & Estado", "Deportes", "Sociedad & Tendencias"\]
-
-    why\_is\_trending: str
-
-    contrarian\_or\_curious\_angle: str \= Field(description="El gancho cognitivo: qué mito se desmiente o qué duda resuelve")
-
-    suggested\_deliverable: Literal\["Gráfico Estático de Alto Impacto", "App Interactiva (Streamlit)", "Análisis Predictivo/Optimización"\]
-
-    data\_sources: List\[DataSource\]
-
-    virality\_score: int \= Field(ge=1, le=10)
-
-    technical\_feasibility\_score: int \= Field(ge=1, le=10)
-
-    fast\_execution\_strategy: str \= Field(description="Plan de acción concreto en 3 pasos para construirlo en menos de 4 horas")
-
-    # Campos de producto con defaults compatibles con historial previo
-    audience: str
-    user\_need: str
-    user\_action: str
-    product\_type: Literal["Visualización / explicador", "Calculadora", "Comparador", "Guía interactiva", "Planificador", "Simulador", "Verificador", "Análisis de datos"]
-    product\_inputs: str
-    product\_output: str
-    share\_reason: str
-    evidence\_status: Literal["Propuesta (no verificada)", "Fuente localizada", "Verificada"]
-    validity\_note: Optional[str]
-
-class RadarResponse(BaseModel):
-
-    evaluated\_topics\_count: int
-
-    top\_opportunities: List\[Opportunity\]
-
-#### Core System Prompt Rules:
-
-1. **Buscar datos no estructurados:** No limitarse a portales de gobierno (`.gob`). Buscar activamente tablas históricas de Wikipedia (e.g. resultados de elecciones, planteles deportivos, datos censales comunales) o sitios con HTML estructurado (Transfermarkt, CMF, Banco Central).  
-2. **Pensar en utilidad y gancho ("Hook"):** Para cada propuesta, definir audiencia, necesidad, acción y producto. El producto resuelve una tarea concreta y no queda restringido a un framework.
-3. **Filtro de umbral:** Solo retornar oportunidades donde `virality_score >= 7` y `technical_feasibility_score >= 6`. Máximo 3 por ejecución para no saturar.
-4. **Honestidad de evidencia:** El pipeline contrasta título y URL detonantes con la ingesta. Antes de notificar, consulta las URLs de datos públicas sin seguir redirecciones y registra fecha, código HTTP y tipo de contenido. Una comprobación exitosa equivale a una fuente técnicamente accesible; no prueba por sí sola que el dataset, regla, licencia o interpretación sea correcto.
-
-### 4.4 Notification Layer (`telegram_bot.py`)
-
-* Envía cada oportunidad como un mensaje formateado en Markdown:  
-    
-  🚀 \*OPORTUNIDAD DE DATA DETECTADA\* (Score: 8.5/10)  
-    
-  📌 \*Tema:\* Polémica por precios de arriendos en comunas céntricas  
-    
-  🎯 \*Ángulo Analítico:\* "¿Realmente cayeron los arriendos o solo se redujo el metraje cuadrado promedio?"  
-    
-  📊 \*Fuentes de Datos:\*  
-    
-  • Portales inmobiliarios (Scraping de precios por m²)  
-    
-  • INE / SII (Avalúo fiscal y series históricas)  
-    
-  ⏱️ \*Entregable sugerido:\* Gráfico estático anotado estilo periodismo de datos.  
-    
-  🛠️ \*Plan rápido:\* 1\. Script BeautifulSoup para 500 avisos | 2\. Boxplot precio/m² por comuna | 3\. Post con hallazgo clave.
-
----
-
-## 5. Automation: GitHub Actions Workflow
-
-Archivo `.github/workflows/daily_radar.yml` (con resiliencia, inputs manuales, rebase y alertas de fallo):
-
-```yaml
-name: Daily Data Newsjacking Radar
-
-on:
-  schedule:
-    # Corre todos los días a las 14:37 UTC (11:37 AM CLT en UTC-3 / 10:37 AM CLT en UTC-4) en valle de baja demanda global en GitHub
-    - cron: '37 14 * * *'
-  workflow_dispatch:
-    inputs:
-      dry_run:
-        description: 'Simular despacho a Telegram'
-        type: boolean
-        required: false
-        default: false
-      skip_llm:
-        description: 'Omitir fase de evaluación con Gemini'
-        type: boolean
-        required: false
-        default: false
-
-jobs:
-  run-radar:
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    permissions:
-      contents: write
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-          cache: 'pip'
-
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-
-      - name: Run Radar Pipeline
-        env:
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-          INPUT_DRY_RUN: ${{ github.event.inputs.dry_run }}
-          INPUT_SKIP_LLM: ${{ github.event.inputs.skip_llm }}
-        run: |
-          CMD="python main.py"
-          if [ "$INPUT_DRY_RUN" = "true" ]; then
-            CMD="$CMD --dry-run"
-          fi
-          if [ "$INPUT_SKIP_LLM" = "true" ]; then
-            CMD="$CMD --skip-llm"
-          fi
-          echo "Ejecutando: $CMD"
-          $CMD
-
-      - name: Commit and push history updates
-        if: success()
-        run: |
-          git config --local user.email "github-actions[bot]@users.noreply.github.com"
-          git config --local user.name "github-actions[bot]"
-          git add data/history.json
-          if ! git diff --staged --quiet; then
-            git commit -m "chore: update radar history [skip ci]"
-            git pull --rebase origin main || git rebase --abort
-            git push origin main
-          fi
-
-      - name: Notify Failure to Telegram
-        if: failure()
-        env:
-          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-        run: |
-          if [ -n "$TELEGRAM_BOT_TOKEN" ] && [ -n "$TELEGRAM_CHAT_ID" ]; then
-            python3 -c '
-          import os, urllib.request, json
-          token = os.environ.get("TELEGRAM_BOT_TOKEN")
-          chat_id = os.environ.get("TELEGRAM_CHAT_ID")
-          run_url = os.environ.get("RUN_URL", "")
-          if token and chat_id:
-              msg = f"🚨 <b>DNR Error en GitHub Actions</b>\n\nEl radar diario falló durante su ejecución.\n👉 <a href=\"{run_url}\">Ver registro de errores en Actions</a>"
-              payload = json.dumps({"chat_id": chat_id, "text": msg, "parse_mode": "HTML"}).encode("utf-8")
-              req = urllib.request.Request(
-                  f"https://api.telegram.org/bot{token}/sendMessage",
-                  data=payload,
-                  headers={"Content-Type": "application/json"}
-              )
-              try:
-                  urllib.request.urlopen(req, timeout=10)
-              except Exception:
-                  pass
-          ' || true
-          fi
-```
-
----
-
-## 6. Environment Variables Required
-
-Configurar en `Settings > Secrets and variables > Actions`:
-
-* `GEMINI_API_KEY`: API Key obtenida gratis en Google AI Studio.  
-* `TELEGRAM_BOT_TOKEN`: Token obtenido al crear el bot con `@BotFather`.  
-* `TELEGRAM_CHAT_ID`: Tu ID de chat personal (obtenible reenviando un mensaje a `@userinfobot`).
-
----
-
-## 7. Implementation Status
-
-1. [x] **Paso 1:** Inicializar repositorio Git y arquitectura modular tipada (`src/`, `config/`, `data/`).
-2. [x] **Paso 2:** Ingesta unificada y resiliente de prensa chilena (RSS) y comunidades (Reddit) con snapshot cache local.
-3. [x] **Paso 3:** Motor de evaluación analítica con Gemini Flash, fallback resiliente y esquemas tipados Pydantic.
-4. [x] **Paso 4:** Capa de despacho a Telegram con formato HTML seguro, trazabilidad 1-click y rate limiting.
-5. [x] **Paso 5:** Automatización desatendida con GitHub Actions, CI con pytest, rebase seguro, inputs dinámicos y alertas ante fallos.
-6. [x] **Paso 6 (Seguridad & DevSecOps):** Blindaje AppSec integral: redacción de secretos en logs, defensa ante inyección indirecta de prompts (`<untrusted_news_items>`), sanitización de URLs salientes, stream acotado anti-DoS en HTTP, validación de subreddits y persistencia atómica con resguardo ante corrupción de datos.
+- Como máximo se proponen tres oportunidades por corrida; también puede haber ninguna.
+- El detonante de una propuesta debe coincidir exactamente con una señal ingerida.
+- No se siguen redirecciones ni se permiten hosts privados al comprobar fuentes.
+- Un acceso bloqueado es incertidumbre, no falsedad. Una afirmación contradicha no se promueve como oportunidad lista para construir.
+- Las pruebas automatizadas cubren contrato, persistencia, seguridad, notificación, ingesta y casos de revisión. No demuestran calidad editorial ni viralidad real.

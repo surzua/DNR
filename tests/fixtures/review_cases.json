@@ -1,0 +1,47 @@
+[
+  {
+    "name": "calculadora_tarifa_con_regla_pendiente",
+    "product_type": "Calculadora",
+    "delivery_format": "App web",
+    "evidence_status": "Pendiente de revisión",
+    "share_mechanism": "Ayudar",
+    "scope_class": "prototipo_breve",
+    "expected": "La tarifa se contrasta antes de comunicar resultados; una URL accesible no cambia el estado editorial."
+  },
+  {
+    "name": "simulador_deportivo_hipotetico",
+    "product_type": "Simulador",
+    "delivery_format": "Experiencia interactiva",
+    "evidence_status": "Respaldo parcial",
+    "share_mechanism": "Comparar escenarios",
+    "scope_class": "prototipo_breve",
+    "expected": "El reglamento respalda reglas; las combinaciones se presentan como escenario, no como resultado oficial."
+  },
+  {
+    "name": "juego_de_probabilidades",
+    "product_type": "Juego o desafío",
+    "delivery_format": "App web",
+    "evidence_status": "Lista para construir",
+    "share_mechanism": "Desafiar",
+    "scope_class": "prototipo_breve",
+    "expected": "La mecánica reproducible se prueba con casos límite y no necesita un dataset artificial."
+  },
+  {
+    "name": "guia_con_fuente_inaccesible",
+    "product_type": "Guía interactiva",
+    "delivery_format": "Recurso descargable",
+    "evidence_status": "Pendiente de revisión",
+    "share_mechanism": "Ayudar",
+    "scope_class": "varias_sesiones",
+    "expected": "El bloqueo técnico es incertidumbre y requiere revisión manual; no demuestra falsedad ni habilita la guía."
+  },
+  {
+    "name": "utilidad_de_archivos_mismo_evento",
+    "product_type": "Utilidad para archivos",
+    "delivery_format": "Utilidad local",
+    "evidence_status": "Pendiente de revisión",
+    "share_mechanism": "Ayudar",
+    "scope_class": "prototipo_breve",
+    "expected": "Puede coexistir con otra propuesta para el mismo evento si cambia necesidad y producto."
+  }
+]
