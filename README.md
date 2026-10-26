@@ -175,6 +175,32 @@ python main.py --skip-llm
 python main.py --skip-telegram
 ```
 
+### Seguimiento de publicación y resultados
+
+El historial también permite registrar qué oportunidades se construyeron y qué resultado tuvieron, sin ejecutar el radar ni requerir credenciales de Gemini o Telegram:
+
+```bash
+# Elegir una oportunidad para construir
+python main.py --mark-selected 2026-10-25-001
+
+# Registrar la publicación de una herramienta
+python main.py --mark-published 2026-10-25-001 \
+  --product-url https://tu-dominio.cl/calculadora \
+  --publication-notes "Publicada en LinkedIn y compartida con la audiencia objetivo"
+
+# Actualizar los totales observados (no incrementos)
+python main.py --record-metrics 2026-10-25-001 \
+  --visits 240 --task-completions 86 --share-clicks 18 --corrections 1 --hours-invested 3.5
+
+# Archivar una herramienta desactualizada
+python main.py --mark-archived 2026-10-25-001 --publication-notes "Regla reemplazada por una nueva versión"
+
+# Revisar publicaciones y métricas de los últimos siete días
+python main.py --publication-report
+```
+
+Los estados son `unpublished`, `selected`, `published` y `archived`. El reporte incluye visitas, resultados completados, clics para compartir, correcciones y horas invertidas de las piezas publicadas durante el período.
+
 ---
 
 ## 🧪 Pruebas Automatizadas

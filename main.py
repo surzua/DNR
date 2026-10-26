@@ -13,9 +13,11 @@ from src.ingestion import gather_all_sources
 from src.notifiers import send_batch_alerts
 from src.storage import (
     HistoryEntry,
+    find_history_entry,
     filter_articles_by_history,
     generate_next_id,
     get_entries_pending_delivery,
+    get_publication_report,
     get_recent_topics,
     get_recent_trigger_titles,
     get_recent_trigger_urls,
@@ -48,6 +50,90 @@ def _dispatch_succeeded(dispatch_results: dict) -> bool:
         and dispatch_results.get("briefing_sent", False)
         and dispatch_results.get("failed", 0) == 0
     )
+
+
+def _handle_publication_command(args: argparse.Namespace) -> int:
+    """Ejecuta operaciones locales del ciclo de vida de una oportunidad."""
+    metric_values = {
+        "visits": args.visits,
+        "task_completions": args.task_completions,
+        "share_clicks": args.share_clicks,
+        "corrections": args.corrections,
+        "hours_invested": args.hours_invested,
+    }
+
+    if args.publication_report:
+        try:
+            report = get_publication_report(load_history(), days=args.report_days)
+        except ValueError as exc:
+            logger.error("Parámetros inválidos para el reporte: %s", exc)
+            return EXIT_CONFIGURATION_ERROR
+        logger.info(
+            "Reporte de publicación (%d días): %d publicadas, %d seleccionadas, %d archivadas | "
+            "%d visitas, %d resultados completados, %d clics para compartir, %d correcciones, %.1f horas.",
+            report["days"],
+            report["published"],
+            report["selected"],
+            report["archived"],
+            report["visits"],
+            report["task_completions"],
+            report["share_clicks"],
+            report["corrections"],
+            report["hours_invested"],
+        )
+        for entry in report["published_entries"]:
+            logger.info("  • %s | %s | %s", entry.id, entry.topic, entry.product_url or "sin URL")
+        return EXIT_SUCCESS
+
+    entry_id = args.mark_selected or args.mark_published or args.mark_archived or args.record_metrics
+    if not entry_id:
+        logger.error("Indica una acción de ciclo de publicación antes de usar sus parámetros.")
+        return EXIT_CONFIGURATION_ERROR
+    if args.product_url and not args.mark_published:
+        logger.error("--product-url solo puede usarse junto con --mark-published.")
+        return EXIT_CONFIGURATION_ERROR
+    if args.mark_published and not args.product_url:
+        logger.error("--mark-published requiere --product-url con la URL pública de la herramienta.")
+        return EXIT_CONFIGURATION_ERROR
+    if any(value is not None for value in metric_values.values()) and not args.record_metrics:
+        logger.error("Las métricas solo pueden actualizarse junto con --record-metrics ID.")
+        return EXIT_CONFIGURATION_ERROR
+    if args.record_metrics and all(value is None for value in metric_values.values()):
+        logger.error("--record-metrics requiere al menos una métrica.")
+        return EXIT_CONFIGURATION_ERROR
+
+    history = load_history()
+    entry = find_history_entry(history, entry_id)
+    if entry is None:
+        logger.error("No existe una oportunidad con ID %s.", entry_id)
+        return EXIT_CONFIGURATION_ERROR
+    if args.record_metrics and entry.published_at is None:
+        logger.error("La oportunidad %s aún no está publicada; no se pueden registrar métricas de uso.", entry_id)
+        return EXIT_CONFIGURATION_ERROR
+
+    try:
+        if args.mark_selected:
+            entry.mark_selected()
+            action = "seleccionada para producción"
+        elif args.mark_published:
+            entry.mark_published(args.product_url, notes=args.publication_notes)
+            action = "marcada como publicada"
+        elif args.mark_archived:
+            entry.mark_archived(notes=args.publication_notes)
+            action = "archivada"
+        else:
+            entry.update_metrics(**metric_values)
+            action = "métricas actualizadas"
+        save_history(history)
+    except ValueError as exc:
+        logger.error("No se pudo actualizar %s: %s", entry_id, exc)
+        return EXIT_CONFIGURATION_ERROR
+    except Exception as exc:
+        logger.exception("No se pudo guardar el ciclo de publicación: %s", exc)
+        return EXIT_EVALUATION_ERROR
+
+    logger.info("Oportunidad %s %s.", entry_id, action)
+    return EXIT_SUCCESS
 
 
 def main() -> int:
@@ -91,7 +177,64 @@ def main() -> int:
         action="store_true",
         help="Omite la fase de despacho de notificaciones a Telegram",
     )
+    lifecycle_group = parser.add_mutually_exclusive_group()
+    lifecycle_group.add_argument(
+        "--mark-selected",
+        metavar="ID",
+        help="Marca una oportunidad como elegida para producción",
+    )
+    lifecycle_group.add_argument(
+        "--mark-published",
+        metavar="ID",
+        help="Marca una oportunidad como publicada; requiere --product-url",
+    )
+    lifecycle_group.add_argument(
+        "--mark-archived",
+        metavar="ID",
+        help="Archiva una oportunidad o producto que ya no se mantendrá",
+    )
+    lifecycle_group.add_argument(
+        "--record-metrics",
+        metavar="ID",
+        help="Actualiza los totales observados de una oportunidad publicada",
+    )
+    lifecycle_group.add_argument(
+        "--publication-report",
+        action="store_true",
+        help="Muestra un resumen de publicaciones y métricas",
+    )
+    parser.add_argument("--product-url", help="URL pública HTTP(S) de la herramienta publicada")
+    parser.add_argument("--publication-notes", help="Notas de contexto, distribución o mantenimiento")
+    parser.add_argument("--visits", type=int, help="Total de visitas o sesiones observado")
+    parser.add_argument("--task-completions", type=int, help="Total de personas que llegaron al resultado")
+    parser.add_argument("--share-clicks", type=int, help="Total de clics para compartir o copiar enlace")
+    parser.add_argument("--corrections", type=int, help="Total de correcciones o incidencias detectadas")
+    parser.add_argument("--hours-invested", type=float, help="Horas reales invertidas en la pieza")
+    parser.add_argument(
+        "--report-days",
+        type=int,
+        default=7,
+        help="Días incluidos por --publication-report (por defecto: 7)",
+    )
     args = parser.parse_args()
+
+    if any(
+        (
+            args.mark_selected,
+            args.mark_published,
+            args.mark_archived,
+            args.record_metrics,
+            args.publication_report,
+            args.product_url,
+            args.publication_notes,
+            args.visits is not None,
+            args.task_completions is not None,
+            args.share_clicks is not None,
+            args.corrections is not None,
+            args.hours_invested is not None,
+        )
+    ):
+        return _handle_publication_command(args)
 
     try:
         pipeline_config = load_pipeline_config()

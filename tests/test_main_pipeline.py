@@ -34,6 +34,72 @@ def test_main_with_skip_llm():
                     mock_eval.assert_not_called()
 
 
+def test_main_manages_publication_lifecycle_without_running_radar():
+    entry = HistoryEntry(
+        id="2026-10-25-001",
+        timestamp=datetime.now(timezone.utc),
+        topic="Calculadora de prueba",
+        category="Economía & Finanzas",
+        viral_hook_type="Hook",
+        analytical_angle="Angle",
+        feasibility_score=8,
+        virality_score=8,
+        recommended_deliverable="Calculadora",
+    )
+
+    with patch("main.load_history", return_value=[entry]):
+        with patch("main.save_history") as mock_save:
+            with patch("main.gather_all_sources") as mock_gather:
+                with patch.object(sys, "argv", ["main.py", "--mark-selected", entry.id]):
+                    assert main() == 0
+                assert entry.publication_status == "selected"
+
+                with patch.object(
+                    sys,
+                    "argv",
+                    [
+                        "main.py",
+                        "--mark-published",
+                        entry.id,
+                        "--product-url",
+                        "https://ejemplo.cl/calculadora",
+                        "--publication-notes",
+                        "Publicada en LinkedIn",
+                    ],
+                ):
+                    assert main() == 0
+                assert entry.publication_status == "published"
+                assert entry.product_url == "https://ejemplo.cl/calculadora"
+
+                with patch.object(
+                    sys,
+                    "argv",
+                    [
+                        "main.py",
+                        "--record-metrics",
+                        entry.id,
+                        "--visits",
+                        "100",
+                        "--task-completions",
+                        "32",
+                        "--hours-invested",
+                        "2.5",
+                    ],
+                ):
+                    assert main() == 0
+
+    assert entry.metrics.visits == 100
+    assert entry.metrics.task_completions == 32
+    assert entry.metrics.hours_invested == 2.5
+    assert mock_save.call_count == 3
+    mock_gather.assert_not_called()
+
+
+def test_main_requires_url_when_marking_published():
+    with patch.object(sys, "argv", ["main.py", "--mark-published", "2026-10-25-001"]):
+        assert main() == 2
+
+
 def test_main_missing_gemini_key_returns_configuration_error():
     test_args = ["main.py", "--use-cache"]
     with patch.object(sys, "argv", test_args):

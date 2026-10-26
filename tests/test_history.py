@@ -7,6 +7,7 @@ from src.storage.history_manager import (
     filter_articles_by_history,
     generate_next_id,
     get_entries_pending_delivery,
+    get_publication_report,
     get_recent_topics,
     get_recent_trigger_titles,
     get_recent_trigger_urls,
@@ -86,6 +87,81 @@ def test_delivery_state_is_backward_compatible_and_retryable():
     assert pending_entry.delivery_attempts == 2
     assert pending_entry.delivered_at is not None
     assert get_entries_pending_delivery([pending_entry]) == []
+
+
+def test_publication_lifecycle_and_metrics_are_persisted():
+    entry = HistoryEntry(
+        id="2026-10-06-001",
+        timestamp=datetime.now(timezone.utc),
+        topic="Calculadora de tarifas",
+        category="Economía & Finanzas",
+        viral_hook_type="Hook",
+        analytical_angle="Angle",
+        feasibility_score=8,
+        virality_score=8,
+        recommended_deliverable="Calculadora",
+    )
+
+    entry.mark_selected()
+    assert entry.publication_status == "selected"
+    assert entry.selected_at is not None
+
+    entry.mark_published("https://ejemplo.cl/calculadora", notes="Difusión en LinkedIn")
+    entry.update_metrics(visits=120, task_completions=45, share_clicks=12, hours_invested=3.5)
+
+    assert entry.publication_status == "published"
+    assert entry.product_url == "https://ejemplo.cl/calculadora"
+    assert entry.publication_notes == "Difusión en LinkedIn"
+    assert entry.metrics.visits == 120
+    assert entry.metrics.task_completions == 45
+    assert entry.metrics.share_clicks == 12
+    assert entry.metrics.hours_invested == 3.5
+    assert entry.metrics.measured_at is not None
+
+    entry.mark_archived(notes="Regla reemplazada")
+    assert entry.publication_status == "archived"
+    assert entry.archived_at is not None
+    assert entry.publication_notes == "Regla reemplazada"
+
+
+def test_publication_report_only_includes_recent_published_entries():
+    now = datetime(2026, 10, 10, 12, 0, tzinfo=timezone.utc)
+    recent = HistoryEntry(
+        id="2026-10-09-001",
+        timestamp=now,
+        topic="Herramienta reciente",
+        category="Economía & Finanzas",
+        viral_hook_type="Hook",
+        analytical_angle="Angle",
+        feasibility_score=8,
+        virality_score=8,
+        recommended_deliverable="Calculadora",
+    )
+    recent.mark_published("https://ejemplo.cl/reciente", published_at=now)
+    recent.update_metrics(visits=100, task_completions=30, share_clicks=8, corrections=1, hours_invested=2)
+
+    old = HistoryEntry(
+        id="2026-09-01-001",
+        timestamp=now,
+        topic="Herramienta antigua",
+        category="Economía & Finanzas",
+        viral_hook_type="Hook",
+        analytical_angle="Angle",
+        feasibility_score=8,
+        virality_score=8,
+        recommended_deliverable="Calculadora",
+    )
+    old.mark_published("https://ejemplo.cl/antigua", published_at=datetime(2026, 9, 1, tzinfo=timezone.utc))
+    old.update_metrics(visits=999, hours_invested=5)
+
+    report = get_publication_report([recent, old], days=7, now=now)
+    assert report["published"] == 1
+    assert report["visits"] == 100
+    assert report["task_completions"] == 30
+    assert report["share_clicks"] == 8
+    assert report["corrections"] == 1
+    assert report["hours_invested"] == 2
+    assert report["published_entries"] == [recent]
 
 
 def test_generate_next_id():

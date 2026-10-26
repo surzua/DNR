@@ -3,9 +3,12 @@
 from src.storage.articles_cache import load_articles_cache, save_articles_cache
 from src.storage.history_manager import (
     HistoryEntry,
+    PublicationMetrics,
     filter_articles_by_history,
+    find_history_entry,
     generate_next_id,
     get_entries_pending_delivery,
+    get_publication_report,
     get_recent_topics,
     get_recent_trigger_titles,
     get_recent_trigger_urls,
@@ -17,7 +20,10 @@ from src.storage.history_manager import (
 
 __all__ = [
     "HistoryEntry",
+    "PublicationMetrics",
     "get_entries_pending_delivery",
+    "find_history_entry",
+    "get_publication_report",
     "load_history",
     "save_history",
     "get_recent_topics",

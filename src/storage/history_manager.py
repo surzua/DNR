@@ -8,7 +8,7 @@ from pathlib import Path
 import re
 import shutil
 import tempfile
-from typing import Any, Dict, List, Optional, Set
+from typing import Any, Dict, List, Literal, Optional, Set
 import unicodedata
 from urllib.parse import urlparse
 from pydantic import BaseModel, Field
@@ -16,6 +16,20 @@ from pydantic import BaseModel, Field
 logger = logging.getLogger("dnr.history_manager")
 
 HISTORY_FILE_PATH = Path("data/history.json")
+
+
+class PublicationMetrics(BaseModel):
+    """Mediciones acumuladas y manuales de una herramienta publicada."""
+
+    visits: int = Field(default=0, ge=0, description="Visitas o sesiones observadas")
+    task_completions: int = Field(default=0, ge=0, description="Personas que llegaron al resultado útil")
+    share_clicks: int = Field(default=0, ge=0, description="Clics para compartir o copiar enlace")
+    corrections: int = Field(default=0, ge=0, description="Correcciones o incidencias de calidad")
+    hours_invested: float = Field(default=0.0, ge=0, description="Horas reales invertidas")
+    measured_at: Optional[datetime] = Field(
+        default=None,
+        description="Momento UTC de la última actualización de métricas",
+    )
 
 
 class HistoryEntry(BaseModel):
@@ -52,10 +66,16 @@ class HistoryEntry(BaseModel):
         default=None,
         description="Momento UTC del último envío confirmado",
     )
-    publication_status: str = Field(
+    publication_status: Literal["unpublished", "selected", "published", "archived"] = Field(
         default="unpublished",
-        description="Estado de publicación: unpublished, published o archived",
+        description="Estado de publicación: unpublished, selected, published o archived",
     )
+    selected_at: Optional[datetime] = Field(default=None, description="Momento UTC de selección")
+    published_at: Optional[datetime] = Field(default=None, description="Momento UTC de publicación")
+    archived_at: Optional[datetime] = Field(default=None, description="Momento UTC de archivo")
+    product_url: Optional[str] = Field(default=None, description="URL pública del producto publicado")
+    publication_notes: Optional[str] = Field(default=None, description="Notas operativas de publicación")
+    metrics: PublicationMetrics = Field(default_factory=PublicationMetrics)
     audience: Optional[str] = Field(default=None, description="Audiencia objetivo del producto")
     user_need: Optional[str] = Field(default=None, description="Necesidad que resuelve")
     user_action: Optional[str] = Field(default=None, description="Acción que podrá completar la audiencia")
@@ -127,6 +147,119 @@ class HistoryEntry(BaseModel):
             self.delivered_at = timestamp
         else:
             self.delivery_status = "failed"
+
+    def mark_selected(self, selected_at: Optional[datetime] = None) -> None:
+        """Marca la oportunidad como elegida para producción."""
+        self.publication_status = "selected"
+        self.selected_at = self.selected_at or selected_at or datetime.now(timezone.utc)
+
+    def mark_published(
+        self,
+        product_url: str,
+        notes: Optional[str] = None,
+        published_at: Optional[datetime] = None,
+    ) -> None:
+        """Registra una publicación y la URL pública de la herramienta."""
+        parsed_url = urlparse(product_url.strip())
+        if parsed_url.scheme not in {"http", "https"} or not parsed_url.netloc:
+            raise ValueError("La URL del producto debe ser HTTP(S) y tener un host válido.")
+
+        timestamp = published_at or datetime.now(timezone.utc)
+        if self.selected_at is None:
+            self.selected_at = timestamp
+        self.publication_status = "published"
+        self.published_at = timestamp
+        self.archived_at = None
+        self.product_url = product_url.strip()
+        if notes is not None:
+            self.publication_notes = notes.strip() or None
+
+    def mark_archived(
+        self,
+        notes: Optional[str] = None,
+        archived_at: Optional[datetime] = None,
+    ) -> None:
+        """Archiva un producto u oportunidad que ya no se mantendrá vigente."""
+        self.publication_status = "archived"
+        self.archived_at = archived_at or datetime.now(timezone.utc)
+        if notes is not None:
+            self.publication_notes = notes.strip() or None
+
+    def update_metrics(
+        self,
+        *,
+        visits: Optional[int] = None,
+        task_completions: Optional[int] = None,
+        share_clicks: Optional[int] = None,
+        corrections: Optional[int] = None,
+        hours_invested: Optional[float] = None,
+        measured_at: Optional[datetime] = None,
+    ) -> None:
+        """Guarda el último total observado de métricas de publicación."""
+        values = {
+            "visits": visits,
+            "task_completions": task_completions,
+            "share_clicks": share_clicks,
+            "corrections": corrections,
+            "hours_invested": hours_invested,
+        }
+        for name, value in values.items():
+            if value is not None:
+                if value < 0:
+                    raise ValueError(f"{name} no puede ser negativo.")
+                setattr(self.metrics, name, value)
+        self.metrics.measured_at = measured_at or datetime.now(timezone.utc)
+
+
+def find_history_entry(history: List[HistoryEntry], entry_id: str) -> Optional[HistoryEntry]:
+    """Busca una oportunidad por su identificador estable."""
+    return next((entry for entry in history if entry.id == entry_id), None)
+
+
+def get_publication_report(
+    history: List[HistoryEntry],
+    days: int = 7,
+    now: Optional[datetime] = None,
+) -> Dict[str, Any]:
+    """Resume publicaciones y métricas acumuladas dentro de una ventana temporal."""
+    if days < 1:
+        raise ValueError("days debe ser mayor o igual a 1.")
+
+    reference_time = now or datetime.now(timezone.utc)
+    cutoff = reference_time - timedelta(days=days)
+    published = [
+        entry
+        for entry in history
+        if entry.publication_status == "published"
+        and entry.published_at is not None
+        and entry.published_at.astimezone(timezone.utc) >= cutoff
+    ]
+    selected = [
+        entry
+        for entry in history
+        if entry.publication_status == "selected"
+        and entry.selected_at is not None
+        and entry.selected_at.astimezone(timezone.utc) >= cutoff
+    ]
+    archived = [
+        entry
+        for entry in history
+        if entry.publication_status == "archived"
+        and entry.archived_at is not None
+        and entry.archived_at.astimezone(timezone.utc) >= cutoff
+    ]
+    return {
+        "days": days,
+        "published": len(published),
+        "selected": len(selected),
+        "archived": len(archived),
+        "visits": sum(entry.metrics.visits for entry in published),
+        "task_completions": sum(entry.metrics.task_completions for entry in published),
+        "share_clicks": sum(entry.metrics.share_clicks for entry in published),
+        "corrections": sum(entry.metrics.corrections for entry in published),
+        "hours_invested": sum(entry.metrics.hours_invested for entry in published),
+        "published_entries": published,
+    }
 
 
 def get_entries_pending_delivery(history: List[HistoryEntry]) -> List[HistoryEntry]:
