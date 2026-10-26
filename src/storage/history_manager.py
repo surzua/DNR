@@ -35,6 +35,27 @@ class HistoryEntry(BaseModel):
     trigger_article_title: Optional[str] = Field(default=None, description="Titular de la noticia detonante")
     trigger_article_url: Optional[str] = Field(default=None, description="URL de la noticia detonante")
     status: str = Field(default="candidate", description="Estado de la oportunidad")
+    evaluation_status: str = Field(
+        default="accepted",
+        description="Resultado de la evaluación que creó este registro",
+    )
+    delivery_status: str = Field(
+        default="untracked",
+        description="Estado del envío: untracked, pending, delivered, failed o skipped",
+    )
+    delivery_attempts: int = Field(default=0, ge=0, description="Intentos de entrega registrados")
+    last_delivery_attempt_at: Optional[datetime] = Field(
+        default=None,
+        description="Momento UTC del último intento de entrega",
+    )
+    delivered_at: Optional[datetime] = Field(
+        default=None,
+        description="Momento UTC del último envío confirmado",
+    )
+    publication_status: str = Field(
+        default="unpublished",
+        description="Estado de publicación: unpublished, published o archived",
+    )
 
     @classmethod
     def from_opportunity(
@@ -43,6 +64,7 @@ class HistoryEntry(BaseModel):
         entry_id: str,
         timestamp: Optional[datetime] = None,
         status: str = "candidate",
+        delivery_status: str = "pending",
     ) -> "HistoryEntry":
         """Convierte un objeto Opportunity a HistoryEntry."""
         ts = timestamp or datetime.now(timezone.utc)
@@ -65,7 +87,34 @@ class HistoryEntry(BaseModel):
             trigger_article_title=getattr(opportunity, "trigger_article_title", None),
             trigger_article_url=getattr(opportunity, "trigger_article_url", None),
             status=status,
+            evaluation_status="accepted",
+            delivery_status=delivery_status,
+            publication_status="unpublished",
         )
+
+    def record_delivery_attempt(
+        self,
+        delivered: bool,
+        attempted_at: Optional[datetime] = None,
+    ) -> None:
+        """Actualiza el resultado de un intento de envío confirmado por Telegram."""
+        timestamp = attempted_at or datetime.now(timezone.utc)
+        self.delivery_attempts += 1
+        self.last_delivery_attempt_at = timestamp
+        if delivered:
+            self.delivery_status = "delivered"
+            self.delivered_at = timestamp
+        else:
+            self.delivery_status = "failed"
+
+
+def get_entries_pending_delivery(history: List[HistoryEntry]) -> List[HistoryEntry]:
+    """Retorna alertas nuevas o fallidas que se pueden reintentar.
+
+    Los registros históricos previos al seguimiento quedan como ``untracked``;
+    así la migración no reenvía retrospectivamente alertas ya vistas.
+    """
+    return [entry for entry in history if entry.delivery_status in {"pending", "failed"}]
 
 
 def load_history(filepath: Path = HISTORY_FILE_PATH) -> List[HistoryEntry]:

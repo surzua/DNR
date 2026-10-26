@@ -163,6 +163,62 @@ def test_main_returns_error_when_telegram_dispatch_fails(mock_radar_opp: Opportu
                                 assert main() == 4
 
 
+def test_main_records_individual_delivery_results(mock_radar_opp: Opportunity):
+    test_args = ["main.py", "--use-cache"]
+    radar_resp = RadarResponse(evaluated_topics_count=1, top_opportunities=[mock_radar_opp])
+    with patch.object(sys, "argv", test_args):
+        with patch.dict("os.environ", {"GEMINI_API_KEY": "fake_key"}):
+            with patch("main.load_articles_cache", return_value=[]):
+                with patch("main.load_history", return_value=[]):
+                    with patch("main.evaluate_opportunities", return_value=radar_resp):
+                        with patch("main.save_history") as mock_save:
+                            with patch(
+                                "main.send_batch_alerts",
+                                return_value={
+                                    "briefing_sent": True,
+                                    "sent": 1,
+                                    "failed": 0,
+                                    "total": 1,
+                                    "skipped": False,
+                                    "item_results": [True],
+                                },
+                            ):
+                                assert main() == 0
+
+    persisted_history = mock_save.call_args_list[-1].args[0]
+    assert persisted_history[0].delivery_status == "delivered"
+    assert persisted_history[0].delivery_attempts == 1
+    assert persisted_history[0].delivered_at is not None
+
+
+def test_main_retries_only_pending_delivery(mock_radar_opp: Opportunity):
+    test_args = ["main.py", "--use-cache"]
+    pending_entry = HistoryEntry.from_opportunity(mock_radar_opp, entry_id="2026-10-25-001")
+    radar_resp = RadarResponse(evaluated_topics_count=1, top_opportunities=[])
+    with patch.object(sys, "argv", test_args):
+        with patch.dict("os.environ", {"GEMINI_API_KEY": "fake_key"}):
+            with patch("main.load_articles_cache", return_value=[]):
+                with patch("main.load_history", return_value=[pending_entry]):
+                    with patch("main.evaluate_opportunities", return_value=radar_resp):
+                        with patch("main.save_history") as mock_save:
+                            with patch(
+                                "main.send_batch_alerts",
+                                return_value={
+                                    "briefing_sent": True,
+                                    "sent": 1,
+                                    "failed": 0,
+                                    "total": 1,
+                                    "skipped": False,
+                                    "item_results": [True],
+                                },
+                            ) as mock_dispatch:
+                                assert main() == 0
+
+    assert mock_dispatch.call_args.kwargs["opportunities"] == [pending_entry]
+    assert pending_entry.delivery_status == "delivered"
+    assert mock_save.call_count == 2
+
+
 def test_main_filters_articles_against_history(mock_radar_opp: Opportunity):
     test_args = ["main.py", "--use-cache", "--cooldown-days", "5", "--skip-telegram"]
     radar_resp = RadarResponse(

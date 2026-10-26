@@ -291,8 +291,8 @@ def send_batch_alerts(
 ) -> Dict[str, Any]:
     """Envía el briefing diario y el lote de oportunidades con control de tasa.
     
-    Retorna un diccionario con estadísticas de despacho:
-    {'briefing_sent': bool, 'sent': int, 'failed': int, 'total': int}
+    Retorna estadísticas de despacho y ``item_results`` en el mismo orden que
+    ``opportunities`` para que el historial pueda persistir cada resultado.
     """
     token = bot_token or os.getenv("TELEGRAM_BOT_TOKEN")
     chat = chat_id or os.getenv("TELEGRAM_CHAT_ID")
@@ -308,6 +308,7 @@ def send_batch_alerts(
             "failed": len(opportunities),
             "total": len(opportunities),
             "skipped": True,
+            "item_results": [],
         }
 
     # 1. Enviar mensaje de cabecera / briefing
@@ -335,11 +336,13 @@ def send_batch_alerts(
             "failed": 0,
             "total": 0,
             "skipped": False,
+            "item_results": [],
         }
 
     # 2. Despachar cada oportunidad con pausa para evitar rate-limits
     sent_count = 0
     failed_count = 0
+    item_results: List[bool] = []
 
     for i, opp in enumerate(opportunities, start=1):
         if not dry_run and delay_between_messages > 0:
@@ -356,6 +359,7 @@ def send_batch_alerts(
             sent_count += 1
         else:
             failed_count += 1
+        item_results.append(ok)
 
     logger.info(
         "Despacho a Telegram completado: %d enviadas, %d fallidas (Total: %d)",
@@ -370,4 +374,5 @@ def send_batch_alerts(
         "failed": failed_count,
         "total": len(opportunities),
         "skipped": False,
+        "item_results": item_results,
     }

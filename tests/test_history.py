@@ -6,6 +6,7 @@ from src.storage.history_manager import (
     HistoryEntry,
     filter_articles_by_history,
     generate_next_id,
+    get_entries_pending_delivery,
     get_recent_topics,
     get_recent_trigger_titles,
     get_recent_trigger_urls,
@@ -40,6 +41,49 @@ def test_history_save_and_load(tmp_path: Path):
     assert len(loaded) == 1
     assert loaded[0].id == "2026-10-06-001"
     assert loaded[0].topic == "Polémica por luminarias públicas"
+
+
+def test_delivery_state_is_backward_compatible_and_retryable():
+    legacy_entry = HistoryEntry(
+        id="2026-10-06-001",
+        timestamp=datetime.now(timezone.utc),
+        topic="Registro histórico",
+        category="Deportes",
+        viral_hook_type="Hook",
+        analytical_angle="Angle",
+        feasibility_score=7,
+        virality_score=8,
+        recommended_deliverable="App",
+    )
+    pending_entry = HistoryEntry.from_opportunity(
+        type("OpportunityStub", (), {
+            "headline": "Nueva alerta",
+            "category": "Deportes",
+            "contrarian_or_curious_angle": "Angle",
+            "data_sources": [],
+            "technical_feasibility_score": 7,
+            "virality_score": 8,
+            "suggested_deliverable": "App",
+            "fast_execution_strategy": None,
+            "trigger_article_title": None,
+            "trigger_article_url": None,
+        })(),
+        entry_id="2026-10-06-002",
+    )
+
+    assert legacy_entry.delivery_status == "untracked"
+    assert get_entries_pending_delivery([legacy_entry, pending_entry]) == [pending_entry]
+
+    pending_entry.record_delivery_attempt(delivered=False)
+    assert pending_entry.delivery_status == "failed"
+    assert pending_entry.delivery_attempts == 1
+    assert get_entries_pending_delivery([pending_entry]) == [pending_entry]
+
+    pending_entry.record_delivery_attempt(delivered=True)
+    assert pending_entry.delivery_status == "delivered"
+    assert pending_entry.delivery_attempts == 2
+    assert pending_entry.delivered_at is not None
+    assert get_entries_pending_delivery([pending_entry]) == []
 
 
 def test_generate_next_id():

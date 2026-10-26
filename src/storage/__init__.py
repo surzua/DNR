@@ -5,6 +5,7 @@ from src.storage.history_manager import (
     HistoryEntry,
     filter_articles_by_history,
     generate_next_id,
+    get_entries_pending_delivery,
     get_recent_topics,
     get_recent_trigger_titles,
     get_recent_trigger_urls,
@@ -16,6 +17,7 @@ from src.storage.history_manager import (
 
 __all__ = [
     "HistoryEntry",
+    "get_entries_pending_delivery",
     "load_history",
     "save_history",
     "get_recent_topics",

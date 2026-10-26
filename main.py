@@ -15,6 +15,7 @@ from src.storage import (
     HistoryEntry,
     filter_articles_by_history,
     generate_next_id,
+    get_entries_pending_delivery,
     get_recent_topics,
     get_recent_trigger_titles,
     get_recent_trigger_urls,
@@ -201,30 +202,24 @@ def main() -> int:
         return EXIT_EVALUATION_ERROR
 
     opportunities = radar_result.top_opportunities
+    pending_deliveries = get_entries_pending_delivery(history)
     logger.info(
         "Evaluación finalizada: %d oportunidades calificadas sobre el umbral.",
         len(opportunities),
     )
 
-    if not opportunities:
-        logger.info("No se detectaron oportunidades que superaran los umbrales de viabilidad y viralidad hoy.")
-        if not args.skip_telegram:
-            logger.info("Despachando notificación de estado a Telegram (0 oportunidades)...")
-            dispatch_results = send_batch_alerts(
-                opportunities=[],
-                total_articles=len(articles),
-                dry_run=args.dry_run,
-            )
-            if not _dispatch_succeeded(dispatch_results):
-                logger.error("No se pudo entregar el briefing de estado a Telegram.")
-                return EXIT_NOTIFICATION_ERROR
-        return EXIT_SUCCESS
-
-    # Guardado de oportunidades en historial
+    # Registrar los nuevos candidatos antes de cualquier envío. Esto evita que un
+    # proceso interrumpido tras Telegram pierda el estado de entrega.
+    new_entries = []
     for opp in opportunities:
         new_id = generate_next_id(history)
-        entry = HistoryEntry.from_opportunity(opp, entry_id=new_id)
+        entry = HistoryEntry.from_opportunity(
+            opp,
+            entry_id=new_id,
+            delivery_status="skipped" if args.skip_telegram else "pending",
+        )
         history.append(entry)
+        new_entries.append(entry)
 
         logger.info("\n🚀 [%s] %s (Viralidad: %d/10 | Viabilidad: %d/10)", new_id, opp.headline, opp.virality_score, opp.technical_feasibility_score)
         logger.info("   📂 Categoría: %s", opp.category)
@@ -235,6 +230,9 @@ def main() -> int:
         logger.info("   🛠️ Plan rápido: %s", opp.fast_execution_strategy)
         for ds in opp.data_sources:
             logger.info("      • Fuente: %s (%s, Fricción: %s)", ds.name, ds.type, ds.friction_level)
+
+    if not opportunities:
+        logger.info("No se detectaron oportunidades nuevas que superaran los umbrales hoy.")
 
     if args.dry_run:
         logger.info("[DRY-RUN] Historial no modificado.")
@@ -249,7 +247,10 @@ def main() -> int:
             len(opportunities),
         )
 
-    # Fase 4: Despacho de alertas a Telegram
+    # Fase 4: despacho de candidatos nuevos y reintentos explícitamente pendientes.
+    # Los registros históricos sin estado de entrega quedan como ``untracked`` y no
+    # se reenvían durante la migración.
+    entries_to_dispatch = pending_deliveries + new_entries
     if args.skip_telegram:
         logger.info("Bandera --skip-telegram activa: Omitiendo despacho a Telegram.")
     else:
@@ -257,7 +258,7 @@ def main() -> int:
         logger.info("Fase 4: Despachando alertas a Telegram%s...", " (DRY-RUN)" if args.dry_run else "")
         logger.info("--------------------------------------------------")
         dispatch_results = send_batch_alerts(
-            opportunities=opportunities,
+            opportunities=entries_to_dispatch,
             total_articles=len(articles),
             dry_run=args.dry_run,
         )
@@ -270,6 +271,28 @@ def main() -> int:
                 dispatch_results.get("failed", 0),
                 dispatch_results.get("briefing_sent", False),
             )
+
+        # Solo actualizamos el historial si cada resultado individual puede
+        # asociarse inequívocamente a su candidato. Así, una respuesta incompleta
+        # del notificador mantiene los candidatos en estado pendiente y evita
+        # registrarlos como entregados por error.
+        item_results = dispatch_results.get("item_results", [])
+        if not args.dry_run and not dispatch_results.get("skipped"):
+            if len(item_results) != len(entries_to_dispatch):
+                logger.error(
+                    "El notificador devolvió %d resultados para %d alertas; se conserva el estado pendiente.",
+                    len(item_results),
+                    len(entries_to_dispatch),
+                )
+                return EXIT_NOTIFICATION_ERROR
+            for entry, delivered in zip(entries_to_dispatch, item_results):
+                entry.record_delivery_attempt(bool(delivered))
+            try:
+                save_history(history)
+            except Exception as exc:
+                logger.exception("No se pudo persistir el resultado del despacho: %s", exc)
+                return EXIT_EVALUATION_ERROR
+
         if not _dispatch_succeeded(dispatch_results):
             logger.error("El despacho a Telegram no se completó correctamente.")
             return EXIT_NOTIFICATION_ERROR

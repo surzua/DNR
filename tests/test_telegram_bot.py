@@ -246,6 +246,7 @@ def test_send_batch_alerts_dry_run(sample_opportunity: Opportunity):
     assert results["failed"] == 0
     assert results["total"] == 2
     assert results["skipped"] == False
+    assert results["item_results"] == [True, True]
 
 
 def test_send_batch_alerts_missing_credentials(sample_opportunity: Opportunity):
@@ -279,6 +280,7 @@ def test_send_batch_alerts_live_mocked(mock_post, sample_opportunity: Opportunit
     assert results["briefing_sent"] is True
     assert results["sent"] == 1
     assert results["failed"] == 0
+    assert results["item_results"] == [True]
     assert mock_post.call_count == 2  # 1 briefing + 1 oportunidad
 
 
