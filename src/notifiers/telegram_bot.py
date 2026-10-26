@@ -128,6 +128,11 @@ def format_opportunity_html(opportunity: Any) -> str:
     delivery_format = _extract_field(opportunity, "delivery_format")
     first_interaction = _extract_field(opportunity, "first_interaction")
     differentiator = _extract_field(opportunity, "differentiator")
+    share_with = _extract_field(opportunity, "share_with")
+    share_purpose = _extract_field(opportunity, "share_purpose")
+    share_mechanism = _extract_field(opportunity, "share_mechanism")
+    shareable_artifact = _extract_field(opportunity, "shareable_artifact")
+    alternatives_review_status = _extract_field(opportunity, "alternatives_review_status")
     evidence_status = _extract_field(opportunity, "evidence_status")
     validity_note = _extract_field(opportunity, "validity_note")
     known_fact = _first_text(_extract_field(opportunity, "known_facts", []))
@@ -176,6 +181,14 @@ def format_opportunity_html(opportunity: Any) -> str:
             lines.append(f"• Diferencia: {html.escape(str(differentiator), quote=False)}")
         if share_reason:
             lines.append(f"• Para compartir: {html.escape(str(share_reason), quote=False)}")
+        if share_with and share_purpose:
+            lines.append(f"• Circuito: {html.escape(str(share_with), quote=False)} — {html.escape(str(share_purpose), quote=False)}")
+        if share_mechanism and share_mechanism != "Pendiente de revisión":
+            lines.append(f"• Mecanismo: {html.escape(str(share_mechanism), quote=False)}")
+        if shareable_artifact:
+            lines.append(f"• Resultado compartible: {html.escape(str(shareable_artifact), quote=False)}")
+        if alternatives_review_status == "pending":
+            lines.append("• Alternativas: revisión pendiente; no se afirma unicidad")
         if evidence_status:
             lines.append(f"• Evidencia: {html.escape(str(evidence_status), quote=False)}")
         if validity_note:

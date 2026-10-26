@@ -237,6 +237,34 @@ class Opportunity(BaseModel):
         default="Diferencia por comprobar frente a alternativas existentes",
         description="Mejora concreta o revisión pendiente de alternativas",
     )
+    share_with: str = Field(
+        default="Personas concretas a quienes les resuelve la misma necesidad",
+        description="Destinatario específico del resultado, no una audiencia abstracta",
+    )
+    share_purpose: str = Field(
+        default="Ayudar, coordinar o invitar a probar el producto",
+        description="Para qué se compartiría el resultado",
+    )
+    share_mechanism: Literal[
+        "Ayudar",
+        "Coordinar",
+        "Desafiar",
+        "Comparar escenarios",
+        "Expresar una creación",
+        "Pendiente de revisión",
+    ] = Field(default="Pendiente de revisión")
+    shareable_artifact: Optional[str] = Field(
+        default=None,
+        description="Enlace, imagen, archivo o desafío reproducible solo cuando aporta valor",
+    )
+    alternatives_review_status: Literal["pending", "reviewed", "not_applicable"] = Field(
+        default="pending",
+        description="No afirmar unicidad si aún no se revisaron alternativas",
+    )
+    assessment_reasons: dict[str, str] = Field(
+        default_factory=dict,
+        description="Justificación breve de puntajes de atención, utilidad y difusión; no probabilidades",
+    )
     evidence_status: Literal[
         "Pendiente de revisión",
         "Respaldo parcial",

@@ -153,6 +153,21 @@ def test_format_opportunity_html_from_history_entry():
     assert "Mercado Público" in formatted
 
 
+def test_format_opportunity_html_explains_concrete_share_circuit(sample_opportunity: Opportunity):
+    sample_opportunity.share_with = "Amistades que siguen el torneo"
+    sample_opportunity.share_purpose = "comparar combinaciones antes del partido"
+    sample_opportunity.share_mechanism = "Desafiar"
+    sample_opportunity.shareable_artifact = "Un desafío con enlace reproducible"
+    sample_opportunity.alternatives_review_status = "pending"
+
+    formatted = format_opportunity_html(sample_opportunity)
+
+    assert "Amistades que siguen el torneo" in formatted
+    assert "Mecanismo: Desafiar" in formatted
+    assert "resultado compartible" in formatted.lower()
+    assert "no se afirma unicidad" in formatted
+
+
 def test_format_opportunity_html_truncation():
     giant_opp = {
         "headline": "Titular Normal",

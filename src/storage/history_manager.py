@@ -91,6 +91,12 @@ class HistoryEntry(BaseModel):
     implementation_options: List[str] = Field(default_factory=list, description="Tecnologías posibles")
     first_interaction: Optional[str] = Field(default=None, description="Primera interacción de valor")
     differentiator: Optional[str] = Field(default=None, description="Diferencia frente a alternativas o revisión pendiente")
+    share_with: Optional[str] = Field(default=None, description="Personas con quienes se compartiría")
+    share_purpose: Optional[str] = Field(default=None, description="Finalidad concreta de compartir")
+    share_mechanism: Optional[str] = Field(default=None, description="Mecanismo de difusión propuesto")
+    shareable_artifact: Optional[str] = Field(default=None, description="Resultado reproducible o exportable")
+    alternatives_review_status: str = Field(default="pending", description="Estado de revisión de alternativas")
+    assessment_reasons: Dict[str, str] = Field(default_factory=dict, description="Razones de los puntajes")
     evidence_status: str = Field(
         default="Propuesta (no verificada)",
         description="Nivel de comprobación de fuentes o reglas",
@@ -178,6 +184,12 @@ class HistoryEntry(BaseModel):
             implementation_options=getattr(opportunity, "implementation_options", []),
             first_interaction=getattr(opportunity, "first_interaction", None),
             differentiator=getattr(opportunity, "differentiator", None),
+            share_with=getattr(opportunity, "share_with", None),
+            share_purpose=getattr(opportunity, "share_purpose", None),
+            share_mechanism=getattr(opportunity, "share_mechanism", None),
+            shareable_artifact=getattr(opportunity, "shareable_artifact", None),
+            alternatives_review_status=getattr(opportunity, "alternatives_review_status", "pending"),
+            assessment_reasons=getattr(opportunity, "assessment_reasons", {}),
             evidence_status=getattr(opportunity, "evidence_status", "Propuesta (no verificada)"),
             validity_note=getattr(opportunity, "validity_note", None),
             known_facts=getattr(opportunity, "known_facts", []),
