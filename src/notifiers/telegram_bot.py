@@ -50,6 +50,16 @@ def _extract_field(obj: Any, field_name: str, default: Any = None) -> Any:
     return default
 
 
+def _first_text(values: Any) -> Optional[str]:
+    """Devuelve el primer texto usable de una lista de notas breves."""
+    if not isinstance(values, list):
+        return None
+    return next(
+        (value.strip() for value in values if isinstance(value, str) and value.strip()),
+        None,
+    )
+
+
 def _strip_html_tags(text: str) -> str:
     """Elimina etiquetas HTML y restaura entidades comunes para fallback plano."""
     clean = re.sub(r"<[^>]+>", "", text)
@@ -117,6 +127,18 @@ def format_opportunity_html(opportunity: Any) -> str:
     share_reason = _extract_field(opportunity, "share_reason")
     evidence_status = _extract_field(opportunity, "evidence_status")
     validity_note = _extract_field(opportunity, "validity_note")
+    known_fact = _first_text(_extract_field(opportunity, "known_facts", []))
+    hypothesis = _first_text(_extract_field(opportunity, "hypotheses_to_test", []))
+    verification_step = _first_text(_extract_field(opportunity, "verification_plan", []))
+    distribution_channel = _extract_field(opportunity, "distribution_channel")
+    existing_alternatives = _extract_field(opportunity, "existing_alternatives")
+    priority_score = _extract_field(opportunity, "priority_score")
+    assessment = _extract_field(opportunity, "assessment") or _extract_field(opportunity, "selection_scores")
+    confidence_score = _extract_field(assessment, "confidence_score")
+    if callable(priority_score):
+        priority_score = None
+    if priority_score is None and hasattr(assessment, "priority_score"):
+        priority_score = assessment.priority_score()
 
     lines = [
         f"🚀 <b>OPORTUNIDAD DE DATA</b> (Viral: <b>{virality}/10</b> | Viab: <b>{feasibility}/10</b>)",
@@ -146,6 +168,24 @@ def format_opportunity_html(opportunity: Any) -> str:
             lines.append(f"• Evidencia: {html.escape(str(evidence_status), quote=False)}")
         if validity_note:
             lines.append(f"• Vigencia: {html.escape(str(validity_note), quote=False)}")
+
+    if known_fact or hypothesis or verification_step or distribution_channel or existing_alternatives:
+        lines.extend(["", "🔎 <b>Antes de construir:</b>"])
+        if priority_score is not None:
+            lines.append(
+                f"• Prioridad: {float(priority_score):.2f}/5"
+                + (f" | Confianza: {confidence_score}/5" if confidence_score else "")
+            )
+        if known_fact:
+            lines.append(f"• Hecho: {html.escape(known_fact, quote=False)}")
+        if hypothesis:
+            lines.append(f"• Hipótesis: {html.escape(hypothesis, quote=False)}")
+        if verification_step:
+            lines.append(f"• Verificar: {html.escape(verification_step, quote=False)}")
+        if distribution_channel:
+            lines.append(f"• Canal: {html.escape(str(distribution_channel), quote=False)}")
+        if existing_alternatives:
+            lines.append(f"• Diferencia: {html.escape(str(existing_alternatives), quote=False)}")
 
     lines.extend(["", "📊 <b>Fuentes de Datos Sugeridas:</b>"])
 

@@ -8,6 +8,7 @@ from src.analysis.opportunity_eval import (
     DataSource,
     EvaluationResponseError,
     Opportunity,
+    OpportunityAssessment,
     RadarResponse,
     evaluate_opportunities,
     filter_and_rank_opportunities,
@@ -49,6 +50,7 @@ def test_opportunity_schemas():
     assert opp.trigger_article_title == "Investigan licitación en comuna de Santiago"
     assert opp.product_type == "Análisis de datos"
     assert opp.evidence_status == "Propuesta (no verificada)"
+    assert opp.assessment.priority_score() is None
 
     response = RadarResponse(
         evaluated_topics_count=50,
@@ -86,7 +88,62 @@ def test_format_article_snippet_and_build_prompt():
     assert "últimas 72 horas" in prompt
     assert "ÚLTIMOS 5 DÍAS" in prompt
     assert "audience, user_need, user_action" in prompt
+    assert "known_facts, hypotheses_to_test y verification_plan" in prompt
     assert "al menos una URL HTTP(S) pública y directa" in SYSTEM_PROMPT
+    assert "Rúbrica honesta" in SYSTEM_PROMPT
+
+
+def test_opportunity_assessment_calculates_weighted_priority():
+    assessment = OpportunityAssessment(
+        utility_score=5,
+        attention_score=4,
+        shareability_score=3,
+        differentiation_score=2,
+        speed_to_publish_score=5,
+        durable_value_score=1,
+        confidence_score=3,
+    )
+
+    assert assessment.has_complete_rubric() is True
+    assert assessment.priority_score() == 3.65
+
+
+def test_filter_and_rank_prefers_complete_product_rubric_over_legacy_scores():
+    legacy = Opportunity(
+        headline="Más viral, pero sin rúbrica",
+        category="Economía & Finanzas",
+        why_is_trending="Tema visible",
+        contrarian_or_curious_angle="Ángulo",
+        suggested_deliverable="Gráfico Estático de Alto Impacto",
+        data_sources=[],
+        virality_score=10,
+        technical_feasibility_score=9,
+        fast_execution_strategy="Paso 1, 2, 3",
+    )
+    assessed = Opportunity(
+        headline="Producto mejor fundamentado",
+        category="Economía & Finanzas",
+        why_is_trending="Tema visible",
+        contrarian_or_curious_angle="Ángulo",
+        suggested_deliverable="Gráfico Estático de Alto Impacto",
+        data_sources=[],
+        virality_score=8,
+        technical_feasibility_score=8,
+        fast_execution_strategy="Paso 1, 2, 3",
+        assessment=OpportunityAssessment(
+            utility_score=5,
+            attention_score=5,
+            shareability_score=5,
+            differentiation_score=5,
+            speed_to_publish_score=5,
+            durable_value_score=5,
+            confidence_score=4,
+        ),
+    )
+
+    ranked = filter_and_rank_opportunities([legacy, assessed])
+
+    assert ranked == [assessed, legacy]
 
 
 def test_filter_and_rank_opportunities():
@@ -510,6 +567,20 @@ def test_opportunity_product_fields_are_persisted_in_history():
         share_reason="Permite comparar una decisión relevante con la familia",
         evidence_status="Fuente localizada",
         validity_note="Actualizar cuando cambien las tasas de referencia",
+        known_facts=["La noticia informa ajustes recientes en condiciones hipotecarias."],
+        hypotheses_to_test=["Una diferencia pequeña de tasa cambia materialmente la cuota."],
+        verification_plan=["Comprobar CAE, seguros incluidos y período de vigencia de cada tasa."],
+        distribution_channel="LinkedIn y grupos de personas buscando vivienda",
+        existing_alternatives="Simuladores bancarios; este compara escenarios entre entidades.",
+        assessment=OpportunityAssessment(
+            utility_score=5,
+            attention_score=4,
+            shareability_score=4,
+            differentiation_score=3,
+            speed_to_publish_score=5,
+            durable_value_score=4,
+            confidence_score=3,
+        ),
     )
 
     entry = HistoryEntry.from_opportunity(opp, entry_id="2026-10-06-002")
@@ -519,6 +590,12 @@ def test_opportunity_product_fields_are_persisted_in_history():
     assert entry.product_output == "Cuota estimada y costo total"
     assert entry.evidence_status == "Fuente localizada"
     assert entry.validity_note == "Actualizar cuando cambien las tasas de referencia"
+    assert entry.known_facts == ["La noticia informa ajustes recientes en condiciones hipotecarias."]
+    assert entry.hypotheses_to_test == ["Una diferencia pequeña de tasa cambia materialmente la cuota."]
+    assert entry.verification_plan == ["Comprobar CAE, seguros incluidos y período de vigencia de cada tasa."]
+    assert entry.distribution_channel == "LinkedIn y grupos de personas buscando vivienda"
+    assert entry.selection_scores["utility_score"] == 5
+    assert entry.priority_score == 4.25
 
 
 def test_evaluate_opportunities_prioritizes_gemini_3_8_flash():

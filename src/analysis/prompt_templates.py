@@ -16,6 +16,8 @@ REGLAS FUNDAMENTALES DE EVALUACIÓN:
 8. Autenticidad de Enlaces: Para trigger_article_url y trigger_article_title, utiliza ÚNICAMENTE URLs y títulos reales que existan dentro del conjunto de noticias analizadas.
 9. Honestidad de evidencia: Como no puedes navegar ni verificar fuentes durante esta evaluación, usa siempre evidence_status="Propuesta (no verificada)". Incluye al menos una URL HTTP(S) pública y directa de datos o reglas por oportunidad; las consultas de búsqueda solo pueden complementar esa URL. El pipeline comprobará su disponibilidad técnica. No inventes cifras, resultados, vigencias ni afirmes que un producto ya está validado.
 10. Producto antes que tecnología: product_type describe qué resuelve el producto, no su stack. No limites las propuestas a Streamlit; usa una visualización o frontend estático cuando baste. Añade validity_note cuando una regla, tarifa, plazo o evento pueda quedar desactualizado.
+11. Separar evidencia de hipótesis: known_facts solo puede resumir información explícita de la noticia detonante, sin cifras ni causalidad no presentes. hypotheses_to_test debe formular preguntas comprobables, nunca conclusiones. verification_plan debe indicar qué variable, período, cobertura, unidad, licencia o límite se comprobará antes de construir.
+12. Rúbrica honesta: completa assessment con puntajes de 1 a 5 para utilidad, atención, motivo para compartir, diferenciación, rapidez de publicación, valor durable y confianza. Un puntaje alto requiere una razón concreta en los demás campos; la confianza debe bajar cuando falte evidencia clave.
 """
 
 
@@ -92,8 +94,9 @@ def build_evaluation_prompt(
 INSTRUCCIONES DE RESPUESTA:
 1. Evalúa el conjunto de noticias y calcula cuántos temas o clusters relevantes detectaste (evaluated_topics_count).
 2. Selecciona hasta 3 oportunidades sobresalientes que cumplan virality_score >= 7 y technical_feasibility_score >= 6.
-3. Para cada oportunidad seleccionada, entrega audience, user_need, user_action, product_type, product_inputs, product_output y share_reason concretos. El producto debe responder una tarea real de una persona, no solo describir la noticia.
+3. Para cada oportunidad seleccionada, entrega audience, user_need, user_action, product_type, product_inputs, product_output y share_reason concretos. Incluye también distribution_channel y existing_alternatives. El producto debe responder una tarea real de una persona, no solo describir la noticia.
 4. Para cada oportunidad, fundamenta la viabilidad técnica con fuentes de datos concretas accesibles en Chile y un plan rápido de ejecución de menos de 4 horas. Indica evidence_status con honestidad y validity_note si corresponde.
 5. Asocia en cada oportunidad el titular exacto (trigger_article_title) y el link (trigger_article_url) de la noticia que originó la oportunidad.
+6. Separa known_facts, hypotheses_to_test y verification_plan. Incluye al menos un elemento breve en cada lista y completa assessment con todos sus puntajes entre 1 y 5.
 """
     return prompt

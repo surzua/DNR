@@ -88,6 +88,36 @@ class HistoryEntry(BaseModel):
         description="Nivel de comprobación de fuentes o reglas",
     )
     validity_note: Optional[str] = Field(default=None, description="Nota o condición de vigencia")
+    known_facts: List[str] = Field(
+        default_factory=list,
+        description="Hechos conocidos del detonante, separados de las hipótesis",
+    )
+    hypotheses_to_test: List[str] = Field(
+        default_factory=list,
+        description="Hipótesis pendientes de comprobar durante la producción",
+    )
+    verification_plan: List[str] = Field(
+        default_factory=list,
+        description="Controles requeridos antes de publicar",
+    )
+    distribution_channel: Optional[str] = Field(
+        default=None,
+        description="Canal inicial de distribución propuesto",
+    )
+    existing_alternatives: Optional[str] = Field(
+        default=None,
+        description="Alternativas existentes y diferenciación propuesta",
+    )
+    selection_scores: Dict[str, int] = Field(
+        default_factory=dict,
+        description="Dimensiones de la rúbrica usada al seleccionar la oportunidad",
+    )
+    priority_score: Optional[float] = Field(
+        default=None,
+        ge=0,
+        le=5,
+        description="Prioridad ponderada de la oportunidad, de 0 a 5",
+    )
 
     @classmethod
     def from_opportunity(
@@ -131,6 +161,21 @@ class HistoryEntry(BaseModel):
             share_reason=getattr(opportunity, "share_reason", None),
             evidence_status=getattr(opportunity, "evidence_status", "Propuesta (no verificada)"),
             validity_note=getattr(opportunity, "validity_note", None),
+            known_facts=getattr(opportunity, "known_facts", []),
+            hypotheses_to_test=getattr(opportunity, "hypotheses_to_test", []),
+            verification_plan=getattr(opportunity, "verification_plan", []),
+            distribution_channel=getattr(opportunity, "distribution_channel", None),
+            existing_alternatives=getattr(opportunity, "existing_alternatives", None),
+            selection_scores=(
+                getattr(opportunity, "assessment").model_dump()
+                if hasattr(getattr(opportunity, "assessment", None), "model_dump")
+                else {}
+            ),
+            priority_score=(
+                getattr(opportunity, "assessment").priority_score()
+                if callable(getattr(getattr(opportunity, "assessment", None), "priority_score", None))
+                else None
+            ),
         )
 
     def record_delivery_attempt(

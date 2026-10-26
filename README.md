@@ -86,7 +86,8 @@ El motor analítico ([src/analysis/opportunity_eval.py](src/analysis/opportunity
 1. **Utilidad y gancho:** Además de un ángulo curioso, cada propuesta especifica audiencia, necesidad, acción, entradas y resultado. El tipo de producto describe lo que resuelve —no la tecnología— y puede ser una calculadora, comparador, guía, planificador, simulador, verificador, visualización o análisis.
 2. **Fuentes abiertas y evidencia honesta:** Antes de notificar, el detonante debe coincidir exactamente con una noticia ingerida y al menos una URL de datos debe responder con contenido legible. La comprobación registra accesibilidad técnica; no presenta la fuente como evidencia editorial comprobada.
 3. **Filtro de umbral y fuente disponible:** Solo califica si `virality_score >= 7`, `technical_feasibility_score >= 6` y al menos una fuente de datos URL responde correctamente con un contenido legible. Si no hay temas relevantes un día, despacha una notificación de tranquilidad sin generar spam.
-4. **Plan y vigencia:** Cada tarjeta entrega un roadmap táctico de 3 pasos accionables en menos de 4 horas y puede indicar cuándo una regla, tarifa, plazo o evento debe revisarse. El historial guarda el estado, fecha, código HTTP y tipo de contenido de cada verificación.
+4. **Hipótesis, verificación y prioridad:** Cada tarjeta separa el hecho conocido de la hipótesis por comprobar y del control que falta antes de construir. Además prioriza utilidad, atención, posibilidad de compartir, diferenciación, rapidez, valor durable y confianza; los puntajes no sustituyen los gates de trazabilidad y fuente.
+5. **Plan y vigencia:** Cada tarjeta entrega un roadmap táctico de 3 pasos accionables en menos de 4 horas y puede indicar cuándo una regla, tarifa, plazo o evento debe revisarse. El historial guarda el estado, fecha, código HTTP y tipo de contenido de cada verificación.
 
 ---
 

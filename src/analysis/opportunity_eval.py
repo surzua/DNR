@@ -53,6 +53,54 @@ class DataSource(BaseModel):
     verification_error: Optional[str] = Field(default=None)
 
 
+class OpportunityAssessment(BaseModel):
+    """Rúbrica explícita para ordenar oportunidades sin fingir precisión.
+
+    Cada dimensión se evalúa entre 0 y 5. Los valores cero indican que una
+    respuesta antigua no proporcionó la dimensión; en ese caso el ranking
+    mantiene el criterio histórico para conservar compatibilidad.
+    """
+
+    utility_score: int = Field(default=0, ge=0, le=5, description="Utilidad de la tarea para su audiencia")
+    attention_score: int = Field(default=0, ge=0, le=5, description="Atención y oportunidad temporal observables")
+    shareability_score: int = Field(default=0, ge=0, le=5, description="Claridad del motivo para compartir")
+    differentiation_score: int = Field(default=0, ge=0, le=5, description="Mejora concreta frente a alternativas")
+    speed_to_publish_score: int = Field(default=0, ge=0, le=5, description="Probabilidad de publicar con rapidez")
+    durable_value_score: int = Field(default=0, ge=0, le=5, description="Valor después del pico de la noticia")
+    confidence_score: int = Field(default=0, ge=0, le=5, description="Confianza en los supuestos disponibles")
+
+    def has_complete_rubric(self) -> bool:
+        """Indica si la respuesta contiene todas las dimensiones solicitadas."""
+        return all(
+            score > 0
+            for score in (
+                self.utility_score,
+                self.attention_score,
+                self.shareability_score,
+                self.differentiation_score,
+                self.speed_to_publish_score,
+                self.durable_value_score,
+                self.confidence_score,
+            )
+        )
+
+    def priority_score(self) -> Optional[float]:
+        """Devuelve la prioridad ponderada o ``None`` si falta la rúbrica."""
+        if not self.has_complete_rubric():
+            return None
+        return round(
+            (
+                self.utility_score * 0.25
+                + self.attention_score * 0.20
+                + self.shareability_score * 0.15
+                + self.differentiation_score * 0.15
+                + self.speed_to_publish_score * 0.15
+                + self.durable_value_score * 0.10
+            ),
+            2,
+        )
+
+
 class Opportunity(BaseModel):
     """Oportunidad editorial y de producto digital detectada.
 
@@ -149,6 +197,37 @@ class Opportunity(BaseModel):
         default=None,
         description="Fecha, condición de vencimiento o nota de vigencia del producto",
     )
+    known_facts: List[str] = Field(
+        default_factory=list,
+        description="Hechos del detonante; no incluyen conclusiones aún no comprobadas",
+    )
+    hypotheses_to_test: List[str] = Field(
+        default_factory=list,
+        description="Preguntas o hipótesis que el producto debe comprobar, no afirmar",
+    )
+    verification_plan: List[str] = Field(
+        default_factory=list,
+        description="Comprobaciones de variables, período, cobertura y límites antes de publicar",
+    )
+    distribution_channel: Optional[str] = Field(
+        default=None,
+        description="Canal inicial concreto para distribuir el producto",
+    )
+    existing_alternatives: Optional[str] = Field(
+        default=None,
+        description="Alternativas existentes y mejora específica que ofrece el producto",
+    )
+    assessment: OpportunityAssessment = Field(
+        default_factory=OpportunityAssessment,
+        description="Rúbrica explícita para comparar utilidad, atención, difusión y factibilidad",
+    )
+
+    def priority_score(self) -> float:
+        """Obtiene una prioridad comparable, con fallback para registros antiguos."""
+        rubric_score = self.assessment.priority_score()
+        if rubric_score is not None:
+            return rubric_score
+        return round((self.virality_score + self.technical_feasibility_score) / 4, 2)
 
 
 class RadarResponse(BaseModel):
@@ -275,9 +354,17 @@ def filter_and_rank_opportunities(
 
             valid.append(opp)
 
-    # Ordenar por puntaje total combinado (viralidad + factibilidad técnica) y luego por viralidad
+    # La rúbrica ordena por utilidad real y posibilidad de distribución, sin
+    # eliminar los gates ya existentes de viralidad, factibilidad y evidencia.
+    # Las respuestas antiguas, que no incluyen rúbrica, conservan un fallback
+    # normalizado de los dos puntajes históricos.
     valid.sort(
-        key=lambda o: (o.virality_score + o.technical_feasibility_score, o.virality_score),
+        key=lambda o: (
+            o.priority_score(),
+            o.assessment.confidence_score,
+            o.virality_score + o.technical_feasibility_score,
+            o.virality_score,
+        ),
         reverse=True,
     )
 

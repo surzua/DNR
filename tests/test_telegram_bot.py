@@ -5,7 +5,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 import requests
 
-from src.analysis.opportunity_eval import DataSource, Opportunity
+from src.analysis.opportunity_eval import DataSource, Opportunity, OpportunityAssessment
 from src.notifiers.telegram_bot import (
     _strip_html_tags,
     format_briefing_html,
@@ -55,6 +55,20 @@ def sample_opportunity() -> Opportunity:
         share_reason="Ayuda a otra persona a buscar vivienda",
         evidence_status="Fuente localizada",
         validity_note="Actualizar mensualmente con avisos vigentes",
+        known_facts=["La noticia reporta un retroceso nominal en arriendos de Santiago."],
+        hypotheses_to_test=["El precio por m² siguió subiendo pese al retroceso nominal."],
+        verification_plan=["Comprobar fecha, muestra y duplicados de los avisos."],
+        distribution_channel="Grupos de búsqueda de vivienda y LinkedIn",
+        existing_alternatives="Portales de avisos; este normaliza precio por m².",
+        assessment=OpportunityAssessment(
+            utility_score=5,
+            attention_score=4,
+            shareability_score=4,
+            differentiation_score=4,
+            speed_to_publish_score=4,
+            durable_value_score=3,
+            confidence_score=3,
+        ),
     )
 
 
@@ -107,6 +121,12 @@ def test_format_opportunity_html_structure_and_escaping(sample_opportunity: Oppo
     assert "Ayuda a otra persona a buscar vivienda" in formatted
     assert "Evidencia: Fuente localizada" in formatted
     assert "Actualizar mensualmente con avisos vigentes" in formatted
+    assert "Antes de construir" in formatted
+    assert "Hecho: La noticia reporta un retroceso nominal" in formatted
+    assert "Hipótesis: El precio por m² siguió subiendo" in formatted
+    assert "Verificar: Comprobar fecha, muestra y duplicados" in formatted
+    assert "Canal: Grupos de búsqueda de vivienda y LinkedIn" in formatted
+    assert "Prioridad: 4.15/5 | Confianza: 3/5" in formatted
 
 
 def test_format_opportunity_html_from_history_entry():
