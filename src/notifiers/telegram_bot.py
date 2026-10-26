@@ -125,6 +125,9 @@ def format_opportunity_html(opportunity: Any) -> str:
     product_type = _extract_field(opportunity, "product_type")
     product_output = _extract_field(opportunity, "product_output")
     share_reason = _extract_field(opportunity, "share_reason")
+    delivery_format = _extract_field(opportunity, "delivery_format")
+    first_interaction = _extract_field(opportunity, "first_interaction")
+    differentiator = _extract_field(opportunity, "differentiator")
     evidence_status = _extract_field(opportunity, "evidence_status")
     validity_note = _extract_field(opportunity, "validity_note")
     known_fact = _first_text(_extract_field(opportunity, "known_facts", []))
@@ -141,7 +144,7 @@ def format_opportunity_html(opportunity: Any) -> str:
         priority_score = assessment.priority_score()
 
     lines = [
-        f"🚀 <b>OPORTUNIDAD DE DATA</b> (Viral: <b>{virality}/10</b> | Viab: <b>{feasibility}/10</b>)",
+        f"🚀 <b>OPORTUNIDAD DE PRODUCTO</b> (Atención: <b>{virality}/10</b> | Viab: <b>{feasibility}/10</b>)",
         "",
         f"📌 <b>Tema:</b> {html.escape(str(headline), quote=False)}",
         f"📂 <b>Categoría:</b> <i>{html.escape(str(category), quote=False)}</i>",
@@ -160,8 +163,14 @@ def format_opportunity_html(opportunity: Any) -> str:
             lines.append(f"• Necesidad: {html.escape(str(user_need), quote=False)}")
         if user_action:
             lines.append(f"• Acción: {html.escape(str(user_action), quote=False)}")
+        if first_interaction:
+            lines.append(f"• Primera interacción: {html.escape(str(first_interaction), quote=False)}")
         if product_output:
             lines.append(f"• Resultado: {html.escape(str(product_output), quote=False)}")
+        if delivery_format:
+            lines.append(f"• Entrega: {html.escape(str(delivery_format), quote=False)}")
+        if differentiator:
+            lines.append(f"• Diferencia: {html.escape(str(differentiator), quote=False)}")
         if share_reason:
             lines.append(f"• Para compartir: {html.escape(str(share_reason), quote=False)}")
         if evidence_status:
@@ -211,7 +220,7 @@ def format_opportunity_html(opportunity: Any) -> str:
     if strategy:
         lines.extend([
             "",
-            "🛠️ <b>Plan Rápido (&lt; 4 horas):</b>",
+            "🛠️ <b>Primeros pasos:</b>",
             f"{html.escape(str(strategy), quote=False)}",
         ])
 

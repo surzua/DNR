@@ -24,7 +24,7 @@ class EvaluationResponseError(RuntimeError):
 
 
 class DataSource(BaseModel):
-    """Fuente de datos requerida para el desarrollo del análisis."""
+    """Evidencia, regla o insumo requerido para construir la propuesta."""
 
     name: str = Field(description="Nombre descriptivo de la fuente o institución")
     type: Literal[
@@ -33,6 +33,10 @@ class DataSource(BaseModel):
         "Portal Abierto",
         "Scraping HTML",
         "Dataset Descargable",
+        "Regla o reglamento",
+        "Documentación oficial",
+        "Mecánica reproducible",
+        "Fuente editorial",
     ] = Field(description="Tipo de acceso técnico a los datos")
     potential_url_or_query: str = Field(
         description="URL directa o término de búsqueda exacto para encontrar la data"
@@ -42,9 +46,9 @@ class DataSource(BaseModel):
         "Media (1-2 días)",
         "Alta (Requiere peticiones de transparencia)",
     ] = Field(description="Estimación del tiempo y complejidad para obtener el dataset")
-    verification_status: Literal["not_checked", "not_checkable", "verified", "failed"] = Field(
+    verification_status: Literal["not_checked", "not_checkable", "accessible", "failed"] = Field(
         default="not_checked",
-        description="Resultado de la comprobación HTTP realizada por el pipeline",
+        description="Resultado de acceso técnico; no es una validación editorial",
     )
     verification_checked_at: Optional[datetime] = Field(default=None)
     verification_url: Optional[str] = Field(default=None)
@@ -68,6 +72,7 @@ class OpportunityAssessment(BaseModel):
     speed_to_publish_score: int = Field(default=0, ge=0, le=5, description="Probabilidad de publicar con rapidez")
     durable_value_score: int = Field(default=0, ge=0, le=5, description="Valor después del pico de la noticia")
     confidence_score: int = Field(default=0, ge=0, le=5, description="Confianza en los supuestos disponibles")
+    learning_value_score: int = Field(default=0, ge=0, le=5, description="Valor de aprendizaje al construir")
 
     def has_complete_rubric(self) -> bool:
         """Indica si la respuesta contiene todas las dimensiones solicitadas."""
@@ -127,7 +132,11 @@ class Opportunity(BaseModel):
         "Gráfico Estático de Alto Impacto",
         "App Interactiva (Streamlit)",
         "Análisis Predictivo/Optimización",
-    ] = Field(description="Formato recomendado para maximizar viralidad y rapidez")
+        "App web",
+        "Experiencia interactiva",
+        "Utilidad local",
+        "Recurso descargable",
+    ] = Field(description="Formato de entrega; no determina la tecnología")
     data_sources: List[DataSource] = Field(
         description="Fuentes de datos públicas necesarias"
     )
@@ -135,10 +144,10 @@ class Opportunity(BaseModel):
         ge=1, le=10, description="Potencial viral y de debate público (1-10)"
     )
     technical_feasibility_score: int = Field(
-        ge=1, le=10, description="Viabilidad técnica de construir en < 4 horas (1-10)"
+        ge=1, le=10, description="Viabilidad técnica del alcance mínimo (1-10)"
     )
     fast_execution_strategy: str = Field(
-        description="Plan de acción concreto en 3 pasos para construirlo en menos de 4 horas"
+        description="Primeros pasos concretos para investigar y construir el alcance mínimo"
     )
     trigger_article_title: Optional[str] = Field(
         default=None,
@@ -169,6 +178,11 @@ class Opportunity(BaseModel):
         "Simulador",
         "Verificador",
         "Análisis de datos",
+        "Juego o desafío",
+        "Utilidad para archivos",
+        "Recurso descargable",
+        "Generador creativo",
+        "Checklist",
     ] = Field(
         default="Análisis de datos",
         description="Tipo de producto; describe la utilidad, no la tecnología usada",
@@ -185,13 +199,32 @@ class Opportunity(BaseModel):
         default="Ayuda a otra persona a entender o resolver el mismo tema",
         description="Motivo específico por el que alguien compartiría el resultado",
     )
+    delivery_format: str = Field(
+        default="App web o recurso local, según la interacción",
+        description="Medio de entrega separado del tipo de producto y de la tecnología",
+    )
+    implementation_options: List[str] = Field(
+        default_factory=list,
+        description="Tecnologías posibles justificadas por la necesidad, nunca obligatorias",
+    )
+    first_interaction: str = Field(
+        default="La persona abre el producto y realiza una acción breve para obtener valor",
+        description="Primera acción de valor sin exigir registro o formularios largos",
+    )
+    differentiator: str = Field(
+        default="Diferencia por comprobar frente a alternativas existentes",
+        description="Mejora concreta o revisión pendiente de alternativas",
+    )
     evidence_status: Literal[
+        "Pendiente de revisión",
+        "Respaldo parcial",
+        "Lista para construir",
         "Propuesta (no verificada)",
         "Fuente localizada",
         "Verificada",
     ] = Field(
         default="Propuesta (no verificada)",
-        description="Nivel de comprobación real de las fuentes o reglas necesarias",
+        description="Estado editorial de evidencia; no se infiere desde HTTP",
     )
     validity_note: Optional[str] = Field(
         default=None,
@@ -208,6 +241,18 @@ class Opportunity(BaseModel):
     verification_plan: List[str] = Field(
         default_factory=list,
         description="Comprobaciones de variables, período, cobertura y límites antes de publicar",
+    )
+    reported_facts: List[str] = Field(
+        default_factory=list,
+        description="Lo que reporta el detonante, sin elevarlo a hecho contrastado",
+    )
+    corroborated_facts: List[str] = Field(
+        default_factory=list,
+        description="Hechos contrastados con evidencia revisada; vacíos si no se consultó el contenido",
+    )
+    assumptions: List[str] = Field(
+        default_factory=list,
+        description="Supuestos explícitos que no deben comunicarse como hallazgos",
     )
     distribution_channel: Optional[str] = Field(
         default=None,
@@ -272,8 +317,8 @@ def _verify_opportunity_inputs(opportunity: Opportunity, articles: List[Any]) ->
 
     No consulta la red: confirma que el LLM no inventó la noticia detonante y que
     existe al menos una fuente con URL HTTP(S) o una consulta de búsqueda concreta.
-    La evidencia solo se eleva hasta ``Fuente localizada`` cuando se recibió una
-    URL válida; una URL no prueba que el dataset sea correcto o esté vigente.
+    Una URL no cambia el estado editorial: solo deja un respaldo localizable para
+    revisión humana posterior.
     """
     trigger_url = opportunity.trigger_article_url
     trigger_title = opportunity.trigger_article_title
@@ -297,7 +342,6 @@ def _verify_opportunity_inputs(opportunity: Opportunity, articles: List[Any]) ->
         return False
 
     valid_sources: List[DataSource] = []
-    has_located_url = False
     for source in opportunity.data_sources:
         reference = source.potential_url_or_query.strip()
         parsed_reference = urlparse(reference)
@@ -305,7 +349,6 @@ def _verify_opportunity_inputs(opportunity: Opportunity, articles: List[Any]) ->
             if not _is_safe_http_url(reference):
                 logger.info("Fuente descartada por URL no segura: %s.", source.name)
                 continue
-            has_located_url = True
         elif len(reference) < 3 or not any(char.isalnum() for char in reference):
             logger.info("Fuente descartada por referencia insuficiente: %s.", source.name)
             continue
@@ -318,9 +361,8 @@ def _verify_opportunity_inputs(opportunity: Opportunity, articles: List[Any]) ->
     opportunity.data_sources = valid_sources
     opportunity.trigger_article_title = _article_field(matching_article, "title")
     opportunity.trigger_article_url = _article_field(matching_article, "link")
-    opportunity.evidence_status = (
-        "Fuente localizada" if has_located_url else "Propuesta (no verificada)"
-    )
+    # Nunca promocionar evidencia editorial desde la forma de una URL. Conservamos
+    # el estado proporcionado por la evaluación, que por defecto es pendiente.
     return True
 
 

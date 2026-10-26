@@ -87,6 +87,10 @@ class HistoryEntry(BaseModel):
     product_inputs: Optional[str] = Field(default=None, description="Entradas mínimas del producto")
     product_output: Optional[str] = Field(default=None, description="Resultado para la audiencia")
     share_reason: Optional[str] = Field(default=None, description="Motivo para compartir el resultado")
+    delivery_format: Optional[str] = Field(default=None, description="Formato de entrega separado del producto")
+    implementation_options: List[str] = Field(default_factory=list, description="Tecnologías posibles")
+    first_interaction: Optional[str] = Field(default=None, description="Primera interacción de valor")
+    differentiator: Optional[str] = Field(default=None, description="Diferencia frente a alternativas o revisión pendiente")
     evidence_status: str = Field(
         default="Propuesta (no verificada)",
         description="Nivel de comprobación de fuentes o reglas",
@@ -166,6 +170,10 @@ class HistoryEntry(BaseModel):
             product_inputs=getattr(opportunity, "product_inputs", None),
             product_output=getattr(opportunity, "product_output", None),
             share_reason=getattr(opportunity, "share_reason", None),
+            delivery_format=getattr(opportunity, "delivery_format", None),
+            implementation_options=getattr(opportunity, "implementation_options", []),
+            first_interaction=getattr(opportunity, "first_interaction", None),
+            differentiator=getattr(opportunity, "differentiator", None),
             evidence_status=getattr(opportunity, "evidence_status", "Propuesta (no verificada)"),
             validity_note=getattr(opportunity, "validity_note", None),
             known_facts=getattr(opportunity, "known_facts", []),

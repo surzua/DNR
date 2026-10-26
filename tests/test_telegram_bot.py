@@ -109,7 +109,7 @@ def test_format_opportunity_html_structure_and_escaping(sample_opportunity: Oppo
 
     assert "Arriendos &lt;en alza&gt; &amp; 'polémica'" in formatted
     assert "Economía &amp; Finanzas" in formatted
-    assert "Viral: <b>9/10</b>" in formatted
+    assert "Atención: <b>9/10</b>" in formatted
     assert "Viab: <b>8/10</b>" in formatted
     assert "https://ejemplo.com/noticias/arriendos-septiembre" in formatted
     assert "Precios de arriendos en Santiago marcan leve retroceso" in formatted
@@ -148,7 +148,7 @@ def test_format_opportunity_html_from_history_entry():
     )
     formatted = format_opportunity_html(entry)
     assert "Crisis de Luminarias" in formatted
-    assert "Viral: <b>8/10</b>" in formatted
+    assert "Atención: <b>8/10</b>" in formatted
     assert "Viab: <b>7/10</b>" in formatted
     assert "Mercado Público" in formatted
 

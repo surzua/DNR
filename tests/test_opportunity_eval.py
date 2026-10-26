@@ -88,9 +88,9 @@ def test_format_article_snippet_and_build_prompt():
     assert "[1] [EMOL] [Economía]" in prompt
     assert "últimas 72 horas" in prompt
     assert "ÚLTIMOS 5 DÍAS" in prompt
-    assert "audience, user_need, user_action" in prompt
+    assert "audience, user_need, first_interaction, user_action" in prompt
     assert "known_facts, hypotheses_to_test y verification_plan" in prompt
-    assert "al menos una URL HTTP(S) pública y directa" in SYSTEM_PROMPT
+    assert "No fuerces un dataset" in SYSTEM_PROMPT
     assert "Rúbrica honesta" in SYSTEM_PROMPT
 
 
@@ -346,7 +346,34 @@ def test_filter_and_rank_verifies_trigger_and_minimum_source():
 
     assert filtered == [valid]
     assert valid.trigger_article_url == article["link"]
-    assert valid.evidence_status == "Fuente localizada"
+    assert valid.evidence_status == "Verificada"
+
+
+def test_open_product_contract_supports_game_utility_and_downloadable():
+    base = dict(
+        headline="Desafío de combinaciones",
+        category="Deportes",
+        why_is_trending="Se acerca una fecha decisiva",
+        contrarian_or_curious_angle="Probar escenarios antes del partido",
+        suggested_deliverable="Experiencia interactiva",
+        data_sources=[DataSource(
+            name="Reglamento del torneo",
+            type="Regla o reglamento",
+            potential_url_or_query="https://ejemplo.cl/reglamento",
+            friction_level="Baja (Horas)",
+        )],
+        virality_score=8,
+        technical_feasibility_score=8,
+        fast_execution_strategy="Leer reglas, implementar escenarios y revisar resultados",
+    )
+    game = Opportunity(**base, product_type="Juego o desafío", delivery_format="App web")
+    utility = Opportunity(**(base | {"headline": "Convertidor", "product_type": "Utilidad para archivos", "suggested_deliverable": "Utilidad local"}))
+    downloadable = Opportunity(**(base | {"headline": "Calendario", "product_type": "Recurso descargable", "suggested_deliverable": "Recurso descargable"}))
+
+    assert {game.product_type, utility.product_type, downloadable.product_type} == {
+        "Juego o desafío", "Utilidad para archivos", "Recurso descargable"
+    }
+    assert utility.suggested_deliverable == "Utilidad local"
 
 
 def test_evaluate_opportunities_empty():
