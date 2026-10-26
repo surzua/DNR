@@ -261,9 +261,9 @@ class Opportunity(BaseModel):
         default="pending",
         description="No afirmar unicidad si aún no se revisaron alternativas",
     )
-    assessment_reasons: dict[str, str] = Field(
-        default_factory=dict,
-        description="Justificación breve de puntajes de atención, utilidad y difusión; no probabilidades",
+    assessment_reasons: List[str] = Field(
+        default_factory=list,
+        description="Lista de justificaciones breves para puntajes de atención, utilidad y difusión; no probabilidades",
     )
     scope_class: Literal["prototipo_breve", "varias_sesiones", "demasiado_grande"] = Field(
         default="prototipo_breve",

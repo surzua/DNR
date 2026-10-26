@@ -11,7 +11,7 @@ import tempfile
 from typing import Any, Dict, List, Literal, Optional, Set
 import unicodedata
 from urllib.parse import urlparse
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 logger = logging.getLogger("dnr.history_manager")
 
@@ -96,7 +96,7 @@ class HistoryEntry(BaseModel):
     share_mechanism: Optional[str] = Field(default=None, description="Mecanismo de difusión propuesto")
     shareable_artifact: Optional[str] = Field(default=None, description="Resultado reproducible o exportable")
     alternatives_review_status: str = Field(default="pending", description="Estado de revisión de alternativas")
-    assessment_reasons: Dict[str, str] = Field(default_factory=dict, description="Razones de los puntajes")
+    assessment_reasons: List[str] = Field(default_factory=list, description="Razones de los puntajes")
     scope_class: Optional[str] = Field(default=None, description="Alcance estimado del brief")
     minimum_version: Optional[str] = Field(default=None, description="Primera versión construible")
     explicit_limits: List[str] = Field(default_factory=list, description="Límites de la primera versión")
@@ -148,6 +148,14 @@ class HistoryEntry(BaseModel):
         le=5,
         description="Prioridad ponderada de la oportunidad, de 0 a 5",
     )
+
+    @field_validator("assessment_reasons", mode="before")
+    @classmethod
+    def migrate_assessment_reasons(cls, value: Any) -> Any:
+        """Convierte los mapas históricos al formato de lista usado por Gemini."""
+        if isinstance(value, dict):
+            return [f"{key}: {reason}" for key, reason in value.items() if reason is not None]
+        return value
 
     @classmethod
     def from_opportunity(
@@ -201,7 +209,7 @@ class HistoryEntry(BaseModel):
             share_mechanism=getattr(opportunity, "share_mechanism", None),
             shareable_artifact=getattr(opportunity, "shareable_artifact", None),
             alternatives_review_status=getattr(opportunity, "alternatives_review_status", "pending"),
-            assessment_reasons=getattr(opportunity, "assessment_reasons", {}),
+            assessment_reasons=getattr(opportunity, "assessment_reasons", []),
             scope_class=getattr(opportunity, "scope_class", None),
             minimum_version=getattr(opportunity, "minimum_version", None),
             explicit_limits=getattr(opportunity, "explicit_limits", []),

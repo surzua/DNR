@@ -1,6 +1,7 @@
 """Unit tests for the Opportunity Evaluation module (Step 3)."""
 
 from datetime import datetime, timezone
+import json
 from unittest.mock import MagicMock, patch
 import pytest
 
@@ -59,6 +60,11 @@ def test_opportunity_schemas():
     )
     assert response.evaluated_topics_count == 50
     assert len(response.top_opportunities) == 1
+
+
+def test_gemini_response_schema_has_no_free_form_maps():
+    """Gemini Developer API rechaza los esquemas con additionalProperties."""
+    assert "additionalProperties" not in json.dumps(RadarResponse.model_json_schema())
 
 
 def test_format_article_snippet_and_build_prompt():
