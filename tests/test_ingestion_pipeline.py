@@ -45,6 +45,8 @@ def test_gather_all_sources_deduplication():
 
     with patch("src.ingestion.fetch_rss_feeds", return_value=rss_mock), patch(
         "src.ingestion.fetch_reddit_threads", return_value=reddit_mock
+    ), patch("src.ingestion.fetch_trending_topics", return_value=[]), patch(
+        "src.ingestion.fetch_scheduled_events", return_value=[]
     ):
         result = gather_all_sources()
 
