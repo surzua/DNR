@@ -49,9 +49,13 @@ class HistoryEntry(BaseModel):
     trigger_article_title: Optional[str] = Field(default=None, description="Titular de la noticia detonante")
     trigger_article_url: Optional[str] = Field(default=None, description="URL de la noticia detonante")
     status: str = Field(default="candidate", description="Estado de la oportunidad")
-    evaluation_status: str = Field(
+    evaluation_status: Literal["accepted", "rejected"] = Field(
         default="accepted",
         description="Resultado de la evaluación que creó este registro",
+    )
+    rejection_reason: Optional[str] = Field(
+        default=None,
+        description="Motivo determinista del descarte; vacío para oportunidades aceptadas",
     )
     delivery_status: str = Field(
         default="untracked",
@@ -127,6 +131,8 @@ class HistoryEntry(BaseModel):
         timestamp: Optional[datetime] = None,
         status: str = "candidate",
         delivery_status: str = "pending",
+        evaluation_status: Literal["accepted", "rejected"] = "accepted",
+        rejection_reason: Optional[str] = None,
     ) -> "HistoryEntry":
         """Convierte un objeto Opportunity a HistoryEntry."""
         ts = timestamp or datetime.now(timezone.utc)
@@ -148,8 +154,9 @@ class HistoryEntry(BaseModel):
             fast_execution_strategy=getattr(opportunity, "fast_execution_strategy", None),
             trigger_article_title=getattr(opportunity, "trigger_article_title", None),
             trigger_article_url=getattr(opportunity, "trigger_article_url", None),
-            status=status,
-            evaluation_status="accepted",
+            status="rejected" if evaluation_status == "rejected" else status,
+            evaluation_status=evaluation_status,
+            rejection_reason=rejection_reason,
             delivery_status=delivery_status,
             publication_status="unpublished",
             audience=getattr(opportunity, "audience", None),
@@ -307,6 +314,35 @@ def get_publication_report(
     }
 
 
+def get_rejection_report(
+    history: List[HistoryEntry],
+    days: int = 7,
+    now: Optional[datetime] = None,
+) -> Dict[str, Any]:
+    """Resume candidatos descartados y sus motivos dentro de una ventana temporal."""
+    if days < 1:
+        raise ValueError("days debe ser mayor o igual a 1.")
+
+    cutoff = (now or datetime.now(timezone.utc)) - timedelta(days=days)
+    rejected = [
+        entry
+        for entry in history
+        if entry.evaluation_status == "rejected"
+        and entry.timestamp.astimezone(timezone.utc) >= cutoff
+    ]
+    reasons: Dict[str, int] = {}
+    for entry in rejected:
+        reason = entry.rejection_reason or "sin_motivo_registrado"
+        reasons[reason] = reasons.get(reason, 0) + 1
+
+    return {
+        "days": days,
+        "rejected": len(rejected),
+        "reasons": reasons,
+        "entries": rejected,
+    }
+
+
 def get_entries_pending_delivery(history: List[HistoryEntry]) -> List[HistoryEntry]:
     """Retorna alertas nuevas o fallidas que se pueden reintentar.
 
@@ -385,7 +421,8 @@ def get_recent_topics(
     return [
         item.topic
         for item in items
-        if item.timestamp.astimezone(timezone.utc) >= cutoff
+        if item.evaluation_status == "accepted"
+        and item.timestamp.astimezone(timezone.utc) >= cutoff
     ]
 
 
@@ -423,7 +460,11 @@ def get_recent_trigger_urls(
     cutoff = (now or datetime.now(timezone.utc)) - timedelta(days=days)
     urls: Set[str] = set()
     for item in items:
-        if item.timestamp.astimezone(timezone.utc) >= cutoff and item.trigger_article_url:
+        if (
+            item.evaluation_status == "accepted"
+            and item.timestamp.astimezone(timezone.utc) >= cutoff
+            and item.trigger_article_url
+        ):
             norm = normalize_url_for_dedup(item.trigger_article_url)
             if norm:
                 urls.add(norm)
@@ -442,7 +483,11 @@ def get_recent_trigger_titles(
     titles: List[str] = []
     seen: Set[str] = set()
     for item in items:
-        if item.timestamp.astimezone(timezone.utc) >= cutoff and item.trigger_article_title:
+        if (
+            item.evaluation_status == "accepted"
+            and item.timestamp.astimezone(timezone.utc) >= cutoff
+            and item.trigger_article_title
+        ):
             cleaned = item.trigger_article_title.strip()
             norm = normalize_title_for_dedup(cleaned)
             if norm and norm not in seen:
@@ -472,7 +517,10 @@ def filter_articles_by_history(
     recent_titles: Set[str] = set()
 
     for item in items:
-        if item.timestamp.astimezone(timezone.utc) >= cutoff:
+        if (
+            item.evaluation_status == "accepted"
+            and item.timestamp.astimezone(timezone.utc) >= cutoff
+        ):
             if item.trigger_article_url:
                 norm_u = normalize_url_for_dedup(item.trigger_article_url)
                 if norm_u:

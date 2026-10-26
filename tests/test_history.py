@@ -8,6 +8,7 @@ from src.storage.history_manager import (
     generate_next_id,
     get_entries_pending_delivery,
     get_publication_report,
+    get_rejection_report,
     get_recent_topics,
     get_recent_trigger_titles,
     get_recent_trigger_urls,
@@ -87,6 +88,53 @@ def test_delivery_state_is_backward_compatible_and_retryable():
     assert pending_entry.delivery_attempts == 2
     assert pending_entry.delivered_at is not None
     assert get_entries_pending_delivery([pending_entry]) == []
+
+
+def test_rejected_entries_are_auditable_but_do_not_block_future_evaluation():
+    now = datetime(2026, 10, 6, 12, 0, tzinfo=timezone.utc)
+    rejected = HistoryEntry(
+        id="2026-10-06-001",
+        timestamp=now,
+        topic="Candidato descartado",
+        category="Deportes",
+        viral_hook_type="Hook",
+        analytical_angle="Angle",
+        feasibility_score=4,
+        virality_score=8,
+        recommended_deliverable="App",
+        trigger_article_title="Noticia aún evaluable",
+        trigger_article_url="https://ejemplo.cl/noticia-aun-evaluable",
+        evaluation_status="rejected",
+        rejection_reason="factibilidad_bajo_umbral",
+        delivery_status="skipped",
+    )
+    accepted = HistoryEntry(
+        id="2026-10-06-002",
+        timestamp=now,
+        topic="Candidato aceptado",
+        category="Deportes",
+        viral_hook_type="Hook",
+        analytical_angle="Angle",
+        feasibility_score=8,
+        virality_score=8,
+        recommended_deliverable="App",
+        trigger_article_title="Noticia ya evaluada",
+        trigger_article_url="https://ejemplo.cl/noticia-ya-evaluada",
+    )
+    articles = [
+        {"title": rejected.trigger_article_title, "link": rejected.trigger_article_url},
+        {"title": accepted.trigger_article_title, "link": accepted.trigger_article_url},
+    ]
+
+    assert get_recent_topics([rejected, accepted], days=2, now=now) == ["Candidato aceptado"]
+    assert get_recent_trigger_urls([rejected, accepted], days=2, now=now) == {
+        "ejemplo.cl/noticia-ya-evaluada"
+    }
+    assert filter_articles_by_history(articles, [rejected, accepted], days=2, now=now) == [articles[0]]
+    report = get_rejection_report([rejected, accepted], days=2, now=now)
+    assert report["rejected"] == 1
+    assert report["reasons"] == {"factibilidad_bajo_umbral": 1}
+    assert report["entries"] == [rejected]
 
 
 def test_publication_lifecycle_and_metrics_are_persisted():

@@ -9,6 +9,7 @@ from src.analysis.opportunity_eval import (
     EvaluationResponseError,
     Opportunity,
     OpportunityAssessment,
+    RejectedOpportunity,
     RadarResponse,
     evaluate_opportunities,
     filter_and_rank_opportunities,
@@ -193,17 +194,23 @@ def test_filter_and_rank_opportunities():
         fast_execution_strategy="Requiere meses de scraping",
     )
 
+    rejected: list[RejectedOpportunity] = []
     filtered = filter_and_rank_opportunities(
         [opp_low_virality, opp_high, opp_low_feasibility, opp_mid],
         min_virality=7,
         min_feasibility=6,
         max_items=3,
+        rejected=rejected,
     )
 
     assert len(filtered) == 2
     # La más alta en puntaje combinado debe ir primero (9+8=17 vs 7+6=13)
     assert filtered[0].headline == "Oportunidad Viral y Factible"
     assert filtered[1].headline == "Oportunidad Justa en Umbral"
+    assert {item.reason for item in rejected} == {
+        "viralidad_bajo_umbral",
+        "factibilidad_bajo_umbral",
+    }
 
 
 def test_filter_and_rank_opportunities_sanitizes_unsafe_trigger_url():
@@ -457,6 +464,47 @@ def test_evaluate_opportunities_can_require_a_verified_source():
 
     assert result.top_opportunities == [opp]
     assert result.top_opportunities[0].evidence_status == "Verificada"
+
+
+def test_evaluate_opportunities_records_rejection_when_source_is_not_verified():
+    source = DataSource(
+        name="Fuente no disponible",
+        type="API Pública",
+        potential_url_or_query="https://datos.gob.cl/serie.json",
+        friction_level="Baja (Horas)",
+    )
+    opp = Opportunity(
+        headline="Oportunidad sin fuente verificable",
+        category="Economía & Finanzas",
+        why_is_trending="Tema vigente",
+        contrarian_or_curious_angle="Comparar escenarios",
+        suggested_deliverable="App Interactiva (Streamlit)",
+        data_sources=[source],
+        virality_score=8,
+        technical_feasibility_score=8,
+        fast_execution_strategy="Construir MVP",
+        trigger_article_title="Nueva medida anunciada",
+        trigger_article_url="https://prensa.cl/medida",
+    )
+    response = MagicMock(parsed=RadarResponse(evaluated_topics_count=1, top_opportunities=[opp]))
+    client = MagicMock()
+    client.models.generate_content.return_value = response
+
+    with patch(
+        "src.analysis.opportunity_eval.verify_opportunities_sources",
+        return_value={id(opp): False},
+    ):
+        result = evaluate_opportunities(
+            articles=[{"title": "Nueva medida anunciada", "link": "https://prensa.cl/medida"}],
+            client=client,
+            verify_sources=True,
+            require_verified_source=True,
+        )
+
+    assert result.top_opportunities == []
+    assert result.rejected_opportunities == [
+        RejectedOpportunity(opportunity=opp, reason="fuente_url_no_verificada")
+    ]
 
 
 def test_evaluate_opportunities_fallback_json_parsing():

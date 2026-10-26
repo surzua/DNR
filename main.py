@@ -18,6 +18,7 @@ from src.storage import (
     generate_next_id,
     get_entries_pending_delivery,
     get_publication_report,
+    get_rejection_report,
     get_recent_topics,
     get_recent_trigger_titles,
     get_recent_trigger_urls,
@@ -85,6 +86,23 @@ def _handle_publication_command(args: argparse.Namespace) -> int:
             logger.info("  • %s | %s | %s", entry.id, entry.topic, entry.product_url or "sin URL")
         return EXIT_SUCCESS
 
+    if args.rejection_report:
+        try:
+            report = get_rejection_report(load_history(), days=args.report_days)
+        except ValueError as exc:
+            logger.error("Parámetros inválidos para el reporte: %s", exc)
+            return EXIT_CONFIGURATION_ERROR
+        logger.info(
+            "Reporte de descartes (%d días): %d candidatos descartados.",
+            report["days"],
+            report["rejected"],
+        )
+        for reason, count in sorted(report["reasons"].items()):
+            logger.info("  • %s: %d", reason, count)
+        for entry in report["entries"]:
+            logger.info("  ↳ %s | %s | %s", entry.id, entry.topic, entry.rejection_reason)
+        return EXIT_SUCCESS
+
     entry_id = args.mark_selected or args.mark_published or args.mark_archived or args.record_metrics
     if not entry_id:
         logger.error("Indica una acción de ciclo de publicación antes de usar sus parámetros.")
@@ -106,6 +124,13 @@ def _handle_publication_command(args: argparse.Namespace) -> int:
     entry = find_history_entry(history, entry_id)
     if entry is None:
         logger.error("No existe una oportunidad con ID %s.", entry_id)
+        return EXIT_CONFIGURATION_ERROR
+    if entry.evaluation_status != "accepted":
+        logger.error(
+            "La oportunidad %s fue descartada (%s) y no puede pasar al ciclo de publicación.",
+            entry_id,
+            entry.rejection_reason or "sin motivo registrado",
+        )
         return EXIT_CONFIGURATION_ERROR
     if args.record_metrics and entry.published_at is None:
         logger.error("La oportunidad %s aún no está publicada; no se pueden registrar métricas de uso.", entry_id)
@@ -203,6 +228,11 @@ def main() -> int:
         action="store_true",
         help="Muestra un resumen de publicaciones y métricas",
     )
+    lifecycle_group.add_argument(
+        "--rejection-report",
+        action="store_true",
+        help="Muestra candidatos descartados y los motivos registrados",
+    )
     parser.add_argument("--product-url", help="URL pública HTTP(S) de la herramienta publicada")
     parser.add_argument("--publication-notes", help="Notas de contexto, distribución o mantenimiento")
     parser.add_argument("--visits", type=int, help="Total de visitas o sesiones observado")
@@ -225,6 +255,7 @@ def main() -> int:
             args.mark_archived,
             args.record_metrics,
             args.publication_report,
+            args.rejection_report,
             args.product_url,
             args.publication_notes,
             args.visits is not None,
@@ -348,10 +379,12 @@ def main() -> int:
         return EXIT_EVALUATION_ERROR
 
     opportunities = radar_result.top_opportunities
+    rejected_opportunities = radar_result.rejected_opportunities
     pending_deliveries = get_entries_pending_delivery(history)
     logger.info(
-        "Evaluación finalizada: %d oportunidades calificadas sobre el umbral.",
+        "Evaluación finalizada: %d oportunidades calificadas y %d descartadas con motivo.",
         len(opportunities),
+        len(rejected_opportunities),
     )
 
     # Registrar los nuevos candidatos antes de cualquier envío. Esto evita que un
@@ -377,6 +410,20 @@ def main() -> int:
         for ds in opp.data_sources:
             logger.info("      • Fuente: %s (%s, Fricción: %s)", ds.name, ds.type, ds.friction_level)
 
+    rejected_entries = []
+    for rejected in rejected_opportunities:
+        new_id = generate_next_id(history)
+        entry = HistoryEntry.from_opportunity(
+            rejected.opportunity,
+            entry_id=new_id,
+            delivery_status="skipped",
+            evaluation_status="rejected",
+            rejection_reason=rejected.reason,
+        )
+        history.append(entry)
+        rejected_entries.append(entry)
+        logger.info("↳ [%s] Descartada: %s (%s)", new_id, entry.topic, rejected.reason)
+
     if not opportunities:
         logger.info("No se detectaron oportunidades nuevas que superaran los umbrales hoy.")
 
@@ -389,8 +436,9 @@ def main() -> int:
             logger.exception("No se pudo guardar el historial de oportunidades: %s", exc)
             return EXIT_EVALUATION_ERROR
         logger.info(
-            "\nHistorial actualizado exitosamente en data/history.json con %d oportunidades nuevas.",
+            "\nHistorial actualizado exitosamente en data/history.json con %d oportunidades aceptadas y %d descartadas.",
             len(opportunities),
+            len(rejected_entries),
         )
 
     # Fase 4: despacho de candidatos nuevos y reintentos explícitamente pendientes.

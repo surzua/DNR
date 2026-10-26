@@ -88,6 +88,7 @@ El motor analítico ([src/analysis/opportunity_eval.py](src/analysis/opportunity
 3. **Filtro de umbral y fuente disponible:** Solo califica si `virality_score >= 7`, `technical_feasibility_score >= 6` y al menos una fuente de datos URL responde correctamente con un contenido legible. Si no hay temas relevantes un día, despacha una notificación de tranquilidad sin generar spam.
 4. **Hipótesis, verificación y prioridad:** Cada tarjeta separa el hecho conocido de la hipótesis por comprobar y del control que falta antes de construir. Además prioriza utilidad, atención, posibilidad de compartir, diferenciación, rapidez, valor durable y confianza; los puntajes no sustituyen los gates de trazabilidad y fuente.
 5. **Plan y vigencia:** Cada tarjeta entrega un roadmap táctico de 3 pasos accionables en menos de 4 horas y puede indicar cuándo una regla, tarifa, plazo o evento debe revisarse. El historial guarda el estado, fecha, código HTTP y tipo de contenido de cada verificación.
+6. **Descartes auditables:** Los candidatos que fallen un filtro determinista se guardan con su motivo, no se envían a Telegram y no bloquean que la misma noticia se reevalúe con nueva evidencia o un ángulo distinto.
 
 ---
 
@@ -198,9 +199,12 @@ python main.py --mark-archived 2026-10-25-001 --publication-notes "Regla reempla
 
 # Revisar publicaciones y métricas de los últimos siete días
 python main.py --publication-report
+
+# Revisar los candidatos descartados y por qué se descartaron
+python main.py --rejection-report
 ```
 
-Los estados son `unpublished`, `selected`, `published` y `archived`. El reporte incluye visitas, resultados completados, clics para compartir, correcciones y horas invertidas de las piezas publicadas durante el período.
+Los estados de publicación son `unpublished`, `selected`, `published` y `archived`. El historial además conserva los descartes deterministas como `evaluation_status: rejected`, con su motivo; no se reenvían ni bloquean una futura reevaluación del detonante. El reporte de publicación incluye visitas, resultados completados, clics para compartir, correcciones y horas invertidas de las piezas publicadas durante el período.
 
 ---
 

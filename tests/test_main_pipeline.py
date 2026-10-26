@@ -5,7 +5,7 @@ import pytest
 
 from main import main
 from src.config import PipelineConfig
-from src.analysis.opportunity_eval import Opportunity, RadarResponse
+from src.analysis.opportunity_eval import Opportunity, RadarResponse, RejectedOpportunity
 from src.storage.history_manager import HistoryEntry
 
 
@@ -100,6 +100,54 @@ def test_main_requires_url_when_marking_published():
         assert main() == 2
 
 
+def test_main_does_not_allow_a_rejected_entry_to_be_selected():
+    entry = HistoryEntry(
+        id="2026-10-25-001",
+        timestamp=datetime.now(timezone.utc),
+        topic="Candidato descartado",
+        category="Economía & Finanzas",
+        viral_hook_type="Hook",
+        analytical_angle="Angle",
+        feasibility_score=4,
+        virality_score=8,
+        recommended_deliverable="Calculadora",
+        evaluation_status="rejected",
+        rejection_reason="factibilidad_bajo_umbral",
+        delivery_status="skipped",
+    )
+
+    with patch("main.load_history", return_value=[entry]):
+        with patch("main.save_history") as mock_save:
+            with patch.object(sys, "argv", ["main.py", "--mark-selected", entry.id]):
+                assert main() == 2
+
+    mock_save.assert_not_called()
+
+
+def test_main_reports_rejections_without_running_radar():
+    entry = HistoryEntry(
+        id="2026-10-25-001",
+        timestamp=datetime.now(timezone.utc),
+        topic="Candidato descartado",
+        category="Economía & Finanzas",
+        viral_hook_type="Hook",
+        analytical_angle="Angle",
+        feasibility_score=4,
+        virality_score=8,
+        recommended_deliverable="Calculadora",
+        evaluation_status="rejected",
+        rejection_reason="factibilidad_bajo_umbral",
+        delivery_status="skipped",
+    )
+
+    with patch("main.load_history", return_value=[entry]):
+        with patch("main.gather_all_sources") as mock_gather:
+            with patch.object(sys, "argv", ["main.py", "--rejection-report"]):
+                assert main() == 0
+
+    mock_gather.assert_not_called()
+
+
 def test_main_missing_gemini_key_returns_configuration_error():
     test_args = ["main.py", "--use-cache"]
     with patch.object(sys, "argv", test_args):
@@ -148,6 +196,34 @@ def test_main_with_skip_telegram(mock_radar_opp: Opportunity):
                             with patch("main.send_batch_alerts") as mock_batch:
                                 main()
                                 mock_batch.assert_not_called()
+
+
+def test_main_persists_deterministic_rejections_without_dispatch(mock_radar_opp: Opportunity):
+    rejected_opp = mock_radar_opp.model_copy(update={"headline": "Candidata descartada"})
+    radar_resp = RadarResponse(
+        evaluated_topics_count=2,
+        top_opportunities=[mock_radar_opp],
+        rejected_opportunities=[
+            RejectedOpportunity(
+                opportunity=rejected_opp,
+                reason="prioridad_menor_que_limite_de_alertas",
+            )
+        ],
+    )
+    history: list[HistoryEntry] = []
+
+    with patch.object(sys, "argv", ["main.py", "--use-cache", "--skip-telegram"]):
+        with patch.dict("os.environ", {"GEMINI_API_KEY": "fake_key"}):
+            with patch("main.load_articles_cache", return_value=[MagicMock(source="La Tercera")]):
+                with patch("main.load_history", return_value=history):
+                    with patch("main.evaluate_opportunities", return_value=radar_resp):
+                        with patch("main.save_history") as mock_save:
+                            assert main() == 0
+
+    assert mock_save.call_count == 1
+    assert [entry.evaluation_status for entry in history] == ["accepted", "rejected"]
+    assert history[1].rejection_reason == "prioridad_menor_que_limite_de_alertas"
+    assert history[1].delivery_status == "skipped"
 
 
 def test_main_with_days_flag_propagates_lookback_hours():

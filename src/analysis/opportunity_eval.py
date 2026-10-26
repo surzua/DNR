@@ -230,6 +230,13 @@ class Opportunity(BaseModel):
         return round((self.virality_score + self.technical_feasibility_score) / 4, 2)
 
 
+class RejectedOpportunity(BaseModel):
+    """Candidato descartado por un filtro determinista y su motivo auditable."""
+
+    opportunity: Opportunity
+    reason: str = Field(description="Motivo concreto del descarte")
+
+
 class RadarResponse(BaseModel):
     """Estructura de respuesta completa del evaluador de radar."""
 
@@ -239,6 +246,10 @@ class RadarResponse(BaseModel):
     top_opportunities: List[Opportunity] = Field(
         default_factory=list,
         description="Oportunidades destacadas que superaron los umbrales de viabilidad",
+    )
+    rejected_opportunities: List[RejectedOpportunity] = Field(
+        default_factory=list,
+        description="Candidatos descartados por los filtros deterministas del pipeline",
     )
 
 
@@ -321,6 +332,7 @@ def filter_and_rank_opportunities(
     exclude_trigger_urls: Optional[Set[str]] = None,
     exclude_trigger_titles: Optional[Set[str]] = None,
     source_articles: Optional[List[Any]] = None,
+    rejected: Optional[List[RejectedOpportunity]] = None,
 ) -> List[Opportunity]:
     """Filtra por umbrales, trazabilidad, fuentes mínimas, historial y duplicados.
 
@@ -328,31 +340,44 @@ def filter_and_rank_opportunities(
     provenga de la ingesta; se mantiene opcional para reutilizar el filtro aislado.
     """
     valid: List[Opportunity] = []
+
+    def reject(opportunity: Opportunity, reason: str) -> None:
+        logger.info("Oportunidad descartada (%s): %s", reason, opportunity.headline)
+        if rejected is not None:
+            rejected.append(RejectedOpportunity(opportunity=opportunity, reason=reason))
+
     for opp in opportunities:
-        if opp.virality_score >= min_virality and opp.technical_feasibility_score >= min_feasibility:
-            # Blindaje contra enlaces inseguros o esquemas maliciosos
-            if opp.trigger_article_url and not _is_safe_http_url(opp.trigger_article_url):
-                logger.warning(
-                    "Descartando trigger_article_url con esquema no seguro: %s",
-                    opp.trigger_article_url,
-                )
-                opp.trigger_article_url = None
+        if opp.virality_score < min_virality:
+            reject(opp, "viralidad_bajo_umbral")
+            continue
+        if opp.technical_feasibility_score < min_feasibility:
+            reject(opp, "factibilidad_bajo_umbral")
+            continue
 
-            norm_url = normalize_url_for_dedup(opp.trigger_article_url)
-            norm_title = normalize_title_for_dedup(opp.trigger_article_title)
+        # Blindaje contra enlaces inseguros o esquemas maliciosos
+        if opp.trigger_article_url and not _is_safe_http_url(opp.trigger_article_url):
+            logger.warning(
+                "Descartando trigger_article_url con esquema no seguro: %s",
+                opp.trigger_article_url,
+            )
+            opp.trigger_article_url = None
 
-            # Exclusión por historial previo
-            if exclude_trigger_urls and norm_url and norm_url in exclude_trigger_urls:
-                logger.info("Oportunidad descartada por coincidir con URL de historial reciente: %s", opp.trigger_article_url)
-                continue
-            if exclude_trigger_titles and norm_title and norm_title in exclude_trigger_titles:
-                logger.info("Oportunidad descartada por coincidir con titular de historial reciente: %s", opp.trigger_article_title)
-                continue
+        norm_url = normalize_url_for_dedup(opp.trigger_article_url)
+        norm_title = normalize_title_for_dedup(opp.trigger_article_title)
 
-            if source_articles is not None and not _verify_opportunity_inputs(opp, source_articles):
-                continue
+        # Exclusión por historial previo
+        if exclude_trigger_urls and norm_url and norm_url in exclude_trigger_urls:
+            reject(opp, "noticia_detonante_ya_evaluada")
+            continue
+        if exclude_trigger_titles and norm_title and norm_title in exclude_trigger_titles:
+            reject(opp, "titular_detonante_ya_evaluado")
+            continue
 
-            valid.append(opp)
+        if source_articles is not None and not _verify_opportunity_inputs(opp, source_articles):
+            reject(opp, "trazabilidad_o_fuente_minima_invalida")
+            continue
+
+        valid.append(opp)
 
     # La rúbrica ordena por utilidad real y posibilidad de distribución, sin
     # eliminar los gates ya existentes de viralidad, factibilidad y evidencia.
@@ -378,10 +403,10 @@ def filter_and_rank_opportunities(
         norm_title = normalize_title_for_dedup(opp.trigger_article_title)
 
         if norm_url and norm_url in seen_run_urls:
-            logger.info("Oportunidad descartada por duplicar noticia detonante en la misma corrida: %s", opp.trigger_article_url)
+            reject(opp, "noticia_detonante_duplicada_en_corrida")
             continue
         if norm_title and norm_title in seen_run_titles:
-            logger.info("Oportunidad descartada por duplicar titular detonante en la misma corrida: %s", opp.trigger_article_title)
+            reject(opp, "titular_detonante_duplicado_en_corrida")
             continue
 
         if norm_url:
@@ -390,7 +415,10 @@ def filter_and_rank_opportunities(
             seen_run_titles.add(norm_title)
         deduped.append(opp)
 
-    return deduped[:max_items]
+    accepted = deduped[:max_items]
+    for opp in deduped[max_items:]:
+        reject(opp, "prioridad_menor_que_limite_de_alertas")
+    return accepted
 
 
 def evaluate_opportunities(
@@ -523,7 +551,9 @@ def evaluate_opportunities(
             "La respuesta de Gemini no cumple el esquema RadarResponse."
         ) from exc
 
-    # Post-procesamiento y filtrado determinista
+    # Post-procesamiento y filtrado determinista. Los descartes los calcula el
+    # pipeline; no se aceptan razones generadas por el modelo como auditoría.
+    radar_response.rejected_opportunities = []
     original_count = len(radar_response.top_opportunities)
     filtered = filter_and_rank_opportunities(
         radar_response.top_opportunities,
@@ -533,6 +563,7 @@ def evaluate_opportunities(
         exclude_trigger_urls=exclude_trigger_urls,
         exclude_trigger_titles=exclude_trigger_titles,
         source_articles=articles,
+        rejected=radar_response.rejected_opportunities,
     )
     if require_verified_source and not verify_sources:
         raise ValueError("require_verified_source necesita verify_sources=True.")
@@ -543,9 +574,18 @@ def evaluate_opportunities(
         )
         if require_verified_source:
             before_verification = len(filtered)
-            filtered = [
-                opp for opp in filtered if verified_by_opportunity.get(id(opp), False)
-            ]
+            verified: List[Opportunity] = []
+            for opp in filtered:
+                if verified_by_opportunity.get(id(opp), False):
+                    verified.append(opp)
+                else:
+                    radar_response.rejected_opportunities.append(
+                        RejectedOpportunity(
+                            opportunity=opp,
+                            reason="fuente_url_no_verificada",
+                        )
+                    )
+            filtered = verified
             if len(filtered) < before_verification:
                 logger.info(
                     "Verificación de fuentes descartó %d oportunidades sin una fuente accesible.",
@@ -559,8 +599,9 @@ def evaluate_opportunities(
     radar_response.top_opportunities = filtered
 
     logger.info(
-        "Evaluación completada: %d oportunidades sugeridas por el LLM, %d superaron los umbrales deterministas.",
+        "Evaluación completada: %d oportunidades sugeridas por el LLM, %d aceptadas y %d descartadas por filtros deterministas.",
         original_count,
         len(filtered),
+        len(radar_response.rejected_opportunities),
     )
     return radar_response
