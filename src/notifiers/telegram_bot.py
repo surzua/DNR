@@ -109,6 +109,14 @@ def format_opportunity_html(opportunity: Any) -> str:
     trigger_title = _extract_field(opportunity, "trigger_article_title")
     trigger_url = _extract_field(opportunity, "trigger_article_url")
     data_sources = _extract_field(opportunity, "data_sources", [])
+    audience = _extract_field(opportunity, "audience")
+    user_need = _extract_field(opportunity, "user_need")
+    user_action = _extract_field(opportunity, "user_action")
+    product_type = _extract_field(opportunity, "product_type")
+    product_output = _extract_field(opportunity, "product_output")
+    share_reason = _extract_field(opportunity, "share_reason")
+    evidence_status = _extract_field(opportunity, "evidence_status")
+    validity_note = _extract_field(opportunity, "validity_note")
 
     lines = [
         f"🚀 <b>OPORTUNIDAD DE DATA</b> (Viral: <b>{virality}/10</b> | Viab: <b>{feasibility}/10</b>)",
@@ -118,9 +126,28 @@ def format_opportunity_html(opportunity: Any) -> str:
         "",
         "🎯 <b>Ángulo Analítico / Gancho:</b>",
         f"<i>{html.escape(str(angle), quote=False)}</i>",
-        "",
-        "📊 <b>Fuentes de Datos Sugeridas:</b>",
     ]
+
+    if product_type or audience or user_need or user_action or product_output:
+        lines.extend(["", "🧩 <b>Producto útil:</b>"])
+        if product_type:
+            lines.append(f"• Tipo: {html.escape(str(product_type), quote=False)}")
+        if audience:
+            lines.append(f"• Para: {html.escape(str(audience), quote=False)}")
+        if user_need:
+            lines.append(f"• Necesidad: {html.escape(str(user_need), quote=False)}")
+        if user_action:
+            lines.append(f"• Acción: {html.escape(str(user_action), quote=False)}")
+        if product_output:
+            lines.append(f"• Resultado: {html.escape(str(product_output), quote=False)}")
+        if share_reason:
+            lines.append(f"• Para compartir: {html.escape(str(share_reason), quote=False)}")
+        if evidence_status:
+            lines.append(f"• Evidencia: {html.escape(str(evidence_status), quote=False)}")
+        if validity_note:
+            lines.append(f"• Vigencia: {html.escape(str(validity_note), quote=False)}")
+
+    lines.extend(["", "📊 <b>Fuentes de Datos Sugeridas:</b>"])
 
     if data_sources:
         for ds in data_sources:

@@ -46,6 +46,15 @@ def sample_opportunity() -> Opportunity:
         fast_execution_strategy="1. Scrapear 500 avisos. 2. Calcular precio/m2. 3. Boxplot comparativo.",
         trigger_article_title="Precios de arriendos en Santiago marcan leve retroceso en septiembre",
         trigger_article_url="https://ejemplo.com/noticias/arriendos-septiembre",
+        audience="Personas que buscan arriendo en Santiago",
+        user_need="Comparar el precio real de barrios y tamaños",
+        user_action="Filtrar un rango de arriendo y metraje",
+        product_type="Comparador",
+        product_inputs="Comuna, presupuesto y metraje",
+        product_output="Rango de precio por m² y alternativas comparables",
+        share_reason="Ayuda a otra persona a buscar vivienda",
+        evidence_status="Fuente localizada",
+        validity_note="Actualizar mensualmente con avisos vigentes",
     )
 
 
@@ -92,6 +101,12 @@ def test_format_opportunity_html_structure_and_escaping(sample_opportunity: Oppo
     assert "Precios de arriendos en Santiago marcan leve retroceso" in formatted
     assert "<b>Portales Inmobiliarios</b>" in formatted
     assert "<code>https://ejemplo.cl/arriendos</code>" in formatted
+    assert "Producto útil" in formatted
+    assert "Tipo: Comparador" in formatted
+    assert "Personas que buscan arriendo en Santiago" in formatted
+    assert "Ayuda a otra persona a buscar vivienda" in formatted
+    assert "Evidencia: Fuente localizada" in formatted
+    assert "Actualizar mensualmente con avisos vigentes" in formatted
 
 
 def test_format_opportunity_html_from_history_entry():

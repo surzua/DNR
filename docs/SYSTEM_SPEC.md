@@ -228,6 +228,17 @@ class Opportunity(BaseModel):
 
     fast\_execution\_strategy: str \= Field(description="Plan de acción concreto en 3 pasos para construirlo en menos de 4 horas")
 
+    # Campos de producto con defaults compatibles con historial previo
+    audience: str
+    user\_need: str
+    user\_action: str
+    product\_type: Literal["Visualización / explicador", "Calculadora", "Comparador", "Guía interactiva", "Planificador", "Simulador", "Verificador", "Análisis de datos"]
+    product\_inputs: str
+    product\_output: str
+    share\_reason: str
+    evidence\_status: Literal["Propuesta (no verificada)", "Fuente localizada", "Verificada"]
+    validity\_note: Optional[str]
+
 class RadarResponse(BaseModel):
 
     evaluated\_topics\_count: int
@@ -237,8 +248,9 @@ class RadarResponse(BaseModel):
 #### Core System Prompt Rules:
 
 1. **Buscar datos no estructurados:** No limitarse a portales de gobierno (`.gob`). Buscar activamente tablas históricas de Wikipedia (e.g. resultados de elecciones, planteles deportivos, datos censales comunales) o sitios con HTML estructurado (Transfermarkt, CMF, Banco Central).  
-2. **Pensar en el gancho ("Hook"):** Descartar resúmenes aburridos. Formular ángulos contrarios a la intuición (*"Todo el mundo dice X, pero la data histórica muestra Y"*) o simuladores de impacto personal (*"¿Cuánto te afecta a ti?"*).  
+2. **Pensar en utilidad y gancho ("Hook"):** Para cada propuesta, definir audiencia, necesidad, acción y producto. El producto resuelve una tarea concreta y no queda restringido a un framework.
 3. **Filtro de umbral:** Solo retornar oportunidades donde `virality_score >= 7` y `technical_feasibility_score >= 6`. Máximo 3 por ejecución para no saturar.
+4. **Honestidad de evidencia:** Diferenciar fuentes propuestas, localizadas y verificadas; no convertir una hipótesis o una sugerencia de fuente en un hecho comprobado.
 
 ### 4.4 Notification Layer (`telegram_bot.py`)
 

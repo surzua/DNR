@@ -3,11 +3,11 @@
 [![CI Tests](https://github.com/surzua/DNR/actions/workflows/ci.yml/badge.svg)](https://github.com/surzua/DNR/actions/workflows/ci.yml)
 [![Daily Radar](https://github.com/surzua/DNR/actions/workflows/daily_radar.yml/badge.svg)](https://github.com/surzua/DNR/actions/workflows/daily_radar.yml)
 ![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)
-![Tests](https://img.shields.io/badge/tests-71%20passed-brightgreen.svg)
+![Tests](https://img.shields.io/badge/tests-75%20passed-brightgreen.svg)
 ![LLM](https://img.shields.io/badge/LLM-Gemini%20Flash-orange.svg)
 ![Alerts](https://img.shields.io/badge/Alerts-Telegram-0088cc.svg)
 
-Sistema autónomo de inteligencia de tendencias diseñado para detectar noticias de alta tracción y viralidad en Chile (políticas, económicas, regulatorias y sociales), evaluando de forma automática su viabilidad como proyectos rápidos de **Data Science, Analytics y Periodismo de Datos**.
+Sistema autónomo de inteligencia de tendencias diseñado para detectar noticias de alta tracción y viralidad en Chile (políticas, económicas, regulatorias y sociales), evaluando de forma automática su viabilidad como **productos digitales útiles**: proyectos rápidos de Data Science, Analytics, Periodismo de Datos, calculadoras, comparadores, guías, planificadores y simuladores.
 
 El objetivo es aprovechar la ventana dorada de atención pública (**24 a 72 horas**) publicando análisis cuantitativos, visualizaciones interactivas o simuladores que aporten evidencia empírica y contrasten narrativas públicas.
 
@@ -83,10 +83,10 @@ mientras comunas del sector oriente toleran más de 40 mm sin interrupciones cr�
 
 El motor analítico ([src/analysis/opportunity_eval.py](src/analysis/opportunity_eval.py)) evalúa los artículos basándose en directrices estrictas:
 
-1. **Ganchos Contraintuitivos o Curiosos:** Descarta resúmenes descriptivos tradicionales. Prioriza ángulos del tipo: *"Todo el mundo dice X, pero los datos históricos muestran Y"* o calculadoras de impacto personal (*"¿Cuánto te cuesta a ti la nueva regulación?"*).
-2. **Fuentes Abiertas de Baja Fricción:** Identifica fuentes reales accesibles en horas: portales de transparencia, CMF, Banco Central, tablas históricas de Wikipedia, datos del INE o scraping ligero.
-3. **Filtro de Umbral Exigente:** Solo califica si `virality_score >= 7` y `technical_feasibility_score >= 6`. Si no hay temas relevantes un día, despacha una notificación de tranquilidad sin generar spam.
-4. **Plan Rápido de Ejecución:** Cada tarjeta entrega un roadmap táctico de 3 pasos accionables en menos de 4 horas.
+1. **Utilidad y gancho:** Además de un ángulo curioso, cada propuesta especifica audiencia, necesidad, acción, entradas y resultado. El tipo de producto describe lo que resuelve —no la tecnología— y puede ser una calculadora, comparador, guía, planificador, simulador, verificador, visualización o análisis.
+2. **Fuentes abiertas y evidencia honesta:** Identifica fuentes accesibles en horas y distingue entre una propuesta no verificada, una fuente localizada y evidencia comprobada. No presenta como hechos los resultados todavía hipotéticos.
+3. **Filtro de umbral exigente:** Solo califica si `virality_score >= 7` y `technical_feasibility_score >= 6`. Si no hay temas relevantes un día, despacha una notificación de tranquilidad sin generar spam.
+4. **Plan y vigencia:** Cada tarjeta entrega un roadmap táctico de 3 pasos accionables en menos de 4 horas y puede indicar cuándo una regla, tarifa, plazo o evento debe revisarse.
 
 ---
 

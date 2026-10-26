@@ -56,6 +56,18 @@ class HistoryEntry(BaseModel):
         default="unpublished",
         description="Estado de publicación: unpublished, published o archived",
     )
+    audience: Optional[str] = Field(default=None, description="Audiencia objetivo del producto")
+    user_need: Optional[str] = Field(default=None, description="Necesidad que resuelve")
+    user_action: Optional[str] = Field(default=None, description="Acción que podrá completar la audiencia")
+    product_type: Optional[str] = Field(default=None, description="Tipo de producto propuesto")
+    product_inputs: Optional[str] = Field(default=None, description="Entradas mínimas del producto")
+    product_output: Optional[str] = Field(default=None, description="Resultado para la audiencia")
+    share_reason: Optional[str] = Field(default=None, description="Motivo para compartir el resultado")
+    evidence_status: str = Field(
+        default="Propuesta (no verificada)",
+        description="Nivel de comprobación de fuentes o reglas",
+    )
+    validity_note: Optional[str] = Field(default=None, description="Nota o condición de vigencia")
 
     @classmethod
     def from_opportunity(
@@ -90,6 +102,15 @@ class HistoryEntry(BaseModel):
             evaluation_status="accepted",
             delivery_status=delivery_status,
             publication_status="unpublished",
+            audience=getattr(opportunity, "audience", None),
+            user_need=getattr(opportunity, "user_need", None),
+            user_action=getattr(opportunity, "user_action", None),
+            product_type=getattr(opportunity, "product_type", None),
+            product_inputs=getattr(opportunity, "product_inputs", None),
+            product_output=getattr(opportunity, "product_output", None),
+            share_reason=getattr(opportunity, "share_reason", None),
+            evidence_status=getattr(opportunity, "evidence_status", "Propuesta (no verificada)"),
+            validity_note=getattr(opportunity, "validity_note", None),
         )
 
     def record_delivery_attempt(

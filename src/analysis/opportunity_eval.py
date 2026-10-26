@@ -43,7 +43,13 @@ class DataSource(BaseModel):
 
 
 class Opportunity(BaseModel):
-    """Oportunidad de proyecto de data journalism o analytics detectada."""
+    """Oportunidad editorial y de producto digital detectada.
+
+    Los campos históricos describen el ángulo analítico. Los campos de producto
+    permiten evaluar además para quién resuelve algo la oportunidad y qué MVP se
+    podría publicar. Sus valores por defecto mantienen compatibles respuestas e
+    historial creados antes de esta ampliación.
+    """
 
     headline: str = Field(description="Titular sintético y llamativo del proyecto")
     category: Literal[
@@ -82,6 +88,55 @@ class Opportunity(BaseModel):
     trigger_article_url: Optional[str] = Field(
         default=None,
         description="Enlace web directo a la noticia o publicación detonante",
+    )
+    audience: str = Field(
+        default="Audiencia general interesada en el tema",
+        description="Persona o grupo específico al que sirve el producto",
+    )
+    user_need: str = Field(
+        default="Entender el impacto del tema con información verificable",
+        description="Necesidad concreta que la audiencia busca resolver",
+    )
+    user_action: str = Field(
+        default="Explorar la información y obtener una respuesta útil",
+        description="Acción concreta que podrá completar la persona usuaria",
+    )
+    product_type: Literal[
+        "Visualización / explicador",
+        "Calculadora",
+        "Comparador",
+        "Guía interactiva",
+        "Planificador",
+        "Simulador",
+        "Verificador",
+        "Análisis de datos",
+    ] = Field(
+        default="Análisis de datos",
+        description="Tipo de producto; describe la utilidad, no la tecnología usada",
+    )
+    product_inputs: str = Field(
+        default="Datos públicos y supuestos explícitos",
+        description="Datos o decisiones mínimas que necesita el producto",
+    )
+    product_output: str = Field(
+        default="Una respuesta o resultado interpretable para la audiencia",
+        description="Resultado concreto que recibirá la persona usuaria",
+    )
+    share_reason: str = Field(
+        default="Ayuda a otra persona a entender o resolver el mismo tema",
+        description="Motivo específico por el que alguien compartiría el resultado",
+    )
+    evidence_status: Literal[
+        "Propuesta (no verificada)",
+        "Fuente localizada",
+        "Verificada",
+    ] = Field(
+        default="Propuesta (no verificada)",
+        description="Nivel de comprobación real de las fuentes o reglas necesarias",
+    )
+    validity_note: Optional[str] = Field(
+        default=None,
+        description="Fecha, condición de vencimiento o nota de vigencia del producto",
     )
 
 

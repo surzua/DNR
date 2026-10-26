@@ -46,6 +46,8 @@ def test_opportunity_schemas():
     )
     assert opp.virality_score == 8
     assert opp.trigger_article_title == "Investigan licitación en comuna de Santiago"
+    assert opp.product_type == "Análisis de datos"
+    assert opp.evidence_status == "Propuesta (no verificada)"
 
     response = RadarResponse(
         evaluated_topics_count=50,
@@ -82,6 +84,7 @@ def test_format_article_snippet_and_build_prompt():
     assert "[1] [EMOL] [Economía]" in prompt
     assert "últimas 72 horas" in prompt
     assert "ÚLTIMOS 5 DÍAS" in prompt
+    assert "audience, user_need, user_action" in prompt
 
 
 def test_filter_and_rank_opportunities():
@@ -397,6 +400,37 @@ def test_history_entry_from_opportunity_with_trigger():
     assert entry.topic == "Simulador de crédito hipotecario"
     assert entry.trigger_article_title == "Bancos ajustan condiciones hipotecarias"
     assert entry.trigger_article_url == "https://df.cl/hipotecarios"
+
+
+def test_opportunity_product_fields_are_persisted_in_history():
+    opp = Opportunity(
+        headline="Calculadora de dividendo",
+        category="Economía & Finanzas",
+        why_is_trending="Debate por tasas hipotecarias",
+        contrarian_or_curious_angle="Comparar el efecto real de una décima en la tasa",
+        suggested_deliverable="App Interactiva (Streamlit)",
+        data_sources=[],
+        virality_score=8,
+        technical_feasibility_score=8,
+        fast_execution_strategy="Implementar fórmula y escenarios",
+        audience="Personas evaluando un crédito hipotecario",
+        user_need="Estimar una cuota antes de cotizar",
+        user_action="Comparar escenarios de tasa y plazo",
+        product_type="Calculadora",
+        product_inputs="Monto, pie, tasa y plazo",
+        product_output="Cuota estimada y costo total",
+        share_reason="Permite comparar una decisión relevante con la familia",
+        evidence_status="Fuente localizada",
+        validity_note="Actualizar cuando cambien las tasas de referencia",
+    )
+
+    entry = HistoryEntry.from_opportunity(opp, entry_id="2026-10-06-002")
+
+    assert entry.audience == "Personas evaluando un crédito hipotecario"
+    assert entry.product_type == "Calculadora"
+    assert entry.product_output == "Cuota estimada y costo total"
+    assert entry.evidence_status == "Fuente localizada"
+    assert entry.validity_note == "Actualizar cuando cambien las tasas de referencia"
 
 
 def test_evaluate_opportunities_prioritizes_gemini_3_8_flash():

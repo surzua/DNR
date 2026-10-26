@@ -41,6 +41,8 @@ def test_history_save_and_load(tmp_path: Path):
     assert len(loaded) == 1
     assert loaded[0].id == "2026-10-06-001"
     assert loaded[0].topic == "Polémica por luminarias públicas"
+    assert loaded[0].evidence_status == "Propuesta (no verificada)"
+    assert loaded[0].product_type is None
 
 
 def test_delivery_state_is_backward_compatible_and_retryable():
