@@ -131,6 +131,9 @@ def format_opportunity_html(opportunity: Any) -> str:
     evidence_status = _extract_field(opportunity, "evidence_status")
     validity_note = _extract_field(opportunity, "validity_note")
     known_fact = _first_text(_extract_field(opportunity, "known_facts", []))
+    reported_fact = _first_text(_extract_field(opportunity, "reported_facts", []))
+    corroborated_fact = _first_text(_extract_field(opportunity, "corroborated_facts", []))
+    assumption = _first_text(_extract_field(opportunity, "assumptions", []))
     hypothesis = _first_text(_extract_field(opportunity, "hypotheses_to_test", []))
     verification_step = _first_text(_extract_field(opportunity, "verification_plan", []))
     distribution_channel = _extract_field(opportunity, "distribution_channel")
@@ -178,7 +181,7 @@ def format_opportunity_html(opportunity: Any) -> str:
         if validity_note:
             lines.append(f"• Vigencia: {html.escape(str(validity_note), quote=False)}")
 
-    if known_fact or hypothesis or verification_step or distribution_channel or existing_alternatives:
+    if known_fact or reported_fact or corroborated_fact or assumption or hypothesis or verification_step or distribution_channel or existing_alternatives:
         lines.extend(["", "🔎 <b>Antes de construir:</b>"])
         if priority_score is not None:
             lines.append(
@@ -187,6 +190,12 @@ def format_opportunity_html(opportunity: Any) -> str:
             )
         if known_fact:
             lines.append(f"• Hecho: {html.escape(known_fact, quote=False)}")
+        if reported_fact:
+            lines.append(f"• La noticia reporta: {html.escape(reported_fact, quote=False)}")
+        if corroborated_fact:
+            lines.append(f"• Contrastado: {html.escape(corroborated_fact, quote=False)}")
+        if assumption:
+            lines.append(f"• Supuesto: {html.escape(assumption, quote=False)}")
         if hypothesis:
             lines.append(f"• Hipótesis: {html.escape(hypothesis, quote=False)}")
         if verification_step:
@@ -204,10 +213,18 @@ def format_opportunity_html(opportunity: Any) -> str:
             ds_type = _extract_field(ds, "type", "Portal")
             friction = _extract_field(ds, "friction_level", "Baja")
             url_or_q = _extract_field(ds, "potential_url_or_query", "")
+            access_status = _extract_field(ds, "verification_status")
+            editorial_status = _extract_field(ds, "editorial_status")
             
             ds_line = f"• <b>{html.escape(str(name), quote=False)}</b> ({html.escape(str(ds_type), quote=False)} | Fricción: {html.escape(str(friction), quote=False)})"
             if url_or_q:
                 ds_line += f"\n  ↳ <code>{html.escape(str(url_or_q), quote=False)}</code>"
+            if access_status == "accessible":
+                ds_line += "\n  ↳ URL accesible; contenido pendiente de revisión editorial"
+            elif access_status == "failed":
+                ds_line += "\n  ↳ URL no accesible en la comprobación técnica"
+            if editorial_status and editorial_status != "pending_review":
+                ds_line += f"\n  ↳ Estado editorial: {html.escape(str(editorial_status), quote=False)}"
             lines.append(ds_line)
     else:
         lines.append("• Datos públicos en portales de transparencia / Wikipedia")

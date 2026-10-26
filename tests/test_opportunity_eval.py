@@ -50,7 +50,7 @@ def test_opportunity_schemas():
     assert opp.virality_score == 8
     assert opp.trigger_article_title == "Investigan licitación en comuna de Santiago"
     assert opp.product_type == "Análisis de datos"
-    assert opp.evidence_status == "Propuesta (no verificada)"
+    assert opp.evidence_status == "Pendiente de revisión"
     assert opp.assessment.priority_score() is None
 
     response = RadarResponse(
@@ -89,7 +89,8 @@ def test_format_article_snippet_and_build_prompt():
     assert "últimas 72 horas" in prompt
     assert "ÚLTIMOS 5 DÍAS" in prompt
     assert "audience, user_need, first_interaction, user_action" in prompt
-    assert "known_facts, hypotheses_to_test y verification_plan" in prompt
+    assert "reported_facts" in prompt
+    assert "critical_claims" in prompt
     assert "No fuerces un dataset" in SYSTEM_PROMPT
     assert "Rúbrica honesta" in SYSTEM_PROMPT
 
@@ -476,7 +477,7 @@ def test_evaluate_opportunities_can_require_a_verified_source():
     response = MagicMock(parsed=RadarResponse(evaluated_topics_count=1, top_opportunities=[opp]))
     client = MagicMock()
     client.models.generate_content.return_value = response
-    source.verification_status = "verified"
+    source.verification_status = "accessible"
 
     with patch(
         "src.analysis.opportunity_eval.verify_opportunities_sources",
@@ -490,7 +491,7 @@ def test_evaluate_opportunities_can_require_a_verified_source():
         )
 
     assert result.top_opportunities == [opp]
-    assert result.top_opportunities[0].evidence_status == "Verificada"
+    assert result.top_opportunities[0].evidence_status == "Pendiente de revisión"
 
 
 def test_evaluate_opportunities_records_rejection_when_source_is_not_verified():
@@ -530,7 +531,7 @@ def test_evaluate_opportunities_records_rejection_when_source_is_not_verified():
 
     assert result.top_opportunities == []
     assert result.rejected_opportunities == [
-        RejectedOpportunity(opportunity=opp, reason="fuente_url_no_verificada")
+        RejectedOpportunity(opportunity=opp, reason="fuente_url_no_accesible")
     ]
 
 

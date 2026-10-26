@@ -24,8 +24,13 @@ class PipelineConfig:
     min_virality_score: int
     min_feasibility_score: int
     verify_source_urls: bool = True
-    require_verified_source: bool = True
+    require_accessible_source: bool = False
     source_verification_timeout_seconds: int = 10
+
+    @property
+    def require_verified_source(self) -> bool:
+        """Alias heredado; significa acceso técnico, nunca respaldo editorial."""
+        return self.require_accessible_source
 
 
 def _required_int(values: Mapping[str, Any], key: str, *, minimum: int, maximum: int | None = None) -> int:
@@ -71,10 +76,14 @@ def load_pipeline_config(config_path: str | Path = DEFAULT_CONFIG_PATH) -> Pipel
         raise PipelineConfigError("Falta la sección pipeline en la configuración.")
 
     verify_source_urls = _optional_bool(pipeline, "verify_source_urls", True)
-    require_verified_source = _optional_bool(pipeline, "require_verified_source", True)
-    if require_verified_source and not verify_source_urls:
+    if "require_accessible_source" in pipeline:
+        require_accessible_source = _optional_bool(pipeline, "require_accessible_source", False)
+    else:
+        # Compatibilidad de archivos antiguos: el nombre histórico era ambiguo.
+        require_accessible_source = _optional_bool(pipeline, "require_verified_source", False)
+    if require_accessible_source and not verify_source_urls:
         raise PipelineConfigError(
-            "pipeline.require_verified_source necesita pipeline.verify_source_urls=true."
+            "pipeline.require_accessible_source necesita pipeline.verify_source_urls=true."
         )
 
     return PipelineConfig(
@@ -84,7 +93,7 @@ def load_pipeline_config(config_path: str | Path = DEFAULT_CONFIG_PATH) -> Pipel
         min_virality_score=_required_int(pipeline, "min_virality_score", minimum=1, maximum=10),
         min_feasibility_score=_required_int(pipeline, "min_feasibility_score", minimum=1, maximum=10),
         verify_source_urls=verify_source_urls,
-        require_verified_source=require_verified_source,
+        require_accessible_source=require_accessible_source,
         source_verification_timeout_seconds=_required_int(
             pipeline, "source_verification_timeout_seconds", minimum=1, maximum=60
         ) if "source_verification_timeout_seconds" in pipeline else 10,

@@ -43,9 +43,10 @@ def test_verify_opportunity_source_records_successful_http_check():
     request_get = MagicMock(return_value=response)
 
     assert verify_opportunity_sources(_opportunity(source), request_get=request_get) is True
-    assert source.verification_status == "verified"
+    assert source.verification_status == "accessible"
     assert source.verification_http_status == 200
     assert source.verification_content_type == "application/json"
+    assert source.editorial_status == "pending_review"
     assert source.verification_checked_at is not None
     response.close.assert_called_once()
     assert request_get.call_args.kwargs["allow_redirects"] is False
@@ -94,4 +95,21 @@ def test_verify_opportunity_source_reuses_url_check_cache():
     copied_source = source.model_copy()
     assert verify_opportunity_sources(_opportunity(copied_source), request_get=request_get, cache=cache)
     assert request_get.call_count == 1
-    assert copied_source.verification_status == "verified"
+    assert copied_source.verification_status == "accessible"
+
+
+def test_http_access_never_promotes_editorial_evidence():
+    source = DataSource(
+        name="Documento sin revisar",
+        type="Documentación oficial",
+        potential_url_or_query="https://datos.gob.cl/regla",
+        friction_level="Baja (Horas)",
+        supports_claims=["La regla aplica al cálculo"],
+    )
+    response = MagicMock(status_code=200, headers={"content-type": "text/html"})
+    response.url = source.potential_url_or_query
+
+    assert verify_opportunity_sources(_opportunity(source), request_get=MagicMock(return_value=response))
+    assert source.verification_status == "accessible"
+    assert source.editorial_status == "pending_review"
+    assert source.evidence_location is None

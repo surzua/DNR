@@ -55,6 +55,28 @@ class DataSource(BaseModel):
     verification_http_status: Optional[int] = Field(default=None)
     verification_content_type: Optional[str] = Field(default=None)
     verification_error: Optional[str] = Field(default=None)
+    editorial_status: Literal[
+        "pending_review",
+        "reported_by_trigger",
+        "partially_supported",
+        "supported",
+        "contradicted",
+        "not_applicable",
+    ] = Field(
+        default="pending_review",
+        description="Estado editorial independiente del acceso HTTP",
+    )
+    supports_claims: List[str] = Field(
+        default_factory=list,
+        description="Afirmaciones concretas que este documento respalda o debe revisar",
+    )
+    evidence_location: Optional[str] = Field(
+        default=None,
+        description="Sección, tabla o fragmento consultado; vacío si no se revisó el contenido",
+    )
+    editorial_reviewed_at: Optional[datetime] = Field(default=None)
+    source_validity_note: Optional[str] = Field(default=None)
+    pending_checks: List[str] = Field(default_factory=list)
 
 
 class OpportunityAssessment(BaseModel):
@@ -223,7 +245,7 @@ class Opportunity(BaseModel):
         "Fuente localizada",
         "Verificada",
     ] = Field(
-        default="Propuesta (no verificada)",
+        default="Pendiente de revisión",
         description="Estado editorial de evidencia; no se infiere desde HTTP",
     )
     validity_note: Optional[str] = Field(
@@ -253,6 +275,10 @@ class Opportunity(BaseModel):
     assumptions: List[str] = Field(
         default_factory=list,
         description="Supuestos explícitos que no deben comunicarse como hallazgos",
+    )
+    critical_claims: List[str] = Field(
+        default_factory=list,
+        description="Reglas o datos que deben tener respaldo antes de construir o compartir",
     )
     distribution_channel: Optional[str] = Field(
         default=None,
@@ -497,7 +523,7 @@ def evaluate_opportunities(
         history_days: Ventana efectiva del historial que se comunica al modelo.
         timeout_ms: Timeout máximo por petición HTTP en milisegundos (defecto: 90000 ms).
         verify_sources: Comprueba técnicamente las URLs de datos antes de retornar.
-        require_verified_source: Descarta oportunidades sin una fuente accesible.
+        require_verified_source: Compatibilidad: descarta oportunidades sin URL accesible si se activa.
         source_verification_timeout_seconds: Límite por consulta de fuente.
 
     Returns:
@@ -616,28 +642,26 @@ def evaluate_opportunities(
         )
         if require_verified_source:
             before_verification = len(filtered)
-            verified: List[Opportunity] = []
+            accessible: List[Opportunity] = []
             for opp in filtered:
                 if verified_by_opportunity.get(id(opp), False):
-                    verified.append(opp)
+                    accessible.append(opp)
                 else:
                     radar_response.rejected_opportunities.append(
                         RejectedOpportunity(
                             opportunity=opp,
-                            reason="fuente_url_no_verificada",
+                            reason="fuente_url_no_accesible",
                         )
                     )
-            filtered = verified
+            filtered = accessible
             if len(filtered) < before_verification:
                 logger.info(
-                    "Verificación de fuentes descartó %d oportunidades sin una fuente accesible.",
+                    "Comprobación técnica descartó %d oportunidades sin una URL accesible.",
                     before_verification - len(filtered),
                 )
-        for opportunity in filtered:
-            if verified_by_opportunity.get(id(opportunity), False):
-                # "Verificada" significa accesible y con contenido legible; no
-                # reemplaza la revisión editorial de la interpretación del dato.
-                opportunity.evidence_status = "Verificada"
+        # El acceso HTTP queda en cada DataSource. Jamás eleva evidence_status:
+        # una respuesta 200 no demuestra que una afirmación sea correcta, vigente
+        # ni que el documento respalde la interpretación propuesta.
     radar_response.top_opportunities = filtered
 
     logger.info(

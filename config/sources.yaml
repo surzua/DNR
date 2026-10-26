@@ -34,7 +34,8 @@ pipeline:
   max_opportunities_to_notify: 3
   min_virality_score: 7
   min_feasibility_score: 6
-  # Una alerta requiere al menos una URL de datos accesible y con contenido legible.
+  # La comprobación HTTP solo registra acceso técnico, no valida afirmaciones.
   verify_source_urls: true
-  require_verified_source: true
+  # Las propuestas prometedoras pendientes de revisión no se descartan por una URL caída.
+  require_accessible_source: false
   source_verification_timeout_seconds: 10

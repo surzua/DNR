@@ -108,6 +108,10 @@ class HistoryEntry(BaseModel):
         default_factory=list,
         description="Controles requeridos antes de publicar",
     )
+    reported_facts: List[str] = Field(default_factory=list, description="Afirmaciones atribuidas al detonante")
+    corroborated_facts: List[str] = Field(default_factory=list, description="Afirmaciones con respaldo revisado")
+    assumptions: List[str] = Field(default_factory=list, description="Supuestos explícitos")
+    critical_claims: List[str] = Field(default_factory=list, description="Afirmaciones que requieren respaldo")
     distribution_channel: Optional[str] = Field(
         default=None,
         description="Canal inicial de distribución propuesto",
@@ -179,6 +183,10 @@ class HistoryEntry(BaseModel):
             known_facts=getattr(opportunity, "known_facts", []),
             hypotheses_to_test=getattr(opportunity, "hypotheses_to_test", []),
             verification_plan=getattr(opportunity, "verification_plan", []),
+            reported_facts=getattr(opportunity, "reported_facts", []),
+            corroborated_facts=getattr(opportunity, "corroborated_facts", []),
+            assumptions=getattr(opportunity, "assumptions", []),
+            critical_claims=getattr(opportunity, "critical_claims", []),
             distribution_channel=getattr(opportunity, "distribution_channel", None),
             existing_alternatives=getattr(opportunity, "existing_alternatives", None),
             selection_scores=(

@@ -116,7 +116,7 @@ def verify_source_url(
                     "failed", checked_at, final_url, http_status, content_type or None,
                     "tipo de contenido no verificable",
                 )
-            return SourceCheck("verified", checked_at, final_url, http_status, content_type)
+            return SourceCheck("accessible", checked_at, final_url, http_status, content_type)
         finally:
             close = getattr(response, "close", None)
             if callable(close):
@@ -142,14 +142,14 @@ def verify_opportunity_sources(
     request_get: Callable[..., Any] = requests.get,
     cache: dict[str, SourceCheck] | None = None,
 ) -> bool:
-    """Verifica las URLs de una oportunidad y retorna si alguna quedó utilizable.
+    """Comprueba URLs y retorna si alguna quedó técnicamente accesible.
 
     Las consultas textuales se conservan para el analista, pero no se presentan
-    como fuentes verificadas. ``cache`` permite no consultar dos veces la misma
-    URL durante una ejecución.
+    como evidencia editorial verificada. ``cache`` permite no consultar dos veces
+    la misma URL durante una ejecución.
     """
     checks = cache if cache is not None else {}
-    verified = False
+    accessible = False
     for source in getattr(opportunity, "data_sources", []):
         reference = getattr(source, "potential_url_or_query", "").strip()
         parsed = urlparse(reference)
@@ -173,8 +173,8 @@ def verify_opportunity_sources(
             )
             checks[reference] = check
         _apply_check(source, check)
-        verified = verified or check.status == "verified"
-    return verified
+        accessible = accessible or check.status == "accessible"
+    return accessible
 
 
 def verify_opportunities_sources(
