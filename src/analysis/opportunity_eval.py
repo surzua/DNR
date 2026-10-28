@@ -810,24 +810,53 @@ def evaluate_opportunities(
         logger.error("Fallaron los proveedores configurados; último error: %s", last_error)
         raise RuntimeError("Fallaron NVIDIA y todos los modelos candidatos de Gemini.") from last_error
 
-    # Extracción y validación del modelo Pydantic
+    # Extraer y validar la respuesta; si NVIDIA entrega un formato inválido,
+    # tratarlo como un fallo del proveedor y continuar con los modelos Gemini.
+    def parse_response(candidate: Any, candidate_provider: str) -> RadarResponse:
+        parsed = getattr(candidate, "parsed", None)
+        if isinstance(parsed, RadarResponse):
+            return parsed
+        if isinstance(parsed, GeminiRadarResponse):
+            return _to_radar_response(parsed)
+        if parsed is not None:
+            return _to_radar_response(GeminiRadarResponse.model_validate(parsed))
+        response_text = getattr(candidate, "text", None)
+        if not response_text:
+            raise EvaluationResponseError(f"{candidate_provider} no devolvió contenido estructurado.")
+        return _to_radar_response(GeminiRadarResponse.model_validate_json(response_text))
+
     try:
-        parsed_response = getattr(response, "parsed", None)
-        if isinstance(parsed_response, RadarResponse):
-            radar_response = parsed_response
-        elif isinstance(parsed_response, GeminiRadarResponse):
-            radar_response = _to_radar_response(parsed_response)
-        elif parsed_response is not None:
-            radar_response = _to_radar_response(GeminiRadarResponse.model_validate(parsed_response))
+        radar_response = parse_response(response, provider)
+    except (ValidationError, ValueError, TypeError, json.JSONDecodeError, EvaluationResponseError) as exc:
+        nvidia_parse_error = exc
+        if provider == "NVIDIA" and genai_client is not None:
+            for model in candidate_models:
+                try:
+                    logger.warning("La respuesta de NVIDIA no cumplió el esquema; se probará Gemini (%s).", model)
+                    candidate = genai_client.models.generate_content(
+                        model=model,
+                        contents=prompt,
+                        config=types.GenerateContentConfig(
+                            system_instruction=SYSTEM_PROMPT,
+                            response_mime_type="application/json",
+                            response_schema=GeminiRadarResponse,
+                            temperature=0.2,
+                            automatic_function_calling=types.AutomaticFunctionCallingConfig(disable=True),
+                        ),
+                    )
+                    radar_response = parse_response(candidate, "Gemini")
+                    provider = "Gemini"
+                    break
+                except Exception as gemini_error:
+                    last_error = gemini_error
+            else:
+                raise EvaluationResponseError(
+                    "NVIDIA devolvió un formato inválido y Gemini no pudo generar una respuesta válida."
+                ) from last_error
         else:
-            response_text = getattr(response, "text", None)
-            if not response_text:
-                raise EvaluationResponseError(f"{provider} no devolvió contenido estructurado.")
-            radar_response = _to_radar_response(GeminiRadarResponse.model_validate_json(response_text))
-    except (ValidationError, ValueError, TypeError, json.JSONDecodeError) as exc:
-        raise EvaluationResponseError(
-            f"La respuesta de {provider} no cumple el esquema RadarResponse."
-        ) from exc
+            raise EvaluationResponseError(
+                f"La respuesta de {provider} no cumple el esquema RadarResponse."
+            ) from nvidia_parse_error
 
     # Post-procesamiento y filtrado determinista. Los descartes los calcula el
     # pipeline; no se aceptan razones generadas por el modelo como auditoría.
