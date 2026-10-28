@@ -42,6 +42,7 @@ def _evaluate_with_nvidia(prompt: str, api_key: str, timeout_ms: int) -> Any:
             "temperature": 0.2,
             "max_tokens": 8192,
             "stream": False,
+            "chat_template_kwargs": {"enable_thinking": False},
         },
         timeout=timeout_ms / 1000,
     )
@@ -683,13 +684,13 @@ def evaluate_opportunities(
     require_verified_source: bool = False,
     source_verification_timeout_seconds: int = 10,
 ) -> RadarResponse:
-    """Evalúa candidatos de noticias utilizando Gemini y Structured Outputs Pydantic.
+    """Evalúa noticias con NVIDIA primero y usa Gemini como respaldo.
 
     Args:
         articles: Lista de objetos NewsArticle o diccionarios con noticias.
         recent_history_topics: Lista opcional de temas de los últimos días para deduplicar.
         api_key: Gemini API Key opcional (usa GEMINI_API_KEY del entorno por defecto).
-        model_name: Nombre del modelo a usar (por defecto gemini-3.8-flash con fallbacks automáticos).
+        model_name: Modelo Gemini inicial si NVIDIA falla (con fallbacks automáticos).
         client: Cliente de Gemini inyectable (útil para pruebas unitarias).
         min_virality: Puntaje mínimo de viralidad requerido (defecto: 7).
         min_feasibility: Puntaje mínimo de factibilidad técnica requerido (defecto: 6).
@@ -730,7 +731,7 @@ def evaluate_opportunities(
     if client is None:
         if not resolved_key and not nvidia_key:
             raise ValueError(
-                "GEMINI_API_KEY no encontrada. Configúrala en .env o como variable de entorno."
+                "Configura NVIDIA_API_KEY o GEMINI_API_KEY en .env o como variable de entorno."
             )
         genai_client = genai.Client(
             api_key=resolved_key,
@@ -752,13 +753,22 @@ def evaluate_opportunities(
 
     response = None
     last_error = None
-    for model in candidate_models if genai_client is not None else []:
+    provider = "NVIDIA"
+    if nvidia_key:
+        try:
+            response = _evaluate_with_nvidia(prompt, nvidia_key, timeout_ms)
+        except (requests.RequestException, ValueError, KeyError, IndexError, TypeError, EvaluationResponseError) as exc:
+            logger.warning("Falló NVIDIA; se continuará con Gemini (%s).", type(exc).__name__)
+            last_error = exc
+
+    for model in candidate_models if response is None and genai_client is not None else []:
         try:
             logger.info(
                 "Invocando Gemini (%s) para evaluar %d artículos...",
                 model,
                 len(articles),
             )
+            provider = "Gemini"
             try:
                 response = genai_client.models.generate_content(
                     model=model,
@@ -796,17 +806,9 @@ def evaluate_opportunities(
             logger.warning("Fallo al consultar modelo %s: %s", model, e)
             last_error = e
 
-    provider = "Gemini"
-    if response is None and nvidia_key:
-        try:
-            response = _evaluate_with_nvidia(prompt, nvidia_key, timeout_ms)
-            provider = "NVIDIA"
-        except (requests.RequestException, ValueError, KeyError, IndexError, TypeError, EvaluationResponseError) as exc:
-            logger.warning("Falló la consulta a NVIDIA (%s).", type(exc).__name__)
-            raise RuntimeError("Fallaron Gemini y el respaldo de NVIDIA.") from exc
     if response is None:
-        logger.error("Todos los modelos candidatos de Gemini fallaron: %s", last_error)
-        raise RuntimeError("Todos los modelos candidatos de Gemini fallaron.") from last_error
+        logger.error("Fallaron los proveedores configurados; último error: %s", last_error)
+        raise RuntimeError("Fallaron NVIDIA y todos los modelos candidatos de Gemini.") from last_error
 
     # Extracción y validación del modelo Pydantic
     try:
