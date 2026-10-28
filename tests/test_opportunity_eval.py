@@ -422,6 +422,33 @@ def test_evaluate_opportunities_missing_key():
             )
 
 
+def test_nvidia_fallback_after_gemini_failures():
+    client = MagicMock()
+    client.models.generate_content.side_effect = RuntimeError("unavailable")
+    http_response = MagicMock()
+    http_response.json.return_value = {
+        "choices": [{"finish_reason": "stop", "message": {"content": '{"evaluated_topics_count": 1, "top_opportunities": []}'}}]
+    }
+    with patch.dict("os.environ", {"NVIDIA_API_KEY": "test-key"}, clear=True), patch(
+        "src.analysis.opportunity_eval.requests.post", return_value=http_response
+    ) as post:
+        result = evaluate_opportunities(articles=[{"title": "Prueba"}], client=client)
+    assert result.evaluated_topics_count == 1
+    assert client.models.generate_content.call_count == 4
+    assert post.call_args.kwargs["json"]["model"] == "meta/llama-3.3-70b-instruct"
+    assert post.call_args.kwargs["headers"]["Authorization"] == "Bearer test-key"
+
+
+def test_nvidia_rejects_truncated_response():
+    response = MagicMock()
+    response.json.return_value = {"choices": [{"finish_reason": "length", "message": {"content": "{}"}}]}
+    with patch.dict("os.environ", {"NVIDIA_API_KEY": "test-key"}, clear=True), patch(
+        "src.analysis.opportunity_eval.requests.post", return_value=response
+    ):
+        with pytest.raises(RuntimeError, match="respaldo de NVIDIA"):
+            evaluate_opportunities(articles=[{"title": "Prueba"}])
+
+
 def test_evaluate_opportunities_with_mock_client():
     """Verifica el flujo completo de evaluación estructurada con cliente mockeado."""
     opp = Opportunity(

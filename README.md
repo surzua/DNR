@@ -57,6 +57,10 @@ cp .env.example .env
 
 Configura `GEMINI_API_KEY` para evaluar oportunidades. `TELEGRAM_BOT_TOKEN` y `TELEGRAM_CHAT_ID` solo son necesarios para el envío real.
 
+Como respaldo opcional, configura `NVIDIA_API_KEY` en `.env`. Si todos los modelos de Gemini fallan, el radar consulta NVIDIA NIM con el mismo contexto y valida la respuesta antes de procesarla. Por defecto usa `meta/llama-3.3-70b-instruct`; puedes cambiarlo con `NVIDIA_MODEL` por un modelo de chat disponible para tu cuenta. También puede funcionar solo con la clave de NVIDIA. Comprueba disponibilidad, límites y costos en tu cuenta NVIDIA.
+
+Para GitHub Actions, agrega la clave como secreto del repositorio llamado `NVIDIA_API_KEY` en **Settings → Secrets and variables → Actions → New repository secret**. Opcionalmente, crea una variable de repositorio `NVIDIA_MODEL` en la pestaña **Variables**. La clave local en `.env` no se transfiere a GitHub. Los cambios del workflow deben estar en GitHub para que Actions los use.
+
 ```bash
 # Recolectar fuentes sin usar el modelo ni modificar historial
 python main.py --skip-llm

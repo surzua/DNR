@@ -6,6 +6,8 @@ import os
 from datetime import datetime
 from typing import Any, List, Literal, Optional, Set
 from urllib.parse import urlparse
+from types import SimpleNamespace
+import requests
 from dotenv import load_dotenv
 from google import genai
 from google.genai import types
@@ -21,6 +23,34 @@ logger = logging.getLogger("dnr.opportunity_eval")
 
 class EvaluationResponseError(RuntimeError):
     """La respuesta del modelo no pudo convertirse en un resultado utilizable."""
+
+
+def _evaluate_with_nvidia(prompt: str, api_key: str, timeout_ms: int) -> Any:
+    """Consulta NVIDIA NIM; la respuesta se valida con el contrato común abajo."""
+    model = os.getenv("NVIDIA_MODEL") or "meta/llama-3.3-70b-instruct"
+    schema = json.dumps(GeminiRadarResponse.model_json_schema(), ensure_ascii=False)
+    logger.info("Invocando NVIDIA NIM (%s) como respaldo...", model)
+    response = requests.post(
+        "https://integrate.api.nvidia.com/v1/chat/completions",
+        headers={"Authorization": f"Bearer {api_key}", "Accept": "application/json"},
+        json={
+            "model": model,
+            "messages": [
+                {"role": "system", "content": SYSTEM_PROMPT},
+                {"role": "user", "content": prompt + "\n\nResponde únicamente con un objeto JSON válido que cumpla este esquema:\n" + schema},
+            ],
+            "temperature": 0.2,
+            "max_tokens": 8192,
+            "stream": False,
+        },
+        timeout=timeout_ms / 1000,
+    )
+    response.raise_for_status()
+    data = response.json()
+    choice = data["choices"][0]
+    if choice.get("finish_reason") == "length":
+        raise EvaluationResponseError("NVIDIA devolvió una respuesta truncada.")
+    return SimpleNamespace(parsed=None, text=choice["message"]["content"])
 
 
 class DataSource(BaseModel):
@@ -680,6 +710,7 @@ def evaluate_opportunities(
 
     # Resolver cliente y credenciales
     resolved_key = api_key or os.getenv("GEMINI_API_KEY")
+    nvidia_key = os.getenv("NVIDIA_API_KEY")
     # Mantener alternativas que están disponibles para esta API. Los aliases y
     # modelos retirados para cuentas nuevas no son fallbacks confiables.
     default_candidates = [
@@ -697,7 +728,7 @@ def evaluate_opportunities(
         candidate_models = default_candidates
 
     if client is None:
-        if not resolved_key:
+        if not resolved_key and not nvidia_key:
             raise ValueError(
                 "GEMINI_API_KEY no encontrada. Configúrala en .env o como variable de entorno."
             )
@@ -707,7 +738,7 @@ def evaluate_opportunities(
                 timeout=timeout_ms,
                 retry_options=types.HttpRetryOptions(attempts=2),
             ),
-        )
+        ) if resolved_key else None
     else:
         genai_client = client
 
@@ -721,7 +752,7 @@ def evaluate_opportunities(
 
     response = None
     last_error = None
-    for model in candidate_models:
+    for model in candidate_models if genai_client is not None else []:
         try:
             logger.info(
                 "Invocando Gemini (%s) para evaluar %d artículos...",
@@ -765,6 +796,14 @@ def evaluate_opportunities(
             logger.warning("Fallo al consultar modelo %s: %s", model, e)
             last_error = e
 
+    provider = "Gemini"
+    if response is None and nvidia_key:
+        try:
+            response = _evaluate_with_nvidia(prompt, nvidia_key, timeout_ms)
+            provider = "NVIDIA"
+        except (requests.RequestException, ValueError, KeyError, IndexError, TypeError, EvaluationResponseError) as exc:
+            logger.warning("Falló la consulta a NVIDIA (%s).", type(exc).__name__)
+            raise RuntimeError("Fallaron Gemini y el respaldo de NVIDIA.") from exc
     if response is None:
         logger.error("Todos los modelos candidatos de Gemini fallaron: %s", last_error)
         raise RuntimeError("Todos los modelos candidatos de Gemini fallaron.") from last_error
@@ -781,11 +820,11 @@ def evaluate_opportunities(
         else:
             response_text = getattr(response, "text", None)
             if not response_text:
-                raise EvaluationResponseError("Gemini no devolvió contenido estructurado.")
+                raise EvaluationResponseError(f"{provider} no devolvió contenido estructurado.")
             radar_response = _to_radar_response(GeminiRadarResponse.model_validate_json(response_text))
     except (ValidationError, ValueError, TypeError, json.JSONDecodeError) as exc:
         raise EvaluationResponseError(
-            "La respuesta de Gemini no cumple el esquema RadarResponse."
+            f"La respuesta de {provider} no cumple el esquema RadarResponse."
         ) from exc
 
     # Post-procesamiento y filtrado determinista. Los descartes los calcula el
