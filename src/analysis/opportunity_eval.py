@@ -731,7 +731,8 @@ def evaluate_opportunities(
     if client is None:
         if not resolved_key and not nvidia_key:
             raise ValueError(
-                "Configura NVIDIA_API_KEY o GEMINI_API_KEY en .env o como variable de entorno."
+                "GEMINI_API_KEY no encontrada y NVIDIA_API_KEY tampoco está configurada; "
+                "configura una de las dos en .env o como variable de entorno."
             )
         genai_client = genai.Client(
             api_key=resolved_key,

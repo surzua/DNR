@@ -422,7 +422,7 @@ def test_evaluate_opportunities_missing_key():
             )
 
 
-def test_nvidia_fallback_after_gemini_failures():
+def test_nvidia_is_tried_before_gemini():
     client = MagicMock()
     client.models.generate_content.side_effect = RuntimeError("unavailable")
     http_response = MagicMock()
@@ -434,7 +434,7 @@ def test_nvidia_fallback_after_gemini_failures():
     ) as post:
         result = evaluate_opportunities(articles=[{"title": "Prueba"}], client=client)
     assert result.evaluated_topics_count == 1
-    assert client.models.generate_content.call_count == 4
+    client.models.generate_content.assert_not_called()
     assert post.call_args.kwargs["json"]["model"] == "meta/llama-3.3-70b-instruct"
     assert post.call_args.kwargs["headers"]["Authorization"] == "Bearer test-key"
 
@@ -445,8 +445,25 @@ def test_nvidia_rejects_truncated_response():
     with patch.dict("os.environ", {"NVIDIA_API_KEY": "test-key"}, clear=True), patch(
         "src.analysis.opportunity_eval.requests.post", return_value=response
     ):
-        with pytest.raises(RuntimeError, match="respaldo de NVIDIA"):
+        with pytest.raises(RuntimeError, match="Fallaron NVIDIA y todos"):
             evaluate_opportunities(articles=[{"title": "Prueba"}])
+
+
+def test_invalid_nvidia_json_falls_back_to_gemini():
+    client = MagicMock()
+    client.models.generate_content.return_value = MagicMock(
+        parsed=RadarResponse(evaluated_topics_count=1, top_opportunities=[])
+    )
+    http_response = MagicMock()
+    http_response.json.return_value = {
+        "choices": [{"finish_reason": "stop", "message": {"content": "{invalid json"}}]
+    }
+    with patch.dict("os.environ", {"NVIDIA_API_KEY": "test-key"}, clear=True), patch(
+        "src.analysis.opportunity_eval.requests.post", return_value=http_response
+    ):
+        result = evaluate_opportunities(articles=[{"title": "Prueba"}], client=client)
+    assert result.evaluated_topics_count == 1
+    client.models.generate_content.assert_called_once()
 
 
 def test_evaluate_opportunities_with_mock_client():
