@@ -3,6 +3,7 @@
 import json
 import logging
 import os
+import time
 from datetime import datetime
 from typing import Any, List, Literal, Optional, Set
 from urllib.parse import urlparse
@@ -11,7 +12,7 @@ import requests
 from dotenv import load_dotenv
 from google import genai
 from google.genai import types
-from pydantic import BaseModel, Field, ValidationError
+from pydantic import BaseModel, Field
 
 from src.analysis.prompt_templates import SYSTEM_PROMPT, build_evaluation_prompt
 from src.analysis.source_verification import verify_opportunities_sources
@@ -28,8 +29,7 @@ class EvaluationResponseError(RuntimeError):
 def _evaluate_with_nvidia(prompt: str, api_key: str, timeout_ms: int) -> Any:
     """Consulta NVIDIA NIM; la respuesta se valida con el contrato común abajo."""
     model = os.getenv("NVIDIA_MODEL") or "meta/llama-3.3-70b-instruct"
-    schema = json.dumps(GeminiRadarResponse.model_json_schema(), ensure_ascii=False)
-    logger.info("Invocando NVIDIA NIM (%s) como respaldo...", model)
+    logger.info("Invocando NVIDIA NIM (%s)...", model)
     response = requests.post(
         "https://integrate.api.nvidia.com/v1/chat/completions",
         headers={"Authorization": f"Bearer {api_key}", "Accept": "application/json"},
@@ -37,11 +37,18 @@ def _evaluate_with_nvidia(prompt: str, api_key: str, timeout_ms: int) -> Any:
             "model": model,
             "messages": [
                 {"role": "system", "content": SYSTEM_PROMPT},
-                {"role": "user", "content": prompt + "\n\nResponde únicamente con un objeto JSON válido que cumpla este esquema:\n" + schema},
+                {"role": "user", "content": prompt + "\n\nDevuelve los resultados como un objeto JSON, nunca el esquema."},
             ],
             "temperature": 0.2,
             "max_tokens": 8192,
             "stream": False,
+            "response_format": {
+                "type": "json_schema",
+                "json_schema": {
+                    "name": "radar_response",
+                    "schema": GeminiRadarResponse.model_json_schema(),
+                },
+            },
             "chat_template_kwargs": {"enable_thinking": False},
         },
         timeout=timeout_ms / 1000,
@@ -679,7 +686,7 @@ def evaluate_opportunities(
     max_opportunities: int = 3,
     lookback_hours: int = 24,
     history_days: int = 2,
-    timeout_ms: int = 90000,
+    timeout_ms: int = 60000,
     verify_sources: bool = False,
     require_verified_source: bool = False,
     source_verification_timeout_seconds: int = 10,
@@ -697,7 +704,7 @@ def evaluate_opportunities(
         max_opportunities: Máximo de oportunidades a retornar (defecto: 3).
         lookback_hours: Ventana de ingesta efectiva que se comunica al modelo.
         history_days: Ventana efectiva del historial que se comunica al modelo.
-        timeout_ms: Timeout máximo por petición HTTP en milisegundos (defecto: 90000 ms).
+        timeout_ms: Timeout máximo por petición HTTP en milisegundos (defecto: 60000 ms).
         verify_sources: Comprueba técnicamente las URLs de datos antes de retornar.
         require_verified_source: Compatibilidad: descarta oportunidades sin URL accesible si se activa.
         source_verification_timeout_seconds: Límite por consulta de fuente.
@@ -738,7 +745,9 @@ def evaluate_opportunities(
             api_key=resolved_key,
             http_options=types.HttpOptions(
                 timeout=timeout_ms,
-                retry_options=types.HttpRetryOptions(attempts=2),
+                # El cambio de modelo es el respaldo; evitar multiplicar los
+                # timeouts dentro del SDK y agotar el tiempo del workflow.
+                retry_options=types.HttpRetryOptions(attempts=1),
             ),
         ) if resolved_key else None
     else:
@@ -752,68 +761,7 @@ def evaluate_opportunities(
         history_days=history_days,
     )
 
-    response = None
-    last_error = None
-    provider = "NVIDIA"
-    if nvidia_key:
-        try:
-            response = _evaluate_with_nvidia(prompt, nvidia_key, timeout_ms)
-        except (requests.RequestException, ValueError, KeyError, IndexError, TypeError, EvaluationResponseError) as exc:
-            logger.warning("Falló NVIDIA; se continuará con Gemini (%s).", type(exc).__name__)
-            last_error = exc
-
-    for model in candidate_models if response is None and genai_client is not None else []:
-        try:
-            logger.info(
-                "Invocando Gemini (%s) para evaluar %d artículos...",
-                model,
-                len(articles),
-            )
-            provider = "Gemini"
-            try:
-                response = genai_client.models.generate_content(
-                    model=model,
-                    contents=prompt,
-                    config=types.GenerateContentConfig(
-                        system_instruction=SYSTEM_PROMPT,
-                        response_mime_type="application/json",
-                        response_schema=GeminiRadarResponse,
-                        temperature=0.2,
-                        automatic_function_calling=types.AutomaticFunctionCallingConfig(disable=True),
-                    ),
-                )
-            except Exception as exc:
-                # Algunos modelos del Developer API rechazan esquemas Pydantic
-                # válidos con un 400 genérico. Pedir JSON y validarlo abajo con
-                # RadarResponse conserva el contrato sin bloquear el radar.
-                if "INVALID_ARGUMENT" not in str(exc):
-                    raise
-                logger.warning(
-                    "El modelo %s rechazó la salida estructurada; se reintenta con JSON validado localmente.",
-                    model,
-                )
-                response = genai_client.models.generate_content(
-                    model=model,
-                    contents=prompt,
-                    config=types.GenerateContentConfig(
-                        system_instruction=SYSTEM_PROMPT,
-                        response_mime_type="application/json",
-                        temperature=0.2,
-                        automatic_function_calling=types.AutomaticFunctionCallingConfig(disable=True),
-                    ),
-                )
-            break
-        except Exception as e:
-            logger.warning("Fallo al consultar modelo %s: %s", model, e)
-            last_error = e
-
-    if response is None:
-        logger.error("Fallaron los proveedores configurados; último error: %s", last_error)
-        raise RuntimeError("Fallaron NVIDIA y todos los modelos candidatos de Gemini.") from last_error
-
-    # Extraer y validar la respuesta; si NVIDIA entrega un formato inválido,
-    # tratarlo como un fallo del proveedor y continuar con los modelos Gemini.
-    def parse_response(candidate: Any, candidate_provider: str) -> RadarResponse:
+    def parse_response(candidate: Any) -> RadarResponse:
         parsed = getattr(candidate, "parsed", None)
         if isinstance(parsed, RadarResponse):
             return parsed
@@ -822,42 +770,81 @@ def evaluate_opportunities(
         if parsed is not None:
             return _to_radar_response(GeminiRadarResponse.model_validate(parsed))
         response_text = getattr(candidate, "text", None)
-        if not response_text:
-            raise EvaluationResponseError(f"{candidate_provider} no devolvió contenido estructurado.")
+        if not isinstance(response_text, str) or not response_text.strip():
+            raise EvaluationResponseError("El modelo no devolvió contenido estructurado.")
+        # Algunos endpoints envuelven JSON válido en un bloque Markdown.
+        response_text = response_text.strip()
+        if response_text.startswith("```json\n") and response_text.endswith("```"):
+            response_text = response_text[8:-3].strip()
         return _to_radar_response(GeminiRadarResponse.model_validate_json(response_text))
 
-    try:
-        radar_response = parse_response(response, provider)
-    except (ValidationError, ValueError, TypeError, json.JSONDecodeError, EvaluationResponseError) as exc:
-        nvidia_parse_error = exc
-        if provider == "NVIDIA" and genai_client is not None:
-            for model in candidate_models:
-                try:
-                    logger.warning("La respuesta de NVIDIA no cumplió el esquema; se probará Gemini (%s).", model)
-                    candidate = genai_client.models.generate_content(
-                        model=model,
-                        contents=prompt,
-                        config=types.GenerateContentConfig(
-                            system_instruction=SYSTEM_PROMPT,
-                            response_mime_type="application/json",
-                            response_schema=GeminiRadarResponse,
-                            temperature=0.2,
-                            automatic_function_calling=types.AutomaticFunctionCallingConfig(disable=True),
-                        ),
-                    )
-                    radar_response = parse_response(candidate, "Gemini")
-                    provider = "Gemini"
+    radar_response = None
+    last_error = None
+    failures = []
+
+    def record_failure(provider: str, exc: Exception) -> None:
+        # No registrar el cuerpo: ValidationError puede incluir noticias o una
+        # respuesta completa. Conservar proveedor, tipo y HTTP para diagnóstico.
+        status = getattr(getattr(exc, "response", None), "status_code", None)
+        status = status or getattr(exc, "code", None)
+        detail = f"{provider}: {type(exc).__name__}"
+        if status:
+            detail += f" HTTP {status}"
+        failures.append(detail)
+        logger.warning("Falló evaluación (%s).", detail)
+
+    if nvidia_key:
+        for attempt in range(2):
+            try:
+                radar_response = parse_response(_evaluate_with_nvidia(prompt, nvidia_key, timeout_ms))
+                break
+            except (requests.RequestException, ValueError, KeyError, IndexError, TypeError, EvaluationResponseError) as exc:
+                last_error = exc
+                record_failure("NVIDIA", exc)
+                status = getattr(getattr(exc, "response", None), "status_code", None)
+                if status is not None and status < 500 and status != 429:
                     break
-                except Exception as gemini_error:
-                    last_error = gemini_error
-            else:
-                raise EvaluationResponseError(
-                    "NVIDIA devolvió un formato inválido y Gemini no pudo generar una respuesta válida."
-                ) from last_error
-        else:
-            raise EvaluationResponseError(
-                f"La respuesta de {provider} no cumple el esquema RadarResponse."
-            ) from nvidia_parse_error
+                if attempt == 0:
+                    logger.info("Reintentando NVIDIA una vez antes de cambiar de proveedor.")
+                    time.sleep(2)
+
+    # Una sola ruta para fallos HTTP y respuestas inválidas de cualquier modelo.
+    # Validar dentro del bucle permite probar el siguiente modelo en ambos casos.
+    for model in candidate_models if radar_response is None and genai_client is not None else []:
+        try:
+            logger.info("Invocando Gemini (%s) para evaluar %d artículos...", model, len(articles))
+            config = types.GenerateContentConfig(
+                system_instruction=SYSTEM_PROMPT,
+                response_mime_type="application/json",
+                response_schema=GeminiRadarResponse,
+                temperature=0.2,
+                automatic_function_calling=types.AutomaticFunctionCallingConfig(disable=True),
+            )
+            try:
+                response = genai_client.models.generate_content(model=model, contents=prompt, config=config)
+            except Exception as exc:
+                if "INVALID_ARGUMENT" not in str(exc):
+                    raise
+                logger.warning("El modelo %s rechazó el esquema; se validará JSON localmente.", model)
+                config = config.model_copy(update={"response_schema": None})
+                response = genai_client.models.generate_content(
+                    model=model,
+                    contents=prompt + "\nEsquema de los resultados JSON (no devolver el esquema):\n"
+                    + json.dumps(GeminiRadarResponse.model_json_schema(), ensure_ascii=False),
+                    config=config,
+                )
+            radar_response = parse_response(response)
+            break
+        except Exception as exc:
+            last_error = exc
+            record_failure(f"Gemini/{model}", exc)
+
+    if radar_response is None:
+        raise EvaluationResponseError(
+            "Fallaron NVIDIA y todos los modelos candidatos de Gemini; "
+            "la respuesta no cumple el esquema RadarResponse o el servicio no está disponible. "
+            + "; ".join(failures)
+        ) from last_error
 
     # Post-procesamiento y filtrado determinista. Los descartes los calcula el
     # pipeline; no se aceptan razones generadas por el modelo como auditoría.

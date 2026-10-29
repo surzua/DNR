@@ -306,22 +306,22 @@ def main() -> int:
     for source_name, count in counts.most_common():
         logger.info("  • %s: %d artículos", source_name, count)
 
-    # Fase 2 y 3: Evaluación de oportunidades con Gemini Flash
+    # Fase 2 y 3: Evaluación con los proveedores configurados
     if args.skip_llm:
         logger.info("Bandera --skip-llm activa: Omitiendo fase de evaluación LLM.")
         return EXIT_SUCCESS
 
     gemini_key = os.getenv("GEMINI_API_KEY")
-    if not gemini_key:
+    if not gemini_key and not os.getenv("NVIDIA_API_KEY"):
         logger.error(
-            "GEMINI_API_KEY no encontrada en variables de entorno o archivo .env. "
+            "GEMINI_API_KEY y NVIDIA_API_KEY no encontradas en variables de entorno o archivo .env. "
             "Para ejecutar la evaluación de oportunidades, configura tu API key en .env. "
             "Si deseas probar sin LLM, utiliza la bandera --skip-llm."
         )
         return EXIT_CONFIGURATION_ERROR
 
     logger.info("--------------------------------------------------")
-    logger.info("Fase 3: Evaluando oportunidades con Gemini Flash...")
+    logger.info("Fase 3: Evaluando oportunidades con NVIDIA y/o Gemini...")
     logger.info("--------------------------------------------------")
 
     history = load_history()
@@ -365,7 +365,7 @@ def main() -> int:
             source_verification_timeout_seconds=pipeline_config.source_verification_timeout_seconds,
         )
     except Exception as e:
-        logger.exception("Error durante la evaluación de oportunidades con Gemini: %s", e)
+        logger.error("Error durante la evaluación de oportunidades: %s", e)
         return EXIT_EVALUATION_ERROR
 
     opportunities = radar_result.top_opportunities

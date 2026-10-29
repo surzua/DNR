@@ -55,9 +55,9 @@ pip install -r requirements.txt
 cp .env.example .env
 ```
 
-Configura `GEMINI_API_KEY` para evaluar oportunidades. `TELEGRAM_BOT_TOKEN` y `TELEGRAM_CHAT_ID` solo son necesarios para el envío real.
+Configura `NVIDIA_API_KEY` o `GEMINI_API_KEY` para evaluar oportunidades. `TELEGRAM_BOT_TOKEN` y `TELEGRAM_CHAT_ID` solo son necesarios para el envío real.
 
-Como respaldo opcional, configura `NVIDIA_API_KEY` en `.env`. Si todos los modelos de Gemini fallan, el radar consulta NVIDIA NIM con el mismo contexto y valida la respuesta antes de procesarla. Por defecto usa `meta/llama-3.3-70b-instruct`; puedes cambiarlo con `NVIDIA_MODEL` por un modelo de chat disponible para tu cuenta. También puede funcionar solo con la clave de NVIDIA. Comprueba disponibilidad, límites y costos en tu cuenta NVIDIA.
+Si configuras `NVIDIA_API_KEY`, el radar consulta NVIDIA NIM primero, exige resultados mediante JSON Schema y valida la respuesta localmente. Reintenta una vez ante una respuesta inválida, un timeout o un error HTTP transitorio; los errores permanentes como 401 pasan directamente al respaldo. Por defecto usa `meta/llama-3.3-70b-instruct`; puedes cambiarlo con `NVIDIA_MODEL` por un modelo que admita salida estructurada en tu cuenta. Si NVIDIA falla, prueba los modelos Gemini configurados, validando cada respuesta antes de aceptarla. Cada petición tiene un timeout de 60 segundos y Gemini no multiplica los intentos dentro del SDK. Si todos fallan, la ejecución informa el error; no lo presenta como un día sin oportunidades.
 
 Para GitHub Actions, agrega la clave como secreto del repositorio llamado `NVIDIA_API_KEY` en **Settings → Secrets and variables → Actions → New repository secret**. Opcionalmente, crea una variable de repositorio `NVIDIA_MODEL` en la pestaña **Variables**. La clave local en `.env` no se transfiere a GitHub. Los cambios del workflow deben estar en GitHub para que Actions los use.
 
@@ -92,6 +92,8 @@ El historial es compatible con registros previos: los campos nuevos tienen defau
 ## Automatización
 
 GitHub Actions ejecuta el radar diariamente y puede persistir el historial. La ejecución se serializa para evitar solapamientos. No hay cuotas de alerta: pueden existir hasta tres propuestas, una o ninguna. Las alertas de Telegram son privadas y no publican contenido ni miden su rendimiento.
+
+Ante una falla, Actions conserva durante 7 días el snapshot de noticias como artefacto `radar-input-<run_id>` para reproducir el caso. Las ejecuciones con `dry_run=true` evalúan con las APIs reales, simulan Telegram y omiten tanto la persistencia como las notificaciones de error a Telegram.
 
 ## Estructura
 

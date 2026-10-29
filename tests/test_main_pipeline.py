@@ -156,6 +156,21 @@ def test_main_missing_gemini_key_returns_configuration_error():
                 assert main() == 2
 
 
+def test_main_can_run_with_only_nvidia():
+    with patch.object(sys, "argv", ["main.py", "--use-cache", "--dry-run"]), patch.dict(
+        "os.environ", {"NVIDIA_API_KEY": "fake-key"}, clear=True
+    ), patch("main.load_articles_cache", return_value=[MagicMock(source="RSS")]), patch(
+        "main.load_history", return_value=[]
+    ), patch("main.evaluate_opportunities", return_value=RadarResponse(
+        evaluated_topics_count=1, top_opportunities=[]
+    )) as evaluate, patch("main.send_batch_alerts", return_value={
+        "briefing_sent": True, "sent": 0, "failed": 0, "total": 0,
+    }), patch("main.save_history") as save:
+        assert main() == 0
+    evaluate.assert_called_once()
+    save.assert_not_called()
+
+
 def test_main_with_dry_run_and_opportunities(mock_radar_opp: Opportunity):
     test_args = ["main.py", "--use-cache", "--dry-run"]
     radar_resp = RadarResponse(

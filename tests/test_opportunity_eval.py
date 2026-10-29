@@ -4,6 +4,7 @@ from datetime import datetime, timezone
 import json
 from unittest.mock import MagicMock, patch
 import pytest
+import requests
 
 from src.analysis.opportunity_eval import (
     DataSource,
@@ -23,6 +24,16 @@ from src.analysis.prompt_templates import (
 )
 from src.ingestion.models import NewsArticle
 from src.storage.history_manager import HistoryEntry
+
+
+@pytest.fixture(autouse=True)
+def isolate_provider_credentials_and_retry_delay(monkeypatch):
+    # Las credenciales de .env nunca deben convertir un test con mocks en una
+    # llamada real. Los casos de proveedores inyectan sus propias claves falsas.
+    monkeypatch.setenv("NVIDIA_API_KEY", "")
+    monkeypatch.setenv("GEMINI_API_KEY", "")
+    with patch("src.analysis.opportunity_eval.time.sleep"):
+        yield
 
 
 def test_opportunity_schemas():
@@ -437,6 +448,10 @@ def test_nvidia_is_tried_before_gemini():
     client.models.generate_content.assert_not_called()
     assert post.call_args.kwargs["json"]["model"] == "meta/llama-3.3-70b-instruct"
     assert post.call_args.kwargs["headers"]["Authorization"] == "Bearer test-key"
+    payload = post.call_args.kwargs["json"]
+    assert payload["response_format"]["type"] == "json_schema"
+    assert payload["response_format"]["json_schema"]["schema"] == GeminiRadarResponse.model_json_schema()
+    assert '"$defs"' not in payload["messages"][1]["content"]
 
 
 def test_nvidia_rejects_truncated_response():
@@ -464,6 +479,66 @@ def test_invalid_nvidia_json_falls_back_to_gemini():
         result = evaluate_opportunities(articles=[{"title": "Prueba"}], client=client)
     assert result.evaluated_topics_count == 1
     client.models.generate_content.assert_called_once()
+
+
+def test_nvidia_retries_invalid_json_before_using_gemini():
+    invalid = MagicMock()
+    invalid.json.return_value = {"choices": [{"message": {"content": '{"$defs": {invalid'}}]}
+    valid = MagicMock()
+    valid.json.return_value = {"choices": [{"message": {"content": '{"evaluated_topics_count": 1, "top_opportunities": []}'}}]}
+    client = MagicMock()
+    with patch.dict("os.environ", {"NVIDIA_API_KEY": "test-key"}, clear=True), patch(
+        "src.analysis.opportunity_eval.requests.post", side_effect=[invalid, valid]
+    ) as post:
+        result = evaluate_opportunities(articles=[{"title": "Prueba"}], client=client)
+    assert result.evaluated_topics_count == 1
+    assert post.call_count == 2
+    client.models.generate_content.assert_not_called()
+
+
+@pytest.mark.parametrize("status,expected_attempts", [(401, 1), (429, 2), (503, 2)])
+def test_nvidia_http_failures_have_bounded_retries(status, expected_attempts):
+    response = MagicMock(status_code=status)
+    response.raise_for_status.side_effect = requests.HTTPError(response=response)
+    client = MagicMock()
+    client.models.generate_content.return_value = MagicMock(
+        parsed=RadarResponse(evaluated_topics_count=1, top_opportunities=[])
+    )
+    with patch.dict("os.environ", {"NVIDIA_API_KEY": "test-key"}, clear=True), patch(
+        "src.analysis.opportunity_eval.requests.post", return_value=response
+    ) as post:
+        assert evaluate_opportunities(articles=[{"title": "Prueba"}], client=client).evaluated_topics_count == 1
+    assert post.call_count == expected_attempts
+    client.models.generate_content.assert_called_once()
+
+
+def test_invalid_gemini_response_tries_next_model():
+    client = MagicMock()
+    client.models.generate_content.side_effect = [
+        MagicMock(parsed=None, text='{invalid'),
+        MagicMock(parsed=RadarResponse(evaluated_topics_count=1, top_opportunities=[])),
+    ]
+    with patch.dict("os.environ", {}, clear=True):
+        assert evaluate_opportunities(articles=[{"title": "Prueba"}], client=client).evaluated_topics_count == 1
+    assert client.models.generate_content.call_count == 2
+
+
+def test_invalid_nvidia_response_keeps_gemini_schema_compatibility_fallback():
+    response = MagicMock()
+    response.json.return_value = {"choices": [{"message": {"content": '{invalid'}}]}
+    client = MagicMock()
+    client.models.generate_content.side_effect = [
+        RuntimeError("400 INVALID_ARGUMENT"),
+        MagicMock(parsed=RadarResponse(evaluated_topics_count=1, top_opportunities=[])),
+    ]
+    with patch.dict("os.environ", {"NVIDIA_API_KEY": "test-key"}, clear=True), patch(
+        "src.analysis.opportunity_eval.requests.post", return_value=response
+    ):
+        assert evaluate_opportunities(articles=[{"title": "Prueba"}], client=client).evaluated_topics_count == 1
+    calls = client.models.generate_content.call_args_list
+    assert len(calls) == 2
+    assert calls[0].kwargs["config"].response_schema is GeminiRadarResponse
+    assert calls[1].kwargs["config"].response_schema is None
 
 
 def test_evaluate_opportunities_with_mock_client():

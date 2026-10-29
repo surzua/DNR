@@ -14,7 +14,7 @@ on:
         required: false
         default: false
       skip_llm:
-        description: 'Omitir fase de evaluación con Gemini'
+        description: 'Omitir fase de evaluación con NVIDIA/Gemini'
         type: boolean
         required: false
         default: false
@@ -57,21 +57,31 @@ jobs:
           INPUT_DRY_RUN: ${{ github.event.inputs.dry_run }}
           INPUT_SKIP_LLM: ${{ github.event.inputs.skip_llm }}
         run: |
-          CMD="python main.py"
+          CMD=(python main.py)
           if [ -n "$INPUT_DAYS" ] && [ "$INPUT_DAYS" != "1" ]; then
-            CMD="$CMD --days $INPUT_DAYS"
+            CMD+=(--days "$INPUT_DAYS")
           fi
           if [ "$INPUT_DRY_RUN" = "true" ]; then
-            CMD="$CMD --dry-run"
+            CMD+=(--dry-run)
           fi
           if [ "$INPUT_SKIP_LLM" = "true" ]; then
-            CMD="$CMD --skip-llm"
+            CMD+=(--skip-llm)
           fi
-          echo "Ejecutando: $CMD"
-          $CMD
+          printf 'Ejecutando: %q ' "${CMD[@]}"
+          printf '\n'
+          "${CMD[@]}"
+
+      - name: Preserve input snapshot on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: radar-input-${{ github.run_id }}
+          path: data/latest_articles.json
+          if-no-files-found: ignore
+          retention-days: 7
 
       - name: Commit and push history updates
-        if: success()
+        if: success() && inputs.dry_run != true && inputs.skip_llm != true
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
@@ -85,7 +95,7 @@ jobs:
           fi
 
       - name: Notify Failure to Telegram
-        if: failure()
+        if: failure() && inputs.dry_run != true
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
